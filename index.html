@@ -176,8 +176,7 @@
       padding:18px 20px 20px;
       border:1px solid var(--border-soft);
       box-shadow:0 10px 35px rgba(15,23,42,0.12);
-	rgba(15,23,42,0.12);
-	margin-bottom:18px;
+      margin-bottom:18px;
     }
     .welcome-header{
       display:flex;
@@ -281,6 +280,36 @@
       background:#f9fafb;
     }
 
+    /* LAYOUT MAPA + TABLAS */
+    .kpi-bottom-layout{
+      display:grid;
+      grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);
+      gap:12px;
+      margin-top:12px;
+    }
+    .kpi-map-column{
+      min-height:320px;
+    }
+    #heatmap-container{
+      width:100%;
+      height:440px;
+      border-radius:10px;
+      overflow:hidden;
+      border:1px solid var(--border-soft);
+    }
+    .kpi-tables-column{
+      display:flex;
+      flex-direction:column;
+    }
+    .kpi-table-block{
+      width:100%;
+    }
+    .kpi-table-wrapper-narrow table.kpi-table th,
+    .kpi-table-wrapper-narrow table.kpi-table td{
+      padding:3px 4px;
+      font-size:11px;
+    }
+
     @media(max-width:900px){
       .layout{
         flex-direction:column;
@@ -338,6 +367,12 @@
       .welcome-card{
         padding:14px 14px 16px;
       }
+      .kpi-bottom-layout{
+        grid-template-columns:1fr;
+      }
+      #heatmap-container{
+        height:220px;
+      }
     }
     @media(max-width:480px){
       .menu a span.icon{display:none;}
@@ -356,8 +391,7 @@
 </head>
 <body>
 <div class="layout">
-
-<aside class="sidebar">
+  <aside class="sidebar">
     <div class="sb-header">
       <img src="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" class="sb-logo" alt="MapTrack" />
       <div class="sb-title">
@@ -392,7 +426,7 @@
     </div>
   </aside>
 
-  <main class="main">
+<main class="main">
     <div class="welcome-card">
       <div class="welcome-header">
         <div class="welcome-header-left">
@@ -436,6 +470,7 @@
         <div class="welcome-header-left">
           <h1>Indicadores principales</h1>
           <p id="kpi-subtitle">Cargando datos de la zona seleccionada...</p>
+          <p id="kpi-fecha" style="font-size:11px;color:#6b7280;margin-top:2px;"></p>
         </div>
         <div>
           <div class="badge-zona">
@@ -444,51 +479,59 @@
         </div>
       </div>
 
-      <!-- tarjetas KPI (kg, clientes, unidades, etc) -->
+      <!-- tarjetas KPI -->
       <div class="grid-modulos" id="kpi-cards">
         <!-- se llena desde kpi.js -->
       </div>
 
-      <!-- Resumen por ciudad y ruta en TABLAS -->
-      <div style="margin-top:12px;">
-        <h2 style="font-size:14px;margin-bottom:6px;">📍 Resumen por Ciudad y Ruta</h2>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;font-size:12px;">
-          <div>
-            <strong>Por Ciudad</strong>
-            <div class="kpi-table-wrapper" style="margin-top:4px;">
-              <table class="kpi-table" id="table-ciudad">
-                <thead>
-                  <tr>
-                    <th>Ciudad</th>
-                    <th>Kg</th>
-                    <th>Clientes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- filas desde kpi.js -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div>
-            <strong>Por Ruta</strong>
-            <div class="kpi-table-wrapper" style="margin-top:4px;">
-              <table class="kpi-table" id="table-ruta">
-                <thead>
-                  <tr>
-                    <th>Ruta</th>
-                    <th>Kg</th>
-                    <th>Clientes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- filas desde kpi.js -->
-                </tbody>
-              </table>
-            </div>
-          </div>
+      <!-- MAPA + TABLAS -->
+      <div class="kpi-bottom-layout">
+        <!-- Columna izquierda: mapa -->
+        <div class="kpi-map-column">
+          <h2 style="font-size:14px;margin-bottom:6px;">🗺️ Mapa de calor de atenciones</h2>
+          <div id="heatmap-container"></div>
         </div>
-        <p id="kpi-updated" style="margin-top:6px;font-size:11px;color:#6b7280;">-</p>
+
+        <!-- Columna derecha: tablas -->
+        <div class="kpi-tables-column">
+          <!-- Resumen por Canal -->
+          <div class="kpi-table-block">
+            <h2 style="font-size:13px;margin-bottom:4px;">📊 Resumen por Canal</h2>
+            <div class="kpi-table-wrapper kpi-table-wrapper-narrow">
+              <table class="kpi-table" id="table-canal">
+                <thead>
+                  <tr>
+                    <th>Canal</th>
+                    <th>Kg</th>
+                    <th>Clie</th>
+                    <th>Kg/Clie</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Resumen por Placa (FSE) -->
+          <div class="kpi-table-block" style="margin-top:10px;">
+            <h2 style="font-size:13px;margin-bottom:4px;">🚚 Resumen por Placa (FSE)</h2>
+            <div class="kpi-table-wrapper kpi-table-wrapper-narrow">
+              <table class="kpi-table" id="table-placa">
+                <thead>
+                  <tr>
+                    <th>Placa</th>
+                    <th>Clie</th>
+                    <th>% FSE</th>
+                    <th>Kg</th>
+                    <th>% Kg FSE</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
       </div>
     </section>
   </main>
@@ -522,6 +565,53 @@ function pintarZona(){
 document.addEventListener('DOMContentLoaded', pintarZona);
 </script>
 
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+<script>
+let heatMap, heatLayer;
+
+function renderHeatmap(points){
+  if (typeof L === 'undefined') {
+    return;
+  }
+
+  const container = document.getElementById('heatmap-container');
+  if (!container) return;
+
+  const center = [-12.1, -77.1];
+
+  if (!heatMap){
+    heatMap = L.map('heatmap-container').setView(center, 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(heatMap);
+  }
+
+  if (heatLayer){
+    heatMap.removeLayer(heatLayer);
+  }
+
+  if (points.length > 0){
+    heatLayer = L.heatLayer(points, {
+      radius: 18,
+      blur: 15,
+      maxZoom: 17
+    }).addTo(heatMap);
+
+    const latlngs = points.map(p => [p[0], p[1]]);
+    const bounds = L.latLngBounds(latlngs);
+    heatMap.fitBounds(bounds, {padding:[20,20]});
+  }
+}
+</script>
+
 <script src="kpi.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
@@ -534,4 +624,3 @@ document.addEventListener('DOMContentLoaded', function(){
 
 </body>
 </html>
-
