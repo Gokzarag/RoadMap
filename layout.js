@@ -1,3 +1,4 @@
+// Carga el encabezado + popup en todas las páginas
 async function loadSidebar(activePage){
   const container = document.getElementById('sidebar-container');
   if (!container) return;
@@ -7,33 +8,38 @@ async function loadSidebar(activePage){
     const html = await resp.text();
     container.innerHTML = html;
 
-    // marcar enlace activo
-    const link = container.querySelector(`[data-page="${activePage}"]`);
-    if (link){
-      link.classList.add('primary');
-    }
-
     // aplicar zona guardada
     if (typeof pintarZona === 'function'){
       pintarZona();
     }
 
-    // inicializar botón hamburguesa
-    initHamburger();
+    // inicializar popup
+    initPopupMenu();
+
+    // podrías resaltar módulo activo más adelante si lo deseas
+    // buscando el <a> correspondiente por href
   }catch(e){
     console.error('Error cargando sidebar:', e);
   }
 }
 
-function initHamburger(){
-  const btn    = document.getElementById('btn-menu');
-  const layout = document.querySelector('.layout');
-  if (!btn || !layout) return;
+// Manejo del popup de módulos
+function initPopupMenu(){
+  const btn   = document.getElementById('btn-menu');
+  const popup = document.getElementById('menu-popup');
+  const close = document.getElementById('menu-close');
 
-  // menú inicia abierto
-  layout.classList.remove('menu-collapsed');
+  if (!btn || !popup || !close) return;
 
-  btn.addEventListener('click', () => {
-    layout.classList.toggle('menu-collapsed');
+  const toggle = () => popup.classList.toggle('open');
+
+  btn.addEventListener('click', toggle);
+  close.addEventListener('click', toggle);
+
+  // cerrar al hacer clic fuera del panel
+  popup.addEventListener('click', e => {
+    if (e.target === popup){
+      popup.classList.remove('open');
+    }
   });
 }
