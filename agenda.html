@@ -2,305 +2,361 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>RoadMap - Agenda</title>
+  <title>RoadMap - Agenda diaria</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" />
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
-    :root {
-      --sidebar-bg: #1f2933;
-      --sidebar-accent: #f9735b;
-      --sidebar-accent-soft: #fde3dd;
-      --sidebar-text: #f9fafb;
-      --sidebar-muted: #9ca3af;
-      --main-bg: #f4f5f7;
-      --card-bg: #ffffff;
-      --border-soft: #e5e7eb;
-      --text-main: #111827;
-      --text-muted: #6b7280;
-      --font: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    :root{
+      --sidebar-bg:#1f2933;
+      --sidebar-accent:#f9735b;
+      --sidebar-accent-soft:#fde3dd;
+      --sidebar-text:#f9fafb;
+      --sidebar-muted:#9ca3af;
+      --main-bg:#f4f5f7;
+      --card-bg:#ffffff;
+      --border-soft:#e5e7eb;
+      --text-main:#111827;
+      --text-muted:#6b7280;
+      --font:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font);
-      background: var(--main-bg);
-      color: var(--text-main);
-      min-height: 100vh;
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:var(--font);
+      background:var(--main-bg);
+      color:var(--text-main);
+      min-height:100vh;
+      margin:0;
     }
-    .layout {
-      display: flex;
-      width: 100%;
-      min-height: 100vh;
+    .layout{
+      display:flex;
+      width:100%;
+      min-height:100vh;
     }
-    .sidebar {
-      width: 235px;
-      background: linear-gradient(180deg, #111827, #1f2933);
-      color: var(--sidebar-text);
-      display: flex;
-      flex-direction: column;
-      padding: 14px 14px 16px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
+    /* SIDEBAR (misma de index) */
+    .sidebar{
+      width:235px;
+      background:linear-gradient(180deg,#111827,#1f2933);
+      color:var(--sidebar-text);
+      display:flex;
+      flex-direction:column;
+      padding:14px 14px 16px;
+      position:sticky;
+      top:0;
+      height:100vh;
     }
-    .sb-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 18px;
+    .sb-header{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:18px;
     }
-    .sb-logo {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 1px solid rgba(249,250,251,0.3);
-      box-shadow: 0 0 12px rgba(249,115,91,0.7);
+    .sb-logo{
+      width:32px;height:32px;border-radius:50%;
+      border:1px solid rgba(249,250,251,0.3);
+      box-shadow:0 0 12px rgba(249,115,91,0.7);
     }
-    .sb-title { display: flex; flex-direction: column; }
-    .sb-title span:nth-child(1) {
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--sidebar-muted);
+    .sb-title{
+      display:flex;
+      flex-direction:column;
     }
-    .sb-title span:nth-child(2) {
-      font-size: 15px;
-      font-weight: 700;
+    .sb-title span:nth-child(1){
+      font-size:12px;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      color:var(--sidebar-muted);
     }
-    .sb-section-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--sidebar-muted);
-      margin: 12px 0 6px;
+    .sb-title span:nth-child(2){
+      font-size:15px;
+      font-weight:700;
     }
-    .zona-toggle {
-      background: rgba(15,23,42,0.9);
-      border-radius: 8px;
-      padding: 8px 9px;
-      border: 1px solid rgba(249,250,251,0.06);
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 11.5px;
+    .sb-section-label{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:0.12em;
+      color:var(--sidebar-muted);
+      margin:12px 0 6px;
     }
-    .zona-toggle-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: var(--sidebar-muted);
+    .zona-toggle{
+      background:rgba(15,23,42,0.9);
+      border-radius:8px;
+      padding:8px 9px;
+      border:1px solid rgba(249,250,251,0.06);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:11.5px;
     }
-    .zona-options {
-      display: flex;
-      gap: 6px;
+    .zona-toggle-header{
+      display:flex;align-items:center;justify-content:space-between;
+      color:var(--sidebar-muted);
     }
-    .zona-pill {
-      flex: 1;
-      border-radius: 999px;
-      padding: 5px 6px;
-      text-align: center;
-      font-size: 11px;
-      cursor: pointer;
-      border: 1px solid rgba(249,250,251,0.16);
-      color: var(--sidebar-muted);
-      background: rgba(15,23,42,0.8);
-      transition: all 0.2s;
+    .zona-options{
+      display:flex;
+      gap:6px;
     }
-    .zona-pill.active {
-      background: var(--sidebar-accent);
-      color: #111827;
-      border-color: var(--sidebar-accent-soft);
-      box-shadow: 0 0 0 1px rgba(254,202,202,0.3);
-      font-weight: 600;
+    .zona-pill{
+      flex:1;
+      border-radius:999px;
+      padding:5px 6px;
+      text-align:center;
+      font-size:11px;
+      cursor:pointer;
+      border:1px solid rgba(249,250,251,0.16);
+      color:var(--sidebar-muted);
+      background:rgba(15,23,42,0.8);
+      transition:all .2s;
     }
-    .menu {
-      margin-top: 10px;
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 13px;
+    .zona-pill.active{
+      background:var(--sidebar-accent);
+      color:#111827;
+      border-color:var(--sidebar-accent-soft);
+      box-shadow:0 0 0 1px rgba(254,202,202,0.3);
+      font-weight:600;
     }
-    .menu a {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 8px;
-      color: var(--sidebar-text);
-      text-decoration: none;
-      border-radius: 7px;
-      border: 1px solid transparent;
-      transition: background .18s, border-color .18s, transform .12s;
-      font-size: 13px;
+    .menu{
+      margin-top:10px;
+      list-style:none;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      font-size:13px;
     }
-    .menu a .icon {
-      font-size: 15px;
-      width: 18px;
-      text-align: center;
+    .menu a{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 8px;
+      color:var(--sidebar-text);
+      text-decoration:none;
+      border-radius:7px;
+      border:1px solid transparent;
+      transition:background .18s,border-color .18s,transform .12s;
+      font-size:13px;
     }
-    .menu a:hover {
-      background: rgba(31,41,55,0.9);
-      border-color: rgba(249,250,251,0.08);
-      transform: translateX(1px);
+    .menu a span.icon{
+      font-size:15px;width:18px;text-align:center;
     }
-    .menu a.primary {
-      background: rgba(17,24,39,0.95);
-      border-color: rgba(249,250,251,0.14);
+    .menu a:hover{
+      background:rgba(31,41,55,0.9);
+      border-color:rgba(249,250,251,0.08);
+      transform:translateX(1px);
     }
-    .menu a.active {
-      background: rgba(249,115,91,0.12);
-      border-color: var(--sidebar-accent-soft);
+    .menu a.primary{
+      background:rgba(17,24,39,0.95);
+      border-color:rgba(249,250,251,0.14);
     }
-    .sb-footer {
-      margin-top: auto;
-      font-size: 11px;
-      color: var(--sidebar-muted);
-      border-top: 1px solid rgba(55,65,81,0.9);
-      padding-top: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .menu a.active{
+      background:rgba(249,115,91,0.12);
+      border-color:var(--sidebar-accent-soft);
     }
-    .sb-footer a {
-      color: var(--sidebar-accent-soft);
-      text-decoration: none;
-      font-size: 12px;
+    .sb-footer{
+      margin-top:auto;
+      font-size:11px;
+      color:var(--sidebar-muted);
+      border-top:1px solid rgba(55,65,81,0.9);
+      padding-top:8px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
-    .sb-footer a:hover { text-decoration: underline; }
+    .sb-footer a{
+      color:var(--sidebar-accent-soft);
+      text-decoration:none;
+      font-size:12px;
+    }
+    .sb-footer a:hover{text-decoration:underline;}
 
-    .main {
-      flex: 1;
-      padding: 18px;
-      overflow: auto;
+    /* MAIN */
+    .main{
+      flex:1;
+      padding:18px;
+      overflow:auto;
     }
-    .card {
-      max-width: 1100px;
-      margin: 0 auto;
-      background: var(--card-bg);
-      border-radius: 14px;
-      padding: 18px 20px 20px;
-      border: 1px solid var(--border-soft);
-      box-shadow: 0 10px 35px rgba(15,23,42,0.12);
+    .panel{
+      max-width:1100px;
+      margin:0 auto;
+      background:var(--card-bg);
+      border-radius:14px;
+      padding:18px 20px 20px;
+      border:1px solid var(--border-soft);
+      box-shadow:0 10px 35px rgba(15,23,42,0.12);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height:calc(100vh - 36px);
     }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
+    .panel-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
     }
-    .card-header-left h1 {
-      font-size: 18px;
-      margin-bottom: 4px;
+    .panel-title h1{
+      font-size:18px;
+      margin-bottom:4px;
     }
-    .card-header-left p {
-      font-size: 13px;
-      color: var(--text-muted);
+    .panel-title p{
+      font-size:13px;
+      color:var(--text-muted);
     }
-    .badge-zona {
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: var(--sidebar-accent-soft);
-      color: #7c2d12;
-      border: 1px solid #fed7c2;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      height: fit-content;
+    .panel-meta{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:4px;
+      font-size:11px;
     }
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-      font-size: 13px;
+    .badge-zona-main{
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      background:var(--sidebar-accent-soft);
+      color:#7c2d12;
+      border:1px solid #fed7c2;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
     }
-    .filters label {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .badge-fecha{
+      font-size:11px;
+      padding:3px 7px;
+      border-radius:999px;
+      background:#e5f3ff;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      font-family:monospace;
     }
-    .filters input,
-    .filters select {
-      padding: 4px 6px;
-      border-radius: 6px;
-      border: 1px solid var(--border-soft);
-      font-size: 13px;
+    .buscador-container {
+      display:flex;
+      align-items:center;
+      max-width:260px;
+      gap:6px;
+      margin-top:6px;
     }
-    .table-wrapper {
-      border-radius: 10px;
-      border: 1px solid var(--border-soft);
-      overflow: hidden;
+    .search-box {
+      flex:1;
+      display:flex;
+      align-items:center;
+      background:#f9fafb;
+      border:1px solid #d1d5db;
+      border-radius:999px;
+      overflow:hidden;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
+    .search-box input {
+      flex-grow:1;
+      font-size:12px;
+      padding:5px 8px;
+      border:none;
+      outline:none;
+      background:transparent;
+      color:var(--text-main);
     }
-    thead {
-      background: #f9fafb;
+    .search-box input::placeholder {
+      color:#9ca3af;
+      font-size:12px;
     }
-    th, td {
-      padding: 6px 8px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
-      white-space: nowrap;
+    .search-box button {
+      font-size:11px;
+      padding:5px 10px;
+      color:#111827;
+      background:var(--sidebar-accent);
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+      border-radius:999px;
+      margin-right:3px;
     }
-    tbody tr:nth-child(even) {
-      background: #f9fafb;
+    .search-box button:hover { opacity:.9; }
+    .table-wrapper{
+      flex:1;
+      border-radius:10px;
+      border:1px solid var(--border-soft);
+      background:#f9fafb;
+      overflow:auto;
+      box-shadow:inset 0 0 6px rgba(15,23,42,0.1);
     }
-    tbody tr:hover {
-      background: #fef2f2;
+    table{
+      border-collapse:separate;
+      border-spacing:0 2px;
+      width:100%;
+      min-width:520px;
+      font-size:11px;
+      background:white;
     }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 6px;
-      border-radius: 999px;
-      font-size: 11px;
-      background: #eef2ff;
-      color: #3730a3;
+    thead th{
+      position:sticky;
+      top:0;
+      background:#f9735b;
+      color:white;
+      text-align:left;
+      padding:5px 8px;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:0.04em;
+      z-index:2;
+    }
+    tbody td{
+      padding:4px 8px;
+      white-space:nowrap;
+      border-top:1px solid #f3f4f6;
+      border-bottom:1px solid #f3f4f6;
+    }
+    tbody tr:nth-child(even){
+      background:#f9fafb;
+    }
+    tbody tr:hover{
+      background:#fee2e2;
+    }
+    tr.resaltado{
+      background:#ffe4e6 !important;
+      font-weight:600;
+      color:#b91c1c;
     }
 
-    @media (max-width: 900px) {
-      .layout { flex-direction: column; }
-      .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        padding: 8px 10px;
-        gap: 8px;
+    /* Responsive igual que index */
+    @media(max-width:900px){
+      .layout{flex-direction:column;}
+      .sidebar{
+        width:100%;
+        height:auto;
+        position:relative;
+        flex-direction:row;
+        align-items:center;
+        justify-content:space-between;
+        padding:8px 10px;
+        gap:8px;
       }
-      .sb-section-label { display: none; }
-      .zona-toggle {
-        flex-direction: row;
-        align-items: center;
-        padding: 6px 7px;
+      .sb-header{margin-bottom:0;}
+      .sb-title span:nth-child(2){font-size:13px;}
+      .sb-section-label{display:none;}
+      .zona-toggle{
+        flex-direction:row;
+        align-items:center;
+        padding:6px 7px;
       }
-      .zona-toggle-header { display: none; }
-      .zona-options { gap: 4px; }
-      .zona-pill { padding: 4px 6px; font-size: 10px; }
-      .menu {
-        flex-direction: row;
-        flex-wrap: wrap;
-        margin-top: 0;
-        gap: 4px;
+      .zona-toggle-header{display:none;}
+      .zona-options{gap:4px;}
+      .zona-pill{padding:4px 6px;font-size:10px;}
+      .menu{
+        flex-direction:row;
+        flex-wrap:wrap;
+        margin-top:0;
+        gap:4px;
       }
-      .menu a { padding: 4px 6px; font-size: 11px; }
-      .sb-footer { display: none; }
-      .main { padding: 10px 8px 12px; }
-      .card { padding: 14px 14px 16px; }
+      .menu a{padding:4px 6px;font-size:11px;}
+      .sb-footer{display:none;}
+      .main{padding:10px 8px 12px;}
+      .panel{padding:14px 14px 16px;min-height:auto;}
     }
-    @media (max-width: 480px) {
-      .menu a .icon { display: none; }
-      .menu a span { font-size: 10px; }
-      .zona-pill { font-size: 9px; }
-      .card-header-left h1 { font-size: 16px; }
-      .card-header-left p { font-size: 12px; }
-      th, td { white-space: normal; }
+    @media(max-width:480px){
+      .menu a span.icon{display:none;}
+      .menu a span{font-size:10px;}
+      .zona-pill{font-size:9px;}
+      .panel-title h1{font-size:16px;}
+      .panel-title p{font-size:12px;}
+      table{font-size:10px;}
     }
   </style>
 </head>
@@ -329,10 +385,10 @@
     <div class="sb-section-label">Módulos</div>
     <ul class="menu">
       <li><a href="index.html"><span class="icon">🏠</span><span>Inicio</span></a></li>
-      <li><a href="agenda.html" class="active"><span class="icon">📅</span><span>Agenda</span></a></li>
+      <li><a href="agenda.html" class="primary active"><span class="icon">📋</span><span>Agenda</span></a></li>
       <li><a href="planos.html"><span class="icon">🗺️</span><span>Planos</span></a></li>
       <li><a href="ubicame.html"><span class="icon">📍</span><span>Ubícame</span></a></li>
-      <li><a href="documentos.html"><span class="icon">📄</span><span>Documentos</span></a></li>
+      <li><a href="documentos.html"><span class="icon">📑</span><span>Documentos</span></a></li>
     </ul>
 
     <div class="sb-footer">
@@ -342,89 +398,228 @@
   </aside>
 
   <main class="main">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <h1>Agenda diaria</h1>
-          <p>Lista filtrable de entregas por cliente, placa y ruta de venta.</p>
+    <section class="panel">
+      <header class="panel-header">
+        <div class="panel-title">
+          <h1>Agenda de entregas</h1>
+          <p>Visualiza y filtra la agenda de clientes por zona, placa, solicitante y otros campos clave.</p>
+          <div class="buscador-container">
+            <div class="search-box">
+              <input type="text" id="buscador-principal" placeholder="Buscar en agenda..." autocomplete="off" spellcheck="false" />
+              <button type="button" onclick="nuevaBusqueda()">Nueva</button>
+            </div>
+          </div>
         </div>
-        <div class="badge-zona">
-          Zona activa:
-          <strong id="badge-zona-text">...</strong>
+        <div class="panel-meta">
+          <span class="badge-zona-main">Zona activa: <strong id="badge-zona-text">-</strong></span>
+          <span class="badge-fecha" id="fecha-entrega-badge">--/--/----</span>
         </div>
-      </div>
-
-      <div class="filters">
-        <label>
-          Fecha entrega
-          <input type="date" id="f-fecha" />
-        </label>
-        <label>
-          Cliente
-          <input type="text" id="f-cliente" placeholder="Nombre o código" />
-        </label>
-        <label>
-          Placa / Vehículo
-          <input type="text" id="f-placa" placeholder="Ej. CHQ-902" />
-        </label>
-        <label>
-          Ruta venta
-          <input type="text" id="f-ruta" placeholder="Ruta" />
-        </label>
-        <label>
-          Estado
-          <select id="f-estado">
-            <option value="">Todos</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="en_ruta">En ruta</option>
-            <option value="entregado">Entregado</option>
-          </select>
-        </label>
-      </div>
+      </header>
 
       <div class="table-wrapper">
         <table id="agenda-table">
           <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Vehículo</th>
-            <th>Cliente</th>
-            <th>Ciudad</th>
-            <th>Ruta</th>
-            <th>Kilos</th>
-            <th>Estado</th>
-          </tr>
+            <tr>
+              <th>Cliente</th>
+              <th>Solicitante</th>
+              <th>Ruta Venta</th>
+              <th>Placa</th>
+              <th>Asignación</th>
+              <th>Teléfono</th>
+              <th>Dirección</th>
+            </tr>
           </thead>
-          <tbody>
-          <!-- Aquí luego llenas con JS usando el mismo CSV que ya usas -->
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
-    </div>
+    </section>
   </main>
 </div>
 
 <script>
-  function getZona() {
-    return localStorage.getItem('maptrack_zona') || '0752';
+/* Zona compartida, alineada a index.html */
+function setZona(z){
+  localStorage.setItem('maptrack_zona', z);
+  pintarZonaSidebar();
+  filtrarZonaYRender();
+}
+function getZona(){
+  return localStorage.getItem('maptrack_zona') || '0752';
+}
+function pintarZonaSidebar(){
+  const z = getZona();
+  const ate = document.getElementById('zona-ate');
+  const ch = document.getElementById('zona-chorr');
+  if (ate && ch){
+    ate.classList.toggle('active', z === '0374');
+    ch.classList.toggle('active', z === '0752');
   }
-  function setZona(z) {
-    localStorage.setItem('maptrack_zona', z);
-    pintarZona();
+  const badge = document.getElementById('badge-zona-text');
+  if (badge) badge.textContent = (z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate');
+}
+
+/* Agenda lógica (igual que tu código original, solo ajustado a formato) */
+const CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack_V2.1.csv';
+const COL_PLACA = 'Vehicle Key/Placa',
+      COL_CODIGO_CLIENTE = 'Customer Account # / Cliente',
+      COL_NOMBRE_CLIENTE = 'Customer Name/Solic',
+      COL_ERROR = 'Customer Name2',
+      COL_CITY = 'City',
+      COL_ADDRESS = 'Address',
+      COL_FECHA = 'Fecha de Entrega',
+      COL_CONSIDERA = 'Considera',
+      COL_LAT = 'Latitude',
+      COL_LNG = 'Longitude';
+
+let dataRowsRaw = [];
+let dataRows = [];
+let buscadorGlobal = '';
+
+function toDDMMYYYY(fechaStr) {
+  if (!fechaStr) return '';
+  if (/^d{4}-d{1,2}-d{1,2}$/.test(fechaStr.trim())) {
+    let [a,m,d]=fechaStr.trim().split('-');
+    return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${a}`;
   }
-  function pintarZona() {
-    const z = getZona();
-    const ate = document.getElementById('zona-ate');
-    const ch = document.getElementById('zona-chorr');
-    if (ate && ch) {
-      ate.classList.toggle('active', z === '0374');
-      ch.classList.toggle('active', z === '0752');
+  let sep = fechaStr.includes('/') ? '/' : '-';
+  let [p1,p2,p3] = fechaStr.trim().split(sep);
+  if (p3 && p3.length===4){
+    let d=parseInt(p1),m=parseInt(p2),y=parseInt(p3);
+    if(m>12)[d,m]=[m,d];
+    return `${d.toString().padStart(2,'0')}/${m.toString().padStart(2,'0')}/${y}`;
+  }
+  return fechaStr;
+}
+
+function getUnique(arr) {
+  const seen = new Set();
+  return arr.filter(row => {
+    const key = [
+      row.Cliente, row.Solicitante, row.RutaVenta,
+      row.Placa, row.Asignacion, row.Telefono, row.Direccion
+    ].join('|').toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function mostrarFechaEntrega(rows) {
+  let fechas = [...new Set(rows.map(r => r.FechaEntrega).filter(f => f))];
+  fechas.sort((a, b) => {
+    let [da, ma, aa] = a.split('/').map(Number), [db, mb, ab] = b.split('/').map(Number);
+    let dA = new Date(aa, ma - 1, da), dB = new Date(ab, mb - 1, db);
+    return dA - dB;
+  });
+  let fechaMostrar = fechas.length ? fechas[0] : '';
+  let textoFecha = fechaMostrar ? fechaMostrar : '--/--/----';
+  document.getElementById('fecha-entrega-badge').textContent = textoFecha;
+}
+
+function match(row) {
+  if (buscadorGlobal && buscadorGlobal !== '') {
+    let val = [
+      row.Cliente, row.Solicitante, row.RutaVenta, row.Placa,
+      row.Asignacion, row.Telefono, row.Direccion, row.Pedido
+    ].join(' ').toLowerCase();
+    if (!val.includes(buscadorGlobal)) return false;
+  }
+  return true;
+}
+
+function renderTable() {
+  let tbody = document.querySelector('#agenda-table tbody');
+  let fragment = document.createDocumentFragment();
+  let rowsShow = dataRows.filter(row => match(row));
+  for (let i = 0; i < rowsShow.length && i < 250; i++) {
+    let row = rowsShow[i];
+    let tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td title="${row.Cliente}">${row.Cliente}</td>
+      <td title="${row.Solicitante}">${row.Solicitante}</td>
+      <td title="${row.RutaVenta}">${row.RutaVenta}</td>
+      <td title="${row.Placa}">${row.Placa}</td>
+      <td title="${row.Asignacion}">${row.Asignacion}</td>
+      <td title="${row.Telefono}">${row.Telefono}</td>
+      <td title="${row.Direccion.replace(/<.*?>/g,'')}">${row.Direccion}</td>
+    `;
+    tr.addEventListener('touchstart', ()=> tr.classList.add('resaltado'));
+    tr.addEventListener('touchend', ()=> setTimeout(()=>tr.classList.remove('resaltado'),120));
+    fragment.appendChild(tr);
+  }
+  tbody.innerHTML = '';
+  tbody.appendChild(fragment);
+}
+
+function filtrarZonaYRender() {
+  const zona = getZona();
+  if(zona === '0752') {
+    dataRows = getUnique(dataRowsRaw.filter(r => r.Considera && r.Considera.trim() === '0752'));
+  } else {
+    dataRows = getUnique(dataRowsRaw.filter(r => r.Considera && r.Considera.trim() !== '0752'));
+  }
+  mostrarFechaEntrega(dataRows);
+  renderTable();
+}
+
+/* Búsqueda */
+function onGlobalSearchInput(){
+  buscadorGlobal = document.getElementById('buscador-principal').value.trim().toLowerCase();
+  renderTable();
+}
+function nuevaBusqueda(){
+  buscadorGlobal = '';
+  document.getElementById('buscador-principal').value = '';
+  renderTable();
+}
+
+/* Carga CSV */
+function loadCSV() {
+  Papa.parse(CSV_URL, {
+    download: true, header: true, skipEmptyLines: true,
+    complete: function (results) {
+      const rows = results.data;
+      dataRowsRaw = rows.map(row => {
+        let E = row[COL_NOMBRE_CLIENTE]||'';
+        let F = row[COL_ERROR]||'';
+        let fullSolic = (F && !['0', '#N/A', '(blank)', '', ' '].includes(F)) ? `${E} - ${F}` : E;
+        let address = row[COL_ADDRESS]||'';
+        let city = row[COL_CITY]||'';
+        let dirCity = address + (city ? ' - ' + city : '');
+        let lat = row[COL_LAT]||'';
+        let lng = row[COL_LNG]||'';
+        let mapLink = (lat && lng)
+          ? `<a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" rel="noopener">${dirCity}</a>`
+          : dirCity;
+        let fecha = toDDMMYYYY(row[COL_FECHA]||'');
+        let asignacion = row['Asignación']||row['Asignacion']||'';
+        let telefono = row['Teléfono']||row['Telefono']||row['Phone']||'';
+        return {
+          raw: row,
+          Cliente: row[COL_CODIGO_CLIENTE]||'',
+          Solicitante: fullSolic,
+          RutaVenta: row['RUTA VENTA']||row['Ruta Venta']||'',
+          Placa: row[COL_PLACA]||'',
+          Asignacion: asignacion,
+          Telefono: telefono,
+          Direccion: mapLink,
+          FechaEntrega: fecha,
+          Pedido: row['#Pedido'] || row['Pedido'] || '',
+          Considera: row[COL_CONSIDERA]||''
+        };
+      });
+      filtrarZonaYRender();
     }
-    const label = z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate';
-    const badge = document.getElementById('badge-zona-text');
-    if (badge) badge.textContent = label;
-  }
-  document.addEventListener('DOMContentLoaded', pintarZona);
+  });
+}
+
+/* Init */
+document.addEventListener('DOMContentLoaded', ()=>{
+  pintarZonaSidebar();
+  const input = document.getElementById('buscador-principal');
+  if (input) input.addEventListener('input', onGlobalSearchInput);
+  loadCSV();
+});
 </script>
 </body>
 </html>
