@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>MapTrack Atlas - Ubícame</title>
+  <title>RoadMap - Ubícame</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack.png" />
+  <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -28,14 +28,14 @@
       background:var(--main-bg);
       color:var(--text-main);
       min-height:100vh;
-      display:flex;
+      margin:0;
     }
     .layout{
       display:flex;
       width:100%;
       min-height:100vh;
     }
-    /* SIDEBAR */
+    /* SIDEBAR igual a index */
     .sidebar{
       width:235px;
       background:linear-gradient(180deg,#111827,#1f2933);
@@ -148,6 +148,10 @@
       background:rgba(17,24,39,0.95);
       border-color:rgba(249,250,251,0.14);
     }
+    .menu a.active{
+      background:rgba(249,115,91,0.12);
+      border-color:var(--sidebar-accent-soft);
+    }
     .sb-footer{
       margin-top:auto;
       font-size:11px;
@@ -164,48 +168,51 @@
       font-size:12px;
     }
     .sb-footer a:hover{text-decoration:underline;}
+
     /* MAIN */
     .main{
       flex:1;
-      padding:14px 16px 16px;
+      padding:18px;
       overflow:auto;
     }
     .panel{
+      max-width:1100px;
+      margin:0 auto;
       background:var(--card-bg);
       border-radius:14px;
-      padding:10px 12px 12px;
+      padding:18px 20px 20px;
       border:1px solid var(--border-soft);
-      box-shadow:0 8px 28px rgba(15,23,42,0.12);
+      box-shadow:0 10px 35px rgba(15,23,42,0.12);
       display:flex;
       flex-direction:column;
       gap:10px;
-      height:calc(100vh - 32px);
+      min-height:calc(100vh - 36px);
     }
     .panel-header{
       display:flex;
       justify-content:space-between;
       align-items:flex-start;
-      gap:10px;
+      gap:12px;
       flex-wrap:wrap;
     }
     .panel-title h1{
-      font-size:16px;
-      margin-bottom:2px;
+      font-size:18px;
+      margin-bottom:4px;
     }
     .panel-title p{
-      font-size:12px;
+      font-size:13px;
       color:var(--text-muted);
     }
     .panel-meta{
       display:flex;
       flex-direction:column;
       align-items:flex-end;
-      gap:3px;
+      gap:4px;
       font-size:11px;
     }
     .badge-zona-main{
       font-size:11px;
-      padding:3px 7px;
+      padding:4px 8px;
       border-radius:999px;
       background:var(--sidebar-accent-soft);
       color:#7c2d12;
@@ -214,10 +221,12 @@
       align-items:center;
       gap:4px;
     }
+
     .buscador-box{
       display:flex;
       flex-direction:column;
       gap:8px;
+      margin-top:10px;
       padding:10px 10px 10px;
       border-radius:10px;
       border:1px solid var(--border-soft);
@@ -233,7 +242,7 @@
       border-radius:7px;
       border:1px solid #d1d5db;
       font-size:12px;
-      width:170px;
+      width:190px;
     }
     #buscarClienteBtn{
       padding:6px 12px;
@@ -264,6 +273,7 @@
       color:#b91c1c;
       border:1px solid #fecaca;
     }
+
     .map-wrapper{
       flex:1;
       border-radius:10px;
@@ -277,11 +287,49 @@
       height:100%;
       min-height:260px;
     }
-    @media(max-width:768px){
-      .sidebar{width:210px;}
-      .main{padding:10px;}
-      .panel{height:auto;}
+
+    /* Responsive igual que index */
+    @media(max-width:900px){
+      .layout{flex-direction:column;}
+      .sidebar{
+        width:100%;
+        height:auto;
+        position:relative;
+        flex-direction:row;
+        align-items:center;
+        justify-content:space-between;
+        padding:8px 10px;
+        gap:8px;
+      }
+      .sb-header{margin-bottom:0;}
+      .sb-title span:nth-child(2){font-size:13px;}
+      .sb-section-label{display:none;}
+      .zona-toggle{
+        flex-direction:row;
+        align-items:center;
+        padding:6px 7px;
+      }
+      .zona-toggle-header{display:none;}
+      .zona-options{gap:4px;}
+      .zona-pill{padding:4px 6px;font-size:10px;}
+      .menu{
+        flex-direction:row;
+        flex-wrap:wrap;
+        margin-top:0;
+        gap:4px;
+      }
+      .menu a{padding:4px 6px;font-size:11px;}
+      .sb-footer{display:none;}
+      .main{padding:10px 8px 12px;}
+      .panel{padding:14px 14px 16px;min-height:auto;}
       #ubicame-map{height:60vh;}
+    }
+    @media(max-width:480px){
+      .menu a span.icon{display:none;}
+      .menu a span{font-size:10px;}
+      .zona-pill{font-size:9px;}
+      .panel-title h1{font-size:16px;}
+      .panel-title p{font-size:12px;}
     }
   </style>
 </head>
@@ -289,10 +337,10 @@
 <div class="layout">
   <aside class="sidebar">
     <div class="sb-header">
-      <img src="https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack.png" class="sb-logo" alt="MapTrack" />
+      <img src="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" class="sb-logo" alt="MapTrack" />
       <div class="sb-title">
-        <span>MapTrack Atlas</span>
-        <span>Panel Logístico</span>
+        <span>RoadMap</span>
+        <span>Distribution Platform</span>
       </div>
     </div>
 
@@ -302,7 +350,8 @@
         <span>Selecciona zona activa</span>
       </div>
       <div class="zona-options">
-        <button class="zona-pill" id="zona-ate" onclick="setZona('ATE')">Cedí Ate</button>
+        <!-- mismos códigos que index.html -->
+        <button class="zona-pill" id="zona-ate" onclick="setZona('0374')">Cedi Ate</button>
         <button class="zona-pill" id="zona-chorr" onclick="setZona('0752')">Cadi Chorrillos</button>
       </div>
     </div>
@@ -312,13 +361,13 @@
       <li><a href="index.html"><span class="icon">🏠</span><span>Inicio</span></a></li>
       <li><a href="agenda.html"><span class="icon">📋</span><span>Agenda</span></a></li>
       <li><a href="planos.html"><span class="icon">🗺️</span><span>Planos</span></a></li>
-      <li><a href="ubicame.html" class="primary"><span class="icon">📍</span><span>Ubícame</span></a></li>
+      <li><a href="ubicame.html" class="primary active"><span class="icon">📍</span><span>Ubícame</span></a></li>
       <li><a href="documentos.html"><span class="icon">📑</span><span>Documentos</span></a></li>
     </ul>
 
     <div class="sb-footer">
       <span>v2.1</span>
-      <a href="https://t.me/MapTrack_bot" target="_blank" rel="noopener">Telegram Bot</a>
+      <a href="https://t.me/MapTrackbot" target="_blank" rel="noopener">Telegram Bot</a>
     </div>
   </aside>
 
@@ -327,16 +376,16 @@
       <header class="panel-header">
         <div class="panel-title">
           <h1>Ubicar cliente Sigma</h1>
-          <p>Ingresa el código del cliente (Deudor) y visualiza su ubicación con acceso directo a Google Maps.</p>
+          <p>Ingresa el código (deudor Sigma) y visualiza su ubicación con acceso directo a Google Maps.</p>
           <div class="buscador-box">
             <label for="codigoClienteInput">Código de Cliente (Deudor Sigma):</label>
             <input type="text" id="codigoClienteInput" placeholder="Ej: 123456" autocomplete="off" spellcheck="false" />
-            <button id="buscarClienteBtn" onclick="buscarClienteSigma()">🔍 Ubicar Cliente</button>
+            <button id="buscarClienteBtn" onclick="buscarClienteSigma()">🔍 Ubicar cliente</button>
             <div id="resultadoCliente"></div>
           </div>
         </div>
         <div class="panel-meta">
-          <span class="badge-zona-main">Zona: <strong id="badge-zona-text">-</strong></span>
+          <span class="badge-zona-main">Zona activa: <strong id="badge-zona-text">-</strong></span>
         </div>
       </header>
 
@@ -348,7 +397,7 @@
 </div>
 
 <script>
-/* Zona compartida */
+/* Zona compartida, alineada con index.html */
 function setZona(z){
   localStorage.setItem('maptrack_zona', z);
   pintarZonaSidebar();
@@ -361,19 +410,19 @@ function pintarZonaSidebar(){
   const ate = document.getElementById('zona-ate');
   const ch = document.getElementById('zona-chorr');
   if (ate && ch){
-    ate.classList.toggle('active', z !== '0752');
+    ate.classList.toggle('active', z === '0374');
     ch.classList.toggle('active', z === '0752');
   }
   const badge = document.getElementById('badge-zona-text');
-  if (badge) badge.textContent = (z === '0752' ? 'Cadi Chorrillos' : 'Cedí Ate');
+  if (badge) badge.textContent = (z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate');
 }
 
-/* Mapa Ubícame + Sigma */
+/* Mapa Ubícame + catálogo Sigma (misma lógica) */
 const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
 let sigmaData = [];
 let ubicameMap = null;
-let ubicameMapaIniciado = false;
 let ubicameMarker = null;
+let ubicameUserMarker = null;
 
 function makeCustomMarker(color){
   const svg=encodeURIComponent(
@@ -400,39 +449,40 @@ function makeBlackDotMarker() {
 }
 
 function showUserLocationOnMap(enable, mapInstance = ubicameMap) {
-  if (!mapInstance) return;
-  if (ubicameMarker && ubicameMarker._isUser) {
-    mapInstance.removeLayer(ubicameMarker);
-    ubicameMarker = null;
+  if (!mapInstance || !("geolocation" in navigator)) return;
+
+  if (ubicameUserMarker) {
+    mapInstance.removeLayer(ubicameUserMarker);
+    ubicameUserMarker = null;
   }
-  if (enable && "geolocation" in navigator) {
-    navigator.geolocation.watchPosition(
-      (pos) => {
-        const {latitude, longitude} = pos.coords;
-        if (ubicameMarker && ubicameMarker._isUser) {
-          mapInstance.removeLayer(ubicameMarker);
-        }
-        const mk = L.marker([latitude, longitude], {
-          icon: makeBlackDotMarker(),
-          zIndexOffset: 99999
-        }).addTo(mapInstance)
-          .bindPopup('<div style="font-size:10px;">Mi ubicación actual</div>');
-        mk._isUser = true;
-        ubicameMarker = mk;
-      },
-      (err) => {},
-      { enableHighAccuracy:true, maximumAge:9000, timeout:10000 }
-    );
-  }
+
+  if (!enable) return;
+
+  navigator.geolocation.watchPosition(
+    (pos) => {
+      const {latitude, longitude} = pos.coords;
+      if (ubicameUserMarker) {
+        mapInstance.removeLayer(ubicameUserMarker);
+      }
+      const mk = L.marker([latitude, longitude], {
+        icon: makeBlackDotMarker(),
+        zIndexOffset: 99999
+      }).bindPopup('<div style="font-size:10px;">Mi ubicación actual</div>');
+      mk.addTo(mapInstance);
+      ubicameUserMarker = mk;
+    },
+    (err) => {},
+    { enableHighAccuracy:true, maximumAge:9000, timeout:10000 }
+  );
 }
 
 /* Buscar en Sigma */
 function buscarClienteSigma() {
   const codigo = document.getElementById('codigoClienteInput').value.trim();
   const resultadoDiv = document.getElementById('resultadoCliente');
-  
+
   if (!codigo) {
-    resultadoDiv.textContent = 'Ingresa un código de cliente válido';
+    resultadoDiv.textContent = 'Ingresa un código de cliente válido.';
     resultadoDiv.className = 'error';
     resultadoDiv.style.display = 'block';
     return;
@@ -444,17 +494,17 @@ function buscarClienteSigma() {
   });
 
   if (!cliente) {
-    resultadoDiv.textContent = `Cliente ${codigo} no encontrado en catálogo Sigma`;
+    resultadoDiv.textContent = `Cliente ${codigo} no encontrado en el catálogo Sigma.`;
     resultadoDiv.className = 'error';
     resultadoDiv.style.display = 'block';
-    if (ubicameMarker && !ubicameMarker._isUser) {
+    if (ubicameMarker) {
       ubicameMap.removeLayer(ubicameMarker);
       ubicameMarker = null;
     }
     return;
   }
 
-  // Columnas Sigma según tu definición
+  // columnas de tu CSV Sigma (se respetan)
   const nombre = cliente[7] || 'N/D';       // col 8
   const direccion = cliente[14] || 'N/D';   // col 15
   const distrito = cliente[16] || 'N/D';    // col 17
@@ -462,7 +512,7 @@ function buscarClienteSigma() {
   const lng = parseFloat(cliente[29]);      // col 30
 
   if (isNaN(lat) || isNaN(lng)) {
-    resultadoDiv.textContent = `Cliente ${codigo} no tiene coordenadas válidas`;
+    resultadoDiv.textContent = `Cliente ${codigo} no tiene coordenadas válidas.`;
     resultadoDiv.className = 'error';
     resultadoDiv.style.display = 'block';
     return;
@@ -484,7 +534,7 @@ function buscarClienteSigma() {
 function mostrarClienteEnMapa(lat, lng, nombre, direccion, distrito) {
   if (!ubicameMap) return;
 
-  if (ubicameMarker && !ubicameMarker._isUser) {
+  if (ubicameMarker) {
     ubicameMap.removeLayer(ubicameMarker);
   }
 
@@ -492,8 +542,8 @@ function mostrarClienteEnMapa(lat, lng, nombre, direccion, distrito) {
   const popupContent = `
     <div style="font-size:11px; line-height:1.3; min-width:220px;">
       <div style="font-weight:bold; color:#e95567; margin-bottom:4px;">📍 ${nombre}</div>
-      <div style="color:#666; margin-bottom:2px;">📍 ${direccion}</div>
-      <div style="color:#666; margin-bottom:6px;">🏛️ ${distrito}</div>
+      <div style="color:#374151; margin-bottom:2px;">📍 ${direccion}</div>
+      <div style="color:#6b7280; margin-bottom:6px;">🏛️ ${distrito}</div>
       <a href="${gmaps}" target="_blank" rel="noopener" style="color:#075985; font-weight:600; font-size:10px;">🗺️ Abrir en Google Maps</a>
     </div>
   `;
@@ -507,13 +557,12 @@ function mostrarClienteEnMapa(lat, lng, nombre, direccion, distrito) {
   ubicameMap.setView([lat, lng], 17);
 }
 
-/* Cargar Sigma */
+/* Carga catálogo Sigma */
 function loadSigmaCSV() {
   Papa.parse(SIGMA_CSV_URL, {
     download: true, header: false, skipEmptyLines: true,
     complete: function(results) {
       sigmaData = results.data;
-      // console.log('Catálogo Sigma cargado:', sigmaData.length);
     }
   });
 }
@@ -522,15 +571,12 @@ function loadSigmaCSV() {
 document.addEventListener('DOMContentLoaded', ()=>{
   pintarZonaSidebar();
 
-  setTimeout(function(){
-    ubicameMap = L.map('ubicame-map').setView([-12.1, -77.0], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
-    }).addTo(ubicameMap);
-    ubicameMapaIniciado = true;
-    showUserLocationOnMap(true, ubicameMap);
-  }, 60);
+  ubicameMap = L.map('ubicame-map').setView([-12.1, -77.0], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(ubicameMap);
+  showUserLocationOnMap(true, ubicameMap);
 
   loadSigmaCSV();
 });
