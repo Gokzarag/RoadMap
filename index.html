@@ -32,7 +32,8 @@
       width:100%;
       min-height:100vh;
     }
-    /* SIDEBAR */
+
+    /* SIDEBAR (clases usadas por sidebar.html) */
     .sidebar{
       width:235px;
       background:linear-gradient(180deg,#111827,#1f2933);
@@ -161,6 +162,18 @@
       font-size:12px;
     }
     .sb-footer a:hover{text-decoration:underline;}
+
+    .btn-menu{
+      display:block; /* siempre visible */
+      background:none;
+      border:1px solid rgba(249,250,251,0.2);
+      color:var(--sidebar-text);
+      border-radius:6px;
+      padding:3px 6px;
+      font-size:16px;
+      cursor:pointer;
+      margin-left:auto;
+    }
 
     /* MAIN */
     .main{
@@ -292,7 +305,7 @@
     }
     #heatmap-container{
       width:100%;
-      height:440px;
+      height:320px;
       border-radius:10px;
       overflow:hidden;
       border:1px solid var(--border-soft);
@@ -323,6 +336,7 @@
         justify-content:space-between;
         padding:8px 10px;
         gap:8px;
+        transition:transform .25s ease;
       }
       .sb-header{
         margin-bottom:0;
@@ -373,6 +387,9 @@
       #heatmap-container{
         height:220px;
       }
+      .layout.menu-collapsed .sidebar{
+        transform:translateX(-100%);
+      }
     }
     @media(max-width:480px){
       .menu a span.icon{display:none;}
@@ -391,42 +408,9 @@
 </head>
 <body>
 <div class="layout">
-  <aside class="sidebar">
-    <div class="sb-header">
-      <img src="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" class="sb-logo" alt="MapTrack" />
-      <div class="sb-title">
-        <span>RoadMap</span>
-        <span>Distribution Platform</span>
-      </div>
-    </div>
+  <div id="sidebar-container"></div>
 
-    <div class="sb-section-label">Oficina</div>
-    <div class="zona-toggle">
-      <div class="zona-toggle-header">
-        <span>Selecciona zona activa</span>
-      </div>
-      <div class="zona-options">
-        <button class="zona-pill" id="zona-ate" onclick="setZona('0374')">Cedi Ate</button>
-        <button class="zona-pill" id="zona-chorr" onclick="setZona('0752')">Cadi Chorrillos</button>
-      </div>
-    </div>
-
-    <div class="sb-section-label">Módulos</div>
-    <ul class="menu">
-      <li><a href="index.html" class="primary"><span class="icon">🏠</span><span>Inicio</span></a></li>
-      <li><a href="agenda.html"><span class="icon">📋</span><span>Agenda</span></a></li>
-      <li><a href="planos.html"><span class="icon">🗺️</span><span>Planos</span></a></li>
-      <li><a href="ubicame.html"><span class="icon">📍</span><span>Ubícame</span></a></li>
-      <li><a href="documentos.html"><span class="icon">📑</span><span>Documentos</span></a></li>
-    </ul>
-
-    <div class="sb-footer">
-      <span>v2.1</span>
-      <a href="https://t.me/MapTrack_bot" target="_blank" rel="noopener">Telegram Bot</a>
-    </div>
-  </aside>
-
-<main class="main">
+  <main class="main">
     <div class="welcome-card">
       <div class="welcome-header">
         <div class="welcome-header-left">
@@ -464,7 +448,6 @@
       </div>
     </div>
 
-    <!-- INDICADORES PRINCIPALES -->
     <section class="welcome-card" id="kpi-section">
       <div class="welcome-header">
         <div class="welcome-header-left">
@@ -479,22 +462,15 @@
         </div>
       </div>
 
-      <!-- tarjetas KPI -->
-      <div class="grid-modulos" id="kpi-cards">
-        <!-- se llena desde kpi.js -->
-      </div>
+      <div class="grid-modulos" id="kpi-cards"></div>
 
-      <!-- MAPA + TABLAS -->
       <div class="kpi-bottom-layout">
-        <!-- Columna izquierda: mapa -->
         <div class="kpi-map-column">
           <h2 style="font-size:14px;margin-bottom:6px;">🗺️ Mapa de calor de atenciones</h2>
           <div id="heatmap-container"></div>
         </div>
 
-        <!-- Columna derecha: tablas -->
         <div class="kpi-tables-column">
-          <!-- Resumen por Canal -->
           <div class="kpi-table-block">
             <h2 style="font-size:13px;margin-bottom:4px;">📊 Resumen por Canal</h2>
             <div class="kpi-table-wrapper kpi-table-wrapper-narrow">
@@ -512,7 +488,6 @@
             </div>
           </div>
 
-          <!-- Resumen por Placa (FSE) -->
           <div class="kpi-table-block" style="margin-top:10px;">
             <h2 style="font-size:13px;margin-bottom:4px;">🚚 Resumen por Placa (FSE)</h2>
             <div class="kpi-table-wrapper kpi-table-wrapper-narrow">
@@ -562,24 +537,16 @@ function pintarZona(){
   if (badge) badge.textContent = label;
   if (badgeKpi) badgeKpi.textContent = label;
 }
-document.addEventListener('DOMContentLoaded', pintarZona);
 </script>
 
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
 <script>
 let heatMap, heatLayer;
-
 function renderHeatmap(points){
-  if (typeof L === 'undefined') {
-    return;
-  }
-
+  if (typeof L === 'undefined') return;
   const container = document.getElementById('heatmap-container');
   if (!container) return;
 
@@ -587,24 +554,20 @@ function renderHeatmap(points){
 
   if (!heatMap){
     heatMap = L.map('heatmap-container').setView(center, 11);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; OpenStreetMap'
     }).addTo(heatMap);
   }
-
   if (heatLayer){
     heatMap.removeLayer(heatLayer);
   }
-
   if (points.length > 0){
     heatLayer = L.heatLayer(points, {
       radius: 18,
       blur: 15,
       maxZoom: 17
     }).addTo(heatMap);
-
     const latlngs = points.map(p => [p[0], p[1]]);
     const bounds = L.latLngBounds(latlngs);
     heatMap.fitBounds(bounds, {padding:[20,20]});
@@ -613,9 +576,10 @@ function renderHeatmap(points){
 </script>
 
 <script src="kpi.js"></script>
+<script src="layout.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  pintarZona();
+  loadSidebar('inicio');
   if (typeof loadKPI === 'function') {
     loadKPI();
   }
