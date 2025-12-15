@@ -7,11 +7,8 @@
   <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" />
   <style>
     :root{
-      --sidebar-bg:#0b1120;
       --sidebar-accent:#f9735b;
       --sidebar-accent-soft:#fde3dd;
-      --sidebar-text:#f9fafb;
-      --sidebar-muted:#9ca3af;
       --main-bg:#f4f5f7;
       --card-bg:#ffffff;
       --border-soft:#e5e7eb;
@@ -29,162 +26,141 @@
     }
     .layout{
       display:flex;
-      width:100%;
+      flex-direction:column;
       min-height:100vh;
     }
-
-    /* SIDEBAR (usado por sidebar.html) */
-    .sidebar{
-      width:240px;
-      background:radial-gradient(circle at 0 0,#1f2937 0,#020617 55%);
-      color:var(--sidebar-text);
-      display:flex;
-      flex-direction:column;
-      padding:14px 14px 16px;
-      height:100vh;
-      position:sticky;
-      top:0;
-      transition:transform .25s ease;
-      z-index:30;
-    }
-    .layout.menu-collapsed .sidebar{
-      transform:translateX(-100%);
-    }
-    .sb-header{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:18px;
-    }
-    .sb-logo{
-      width:32px;height:32px;border-radius:12px;
-      border:1px solid rgba(249,250,251,0.3);
-      box-shadow:0 0 12px rgba(249,115,91,0.7);
-    }
-    .sb-title{
-      display:flex;
-      flex-direction:column;
-    }
-    .sb-title span:nth-child(1){
-      font-size:11px;
-      letter-spacing:0.12em;
-      text-transform:uppercase;
-      color:var(--sidebar-muted);
-    }
-    .sb-title span:nth-child(2){
-      font-size:14px;
-      font-weight:700;
-    }
-    .sb-section-label{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:0.12em;
-      color:var(--sidebar-muted);
-      margin:14px 0 6px;
-    }
-    .zona-toggle{
-      background:rgba(15,23,42,0.9);
-      border-radius:10px;
-      padding:8px 9px;
-      border:1px solid rgba(249,250,251,0.08);
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      font-size:11.5px;
-    }
-    .zona-toggle-header{
-      display:flex;align-items:center;justify-content:space-between;
-      color:var(--sidebar-muted);
-    }
-    .zona-options{
-      display:flex;
-      gap:6px;
-    }
-    .zona-pill{
-      flex:1;
-      border-radius:999px;
-      padding:5px 6px;
-      text-align:center;
-      font-size:11px;
-      cursor:pointer;
-      border:1px solid rgba(249,250,251,0.16);
-      color:var(--sidebar-muted);
-      background:rgba(15,23,42,0.8);
-      transition:all .2s;
-    }
-    .zona-pill.active{
-      background:var(--sidebar-accent);
-      color:#111827;
-      border-color:var(--sidebar-accent-soft);
-      box-shadow:0 0 0 1px rgba(254,202,202,0.3);
-      font-weight:600;
-    }
-    .menu{
-      margin-top:10px;
-      list-style:none;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      font-size:13px;
-    }
-    .menu a{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 8px;
-      color:var(--sidebar-text);
-      text-decoration:none;
-      border-radius:7px;
-      border:1px solid transparent;
-      transition:background .18s,border-color .18s,transform .12s;
-      font-size:13px;
-    }
-    .menu a span.icon{
-      font-size:15px;width:18px;text-align:center;
-    }
-    .menu a:hover{
-      background:rgba(31,41,55,0.9);
-      border-color:rgba(249,250,251,0.08);
-      transform:translateX(1px);
-    }
-    .menu a.primary{
-      background:rgba(17,24,39,0.95);
-      border-color:rgba(249,250,251,0.14);
-    }
-    .sb-footer{
-      margin-top:auto;
-      font-size:11px;
-      color:var(--sidebar-muted);
-      border-top:1px solid rgba(55,65,81,0.9);
-      padding-top:8px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-    .sb-footer a{
-      color:var(--sidebar-accent-soft);
-      text-decoration:none;
-      font-size:12px;
-    }
-    .sb-footer a:hover{text-decoration:underline;}
-
-    .btn-menu{
-      background:none;
-      border:1px solid rgba(249,250,251,0.3);
-      color:var(--sidebar-text);
-      border-radius:6px;
-      padding:3px 6px;
-      font-size:16px;
-      cursor:pointer;
-      margin-left:auto;
-    }
-
-    /* MAIN */
     .main{
       flex:1;
-      padding:18px 18px 18px;
-      overflow:auto;
+      padding:16px 18px 18px;
     }
+
+    /* Encabezado común (cargado desde sidebar.html) */
+    .rm-header{
+      position:sticky;
+      top:0;
+      z-index:20;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:8px 12px;
+      background:#020617;
+      color:#f9fafb;
+      border-bottom:1px solid rgba(148,163,184,0.4);
+    }
+    .rm-header-left{
+      display:flex;align-items:center;gap:8px;
+    }
+    .rm-logo{
+      width:30px;height:30px;border-radius:10px;
+      border:1px solid rgba(249,250,251,0.3);
+    }
+    .rm-title{
+      display:flex;flex-direction:column;
+    }
+    .rm-title span:first-child{
+      font-size:11px;text-transform:uppercase;
+      letter-spacing:0.12em;color:#9ca3af;
+    }
+    .rm-title span:last-child{
+      font-size:14px;font-weight:600;
+    }
+    .rm-header-center{
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+    }
+    .rm-label{
+      font-size:10px;text-transform:uppercase;color:#9ca3af;
+    }
+    .rm-zona{
+      display:flex;gap:6px;
+    }
+    .zona-pill{
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:11px;
+      border:1px solid rgba(249,250,251,0.16);
+      background:#0f172a;
+      color:#e5e7eb;
+      cursor:pointer;
+    }
+    .zona-pill.active{
+      background:#f9735b;
+      color:#111827;
+    }
+    .rm-header-right .btn-menu{
+      background:none;
+      border:1px solid rgba(249,250,251,0.3);
+      color:#f9fafb;
+      border-radius:6px;
+      padding:4px 8px;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    /* Popup off-canvas de módulos */
+    .menu-popup{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,0.6);
+      display:flex;
+      justify-content:flex-start;
+      align-items:stretch;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease;
+      z-index:40;
+    }
+    .menu-popup.open{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .menu-popup-inner{
+      width:260px;
+      max-width:80%;
+      background:#020617;
+      color:#f9fafb;
+      padding:16px 14px 18px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.5);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .menu-popup-close{
+      align-self:flex-end;
+      background:none;
+      border:none;
+      color:#e5e7eb;
+      font-size:18px;
+      cursor:pointer;
+      margin-bottom:4px;
+    }
+    .menu-popup-title{
+      font-size:14px;
+      margin-bottom:4px;
+    }
+    .menu-popup-nav a{
+      display:block;
+      padding:6px 4px;
+      color:#e5e7eb;
+      text-decoration:none;
+      border-radius:6px;
+      font-size:13px;
+    }
+    .menu-popup-nav a:hover{
+      background:rgba(148,163,184,0.25);
+    }
+
+    @media(max-width:900px){
+      .rm-header{
+        flex-wrap:wrap;
+      }
+      .rm-header-center{
+        order:3;
+        width:100%;
+      }
+    }
+
+    /* TARJETAS, KPI, MAPA (tu diseño actual) */
     .welcome-card{
       max-width:880px;
       margin:0 auto;
@@ -258,11 +234,8 @@
       font-weight:600;
       border:1px solid rgba(248,250,252,0.8);
     }
-    .mod-card a:hover{
-      opacity:.93;
-    }
+    .mod-card a:hover{ opacity:.93; }
 
-    /* TABLAS RESUMEN KPI */
     .kpi-table-wrapper{
       max-height:220px;
       overflow:auto;
@@ -276,10 +249,7 @@
       font-size:12px;
     }
     table.kpi-table thead{
-      position:sticky;
-      top:0;
-      background:#f3f4f6;
-      z-index:1;
+      position:sticky;top:0;background:#f3f4f6;z-index:1;
     }
     table.kpi-table th,
     table.kpi-table td{
@@ -289,85 +259,45 @@
       white-space:nowrap;
     }
     table.kpi-table th{
-      font-weight:600;
-      color:#4b5563;
-      font-size:11px;
+      font-weight:600;color:#4b5563;font-size:11px;
     }
-    table.kpi-table tbody tr:nth-child(even){
-      background:#f9fafb;
-    }
+    table.kpi-table tbody tr:nth-child(even){background:#f9fafb;}
 
-    /* LAYOUT MAPA + TABLAS */
     .kpi-bottom-layout{
       display:grid;
       grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);
       gap:12px;
       margin-top:12px;
     }
-    .kpi-map-column{
-      min-height:320px;
-    }
+    .kpi-map-column{ min-height:320px; }
     #heatmap-container{
-      width:100%;
-      height:320px;
-      border-radius:10px;
-      overflow:hidden;
-      border:1px solid var(--border-soft);
+      width:100%;height:320px;border-radius:10px;
+      overflow:hidden;border:1px solid var(--border-soft);
     }
     .kpi-tables-column{
-      display:flex;
-      flex-direction:column;
+      display:flex;flex-direction:column;
     }
-    .kpi-table-block{
-      width:100%;
-    }
+    .kpi-table-block{ width:100%; }
     .kpi-table-wrapper-narrow table.kpi-table th,
     .kpi-table-wrapper-narrow table.kpi-table td{
-      padding:3px 4px;
-      font-size:11px;
+      padding:3px 4px;font-size:11px;
     }
 
     @media(max-width:900px){
-      .layout{
-        flex-direction:column;
-        overflow:hidden;
-      }
-      .sidebar{
-        position:fixed;
-        left:0;
-        top:0;
-        bottom:0;
-      }
-      .main{
-        padding:10px 8px 12px;
-      }
-      .welcome-card{
-        padding:14px 14px 16px;
-      }
-      .kpi-bottom-layout{
-        grid-template-columns:1fr;
-      }
-      #heatmap-container{
-        height:220px;
-      }
+      .main{ padding:10px 8px 12px; }
+      .welcome-card{ padding:14px 14px 16px; }
+      .kpi-bottom-layout{ grid-template-columns:1fr; }
+      #heatmap-container{ height:220px; }
     }
     @media(max-width:480px){
-      .menu a span.icon{display:none;}
-      .menu a span{font-size:10px;}
-      .zona-pill{
-        font-size:9px;
-      }
-      .welcome-header-left h1{
-        font-size:16px;
-      }
-      .welcome-header-left p{
-        font-size:12px;
-      }
+      .welcome-header-left h1{font-size:16px;}
+      .welcome-header-left p{font-size:12px;}
     }
   </style>
 </head>
 <body>
 <div class="layout">
+  <!-- aquí se inyecta sidebar.html (encabezado + popup) -->
   <div id="sidebar-container"></div>
 
   <main class="main">
@@ -472,6 +402,7 @@
   </main>
 </div>
 
+<!-- lógica de zona activa -->
 <script>
 function getZona(){
   return localStorage.getItem('maptrack_zona') || '0752';
