@@ -18,7 +18,7 @@ async function loadSidebar(activePage){
       pintarZona();
     }
 
-    // botón hamburguesa
+    // inicializar botón hamburguesa
     initHamburger();
   }catch(e){
     console.error('Error cargando sidebar:', e);
@@ -29,6 +29,9 @@ function initHamburger(){
   const btn    = document.getElementById('btn-menu');
   const layout = document.querySelector('.layout');
   if (!btn || !layout) return;
+
+  // menú inicia abierto
+  layout.classList.remove('menu-collapsed');
 
   btn.addEventListener('click', () => {
     layout.classList.toggle('menu-collapsed');
