@@ -15,6 +15,7 @@
       --text-main:#111827;
       --text-muted:#6b7280;
       --font:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      --content-max:1120px;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{
@@ -31,7 +32,13 @@
     }
     .main{
       flex:1;
-      padding:16px 18px 18px;
+      padding:12px 16px 16px;
+      display:flex;
+      justify-content:center;
+    }
+    .main-inner{
+      width:100%;
+      max-width:var(--content-max);
     }
 
     /* Encabezado común (cargado desde sidebar.html) */
@@ -42,28 +49,37 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      padding:8px 12px;
+      gap:10px;
+      padding:6px 16px;
       background:#020617;
       color:#f9fafb;
       border-bottom:1px solid rgba(148,163,184,0.4);
+    }
+    .rm-header-inner{
+      width:100%;
+      max-width:var(--content-max);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
     }
     .rm-header-left{
       display:flex;align-items:center;gap:8px;
     }
     .rm-logo{
-      width:30px;height:30px;border-radius:10px;
+      width:26px;height:26px;border-radius:8px;
       border:1px solid rgba(249,250,251,0.3);
     }
     .rm-title{
       display:flex;flex-direction:column;
     }
     .rm-title span:first-child{
-      font-size:11px;text-transform:uppercase;
+      font-size:10px;text-transform:uppercase;
       letter-spacing:0.12em;color:#9ca3af;
     }
     .rm-title span:last-child{
-      font-size:14px;font-weight:600;
+      font-size:13px;font-weight:600;
     }
     .rm-header-center{
       display:flex;flex-direction:column;align-items:center;gap:2px;
@@ -72,16 +88,17 @@
       font-size:10px;text-transform:uppercase;color:#9ca3af;
     }
     .rm-zona{
-      display:flex;gap:6px;
+      display:flex;gap:4px;
     }
     .zona-pill{
       border-radius:999px;
-      padding:4px 8px;
+      padding:3px 8px;
       font-size:11px;
       border:1px solid rgba(249,250,251,0.16);
       background:#0f172a;
       color:#e5e7eb;
       cursor:pointer;
+      white-space:nowrap;
     }
     .zona-pill.active{
       background:#f9735b;
@@ -89,10 +106,10 @@
     }
     .rm-header-right .btn-menu{
       background:none;
-      border:1px solid rgba(249,250,251,0.3);
+      border:1px solid rgba(249,250,251,0.4);
       color:#f9fafb;
       border-radius:6px;
-      padding:4px 8px;
+      padding:3px 8px;
       font-size:16px;
       cursor:pointer;
     }
@@ -115,11 +132,11 @@
       pointer-events:auto;
     }
     .menu-popup-inner{
-      width:260px;
+      width:240px;
       max-width:80%;
       background:#020617;
       color:#f9fafb;
-      padding:16px 14px 18px;
+      padding:14px 12px 16px;
       box-shadow:0 8px 30px rgba(0,0,0,0.5);
       display:flex;
       flex-direction:column;
@@ -135,12 +152,12 @@
       margin-bottom:4px;
     }
     .menu-popup-title{
-      font-size:14px;
+      font-size:13px;
       margin-bottom:4px;
     }
     .menu-popup-nav a{
       display:block;
-      padding:6px 4px;
+      padding:5px 4px;
       color:#e5e7eb;
       text-decoration:none;
       border-radius:6px;
@@ -151,36 +168,35 @@
     }
 
     @media(max-width:900px){
-      .rm-header{
+      .rm-header-inner{
         flex-wrap:wrap;
       }
       .rm-header-center{
         order:3;
         width:100%;
+        align-items:flex-start;
       }
     }
 
-    /* TARJETAS, KPI, MAPA (tu diseño actual) */
+    /* TARJETAS, KPI, MAPA */
     .welcome-card{
-      max-width:880px;
-      margin:0 auto;
       background:var(--card-bg);
-      border-radius:14px;
-      padding:18px 20px 20px;
+      border-radius:12px;
+      padding:14px 16px 16px;
       border:1px solid var(--border-soft);
-      box-shadow:0 10px 35px rgba(15,23,42,0.12);
-      margin-bottom:18px;
+      box-shadow:0 6px 20px rgba(15,23,42,0.08);
+      margin-bottom:14px;
     }
     .welcome-header{
       display:flex;
       justify-content:space-between;
-      gap:12px;
-      margin-bottom:14px;
+      gap:10px;
+      margin-bottom:10px;
       flex-wrap:wrap;
     }
     .welcome-header-left h1{
-      font-size:18px;
-      margin-bottom:4px;
+      font-size:17px;
+      margin-bottom:3px;
     }
     .welcome-header-left p{
       font-size:13px;
@@ -188,7 +204,7 @@
     }
     .badge-zona{
       font-size:11px;
-      padding:4px 8px;
+      padding:3px 7px;
       border-radius:999px;
       background:var(--sidebar-accent-soft);
       color:#7c2d12;
@@ -200,33 +216,33 @@
     .grid-modulos{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-      gap:12px;
-      margin-top:8px;
+      gap:10px;
+      margin-top:6px;
     }
     .mod-card{
-      border-radius:10px;
+      border-radius:9px;
       border:1px solid var(--border-soft);
-      padding:11px 11px 12px;
+      padding:9px 9px 10px;
       background:linear-gradient(135deg,#ffffff,#fdf2f2);
       display:flex;
       flex-direction:column;
-      gap:4px;
+      gap:3px;
     }
     .mod-card h2{
-      font-size:14px;
+      font-size:13px;
       display:flex;
       align-items:center;
-      gap:6px;
+      gap:5px;
     }
     .mod-card p{
-      font-size:12px;
+      font-size:11.5px;
       color:var(--text-muted);
     }
     .mod-card a{
       margin-top:4px;
       align-self:flex-start;
-      font-size:12px;
-      padding:4px 8px;
+      font-size:11.5px;
+      padding:3px 8px;
       border-radius:999px;
       background:var(--sidebar-accent);
       color:#111827;
@@ -237,7 +253,7 @@
     .mod-card a:hover{ opacity:.93; }
 
     .kpi-table-wrapper{
-      max-height:220px;
+      max-height:210px;
       overflow:auto;
       border-radius:8px;
       border:1px solid var(--border-soft);
@@ -246,14 +262,14 @@
     table.kpi-table{
       width:100%;
       border-collapse:collapse;
-      font-size:12px;
+      font-size:11.5px;
     }
     table.kpi-table thead{
       position:sticky;top:0;background:#f3f4f6;z-index:1;
     }
     table.kpi-table th,
     table.kpi-table td{
-      padding:4px 6px;
+      padding:3px 5px;
       border-bottom:1px solid #e5e7eb;
       text-align:left;
       white-space:nowrap;
@@ -265,33 +281,36 @@
 
     .kpi-bottom-layout{
       display:grid;
-      grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);
-      gap:12px;
-      margin-top:12px;
+      grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);
+      gap:10px;
+      margin-top:10px;
     }
-    .kpi-map-column{ min-height:320px; }
+    .kpi-map-column{ min-height:280px; }
     #heatmap-container{
-      width:100%;height:320px;border-radius:10px;
+      width:100%;height:280px;border-radius:9px;
       overflow:hidden;border:1px solid var(--border-soft);
     }
     .kpi-tables-column{
-      display:flex;flex-direction:column;
+      display:flex;flex-direction:column;gap:8px;
     }
-    .kpi-table-block{ width:100%; }
+    .kpi-table-block h2{
+      font-size:13px;
+      margin-bottom:3px;
+    }
     .kpi-table-wrapper-narrow table.kpi-table th,
     .kpi-table-wrapper-narrow table.kpi-table td{
       padding:3px 4px;font-size:11px;
     }
 
     @media(max-width:900px){
-      .main{ padding:10px 8px 12px; }
-      .welcome-card{ padding:14px 14px 16px; }
+      .main{ padding:10px 10px 14px; }
       .kpi-bottom-layout{ grid-template-columns:1fr; }
-      #heatmap-container{ height:220px; }
+      #heatmap-container{ height:230px; }
     }
     @media(max-width:480px){
-      .welcome-header-left h1{font-size:16px;}
+      .welcome-header-left h1{font-size:15px;}
       .welcome-header-left p{font-size:12px;}
+      .badge-zona{font-size:10px;}
     }
   </style>
 </head>
@@ -301,104 +320,106 @@
   <div id="sidebar-container"></div>
 
   <main class="main">
-    <div class="welcome-card">
-      <div class="welcome-header">
-        <div class="welcome-header-left">
-          <h1>Bienvenido a RoadMap</h1>
-          <p>Consulta tu agenda, ubica clientes en mapa y accede a documentos clave desde un solo lugar.</p>
+    <div class="main-inner">
+      <div class="welcome-card">
+        <div class="welcome-header">
+          <div class="welcome-header-left">
+            <h1>Bienvenido a RoadMap</h1>
+            <p>Consulta tu agenda, ubica clientes en mapa y accede a documentos clave desde un solo lugar.</p>
+          </div>
+          <div>
+            <div class="badge-zona" id="badge-zona">
+              Zona activa: <strong id="badge-zona-text">-</strong>
+            </div>
+          </div>
         </div>
-        <div>
-          <div class="badge-zona" id="badge-zona">
-            Zona activa: <strong id="badge-zona-text">-</strong>
+
+        <div class="grid-modulos">
+          <div class="mod-card">
+            <h2>📋 Agenda diaria</h2>
+            <p>Lista filtrable de entregas por cliente, placa y ruta de venta, con fecha de entrega visible.</p>
+            <a href="agenda.html">Abrir Agenda</a>
+          </div>
+          <div class="mod-card">
+            <h2>🗺️ Planos</h2>
+            <p>Mapa interactivo con clientes geolocalizados, marcadores visitados y tu ubicación en vivo.</p>
+            <a href="planos.html">Abrir Planos</a>
+          </div>
+          <div class="mod-card">
+            <h2>📍 Ubícame</h2>
+            <p>Busca un código Sigma y visualiza al cliente en mapa con acceso directo a Google Maps.</p>
+            <a href="ubicame.html">Abrir Ubícame</a>
+          </div>
+          <div class="mod-card">
+            <h2>📑 Documentos</h2>
+            <p>Acceso rápido a SCTR y otros documentos de soporte para distribución y operaciones.</p>
+            <a href="documentos.html">Ver Documentos</a>
           </div>
         </div>
       </div>
 
-      <div class="grid-modulos">
-        <div class="mod-card">
-          <h2>📋 Agenda diaria</h2>
-          <p>Lista filtrable de entregas por cliente, placa y ruta de venta, con fecha de entrega visible.</p>
-          <a href="agenda.html">Abrir Agenda</a>
+      <section class="welcome-card" id="kpi-section">
+        <div class="welcome-header">
+          <div class="welcome-header-left">
+            <h1>Indicadores principales</h1>
+            <p id="kpi-subtitle">Cargando datos de la zona seleccionada...</p>
+            <p id="kpi-fecha" style="font-size:11px;color:#6b7280;margin-top:2px;"></p>
+          </div>
+          <div>
+            <div class="badge-zona">
+              Zona activa: <strong id="badge-zona-kpi">-</strong>
+            </div>
+          </div>
         </div>
-        <div class="mod-card">
-          <h2>🗺️ Planos</h2>
-          <p>Mapa interactivo con clientes geolocalizados, marcadores visitados y tu ubicación en vivo.</p>
-          <a href="planos.html">Abrir Planos</a>
+
+        <div class="grid-modulos" id="kpi-cards"></div>
+
+        <div class="kpi-bottom-layout">
+          <div class="kpi-map-column">
+            <h2 style="font-size:13px;margin-bottom:4px;">🗺️ Mapa de calor de atenciones</h2>
+            <div id="heatmap-container"></div>
+          </div>
+
+          <div class="kpi-tables-column">
+            <div class="kpi-table-block">
+              <h2>📊 Resumen por Canal</h2>
+              <div class="kpi-table-wrapper kpi-table-wrapper-narrow">
+                <table class="kpi-table" id="table-canal">
+                  <thead>
+                    <tr>
+                      <th>Canal</th>
+                      <th>Kg</th>
+                      <th>Clie</th>
+                      <th>Kg/Clie</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="kpi-table-block">
+              <h2>🚚 Resumen por Placa (FSE)</h2>
+              <div class="kpi-table-wrapper kpi-table-wrapper-narrow">
+                <table class="kpi-table" id="table-placa">
+                  <thead>
+                    <tr>
+                      <th>Placa</th>
+                      <th>Clie</th>
+                      <th>% FSE</th>
+                      <th>Kg</th>
+                      <th>% Kg FSE</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
         </div>
-        <div class="mod-card">
-          <h2>📍 Ubícame</h2>
-          <p>Busca un código Sigma y visualiza al cliente en mapa con acceso directo a Google Maps.</p>
-          <a href="ubicame.html">Abrir Ubícame</a>
-        </div>
-        <div class="mod-card">
-          <h2>📑 Documentos</h2>
-          <p>Acceso rápido a SCTR y otros documentos de soporte para distribución y operaciones.</p>
-          <a href="documentos.html">Ver Documentos</a>
-        </div>
-      </div>
+      </section>
     </div>
-
-    <section class="welcome-card" id="kpi-section">
-      <div class="welcome-header">
-        <div class="welcome-header-left">
-          <h1>Indicadores principales</h1>
-          <p id="kpi-subtitle">Cargando datos de la zona seleccionada...</p>
-          <p id="kpi-fecha" style="font-size:11px;color:#6b7280;margin-top:2px;"></p>
-        </div>
-        <div>
-          <div class="badge-zona">
-            Zona activa: <strong id="badge-zona-kpi">-</strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid-modulos" id="kpi-cards"></div>
-
-      <div class="kpi-bottom-layout">
-        <div class="kpi-map-column">
-          <h2 style="font-size:14px;margin-bottom:6px;">🗺️ Mapa de calor de atenciones</h2>
-          <div id="heatmap-container"></div>
-        </div>
-
-        <div class="kpi-tables-column">
-          <div class="kpi-table-block">
-            <h2 style="font-size:13px;margin-bottom:4px;">📊 Resumen por Canal</h2>
-            <div class="kpi-table-wrapper kpi-table-wrapper-narrow">
-              <table class="kpi-table" id="table-canal">
-                <thead>
-                  <tr>
-                    <th>Canal</th>
-                    <th>Kg</th>
-                    <th>Clie</th>
-                    <th>Kg/Clie</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="kpi-table-block" style="margin-top:10px;">
-            <h2 style="font-size:13px;margin-bottom:4px;">🚚 Resumen por Placa (FSE)</h2>
-            <div class="kpi-table-wrapper kpi-table-wrapper-narrow">
-              <table class="kpi-table" id="table-placa">
-                <thead>
-                  <tr>
-                    <th>Placa</th>
-                    <th>Clie</th>
-                    <th>% FSE</th>
-                    <th>Kg</th>
-                    <th>% Kg FSE</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
   </main>
 </div>
 
