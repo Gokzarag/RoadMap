@@ -1,37 +1,38 @@
-<aside class="sidebar">
-  <div class="sb-header">
-    <img src="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" class="sb-logo" alt="MapTrack" />
-    <div class="sb-title">
+<!-- Encabezado común -->
+<header class="rm-header">
+  <div class="rm-header-left">
+    <img src="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png"
+         class="rm-logo" alt="MapTrack" />
+    <div class="rm-title">
       <span>RoadMap</span>
       <span>Distribution Platform</span>
     </div>
-    <button id="btn-menu" class="btn-menu" aria-label="Mostrar u ocultar menú">
-      ☰
-    </button>
   </div>
 
-  <div class="sb-section-label">OFICINA</div>
-  <div class="zona-toggle">
-    <div class="zona-toggle-header">
-      <span>Selecciona zona activa</span>
-    </div>
-    <div class="zona-options">
+  <div class="rm-header-center">
+    <span class="rm-label">Oficina</span>
+    <div class="rm-zona">
       <button class="zona-pill" id="zona-ate" onclick="setZona('0374')">Cedi Ate</button>
       <button class="zona-pill" id="zona-chorr" onclick="setZona('0752')">Cadi Chorrillos</button>
     </div>
   </div>
 
-  <div class="sb-section-label">MÓDULOS</div>
-  <ul class="menu">
-    <li><a href="index.html"       data-page="inicio"><span class="icon">🏠</span><span>Inicio</span></a></li>
-    <li><a href="agenda.html"      data-page="agenda"><span class="icon">📋</span><span>Agenda</span></a></li>
-    <li><a href="planos.html"      data-page="planos"><span class="icon">🗺️</span><span>Planos</span></a></li>
-    <li><a href="ubicame.html"     data-page="ubicame"><span class="icon">📍</span><span>Ubícame</span></a></li>
-    <li><a href="documentos.html"  data-page="documentos"><span class="icon">📑</span><span>Documentos</span></a></li>
-  </ul>
-
-  <div class="sb-footer">
-    <span>v2.1</span>
-    <a href="https://t.me/MapTrack_bot" target="_blank" rel="noopener">Telegram Bot</a>
+  <div class="rm-header-right">
+    <button id="btn-menu" class="btn-menu" aria-label="Mostrar menú de módulos">☰</button>
   </div>
-</aside>
+</header>
+
+<!-- Popup de módulos -->
+<div id="menu-popup" class="menu-popup">
+  <div class="menu-popup-inner">
+    <button id="menu-close" class="menu-popup-close" aria-label="Cerrar menú">✕</button>
+    <h3 class="menu-popup-title">Módulos</h3>
+    <nav class="menu-popup-nav">
+      <a href="index.html">Inicio</a>
+      <a href="agenda.html">Agenda</a>
+      <a href="planos.html">Planos</a>
+      <a href="ubicame.html">Ubícame</a>
+      <a href="documentos.html">Documentos</a>
+    </nav>
+  </div>
+</div>
