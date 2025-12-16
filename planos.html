@@ -8,19 +8,18 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
   <style>
     :root{
-      --sidebar-bg:#1f2933;
       --sidebar-accent:#f9735b;
       --sidebar-accent-soft:#fde3dd;
-      --sidebar-text:#f9fafb;
-      --sidebar-muted:#9ca3af;
       --main-bg:#f4f5f7;
       --card-bg:#ffffff;
       --border-soft:#e5e7eb;
       --text-main:#111827;
       --text-muted:#6b7280;
       --font:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      --content-max:1120px;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{
@@ -32,149 +31,148 @@
     }
     .layout{
       display:flex;
-      width:100%;
+      flex-direction:column;
       min-height:100vh;
     }
-    /* SIDEBAR (igual a index) */
-    .sidebar{
-      width:235px;
-      background:linear-gradient(180deg,#111827,#1f2933);
-      color:var(--sidebar-text);
-      display:flex;
-      flex-direction:column;
-      padding:14px 14px 16px;
-      position:sticky;
-      top:0;
-      height:100vh;
-    }
-    .sb-header{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:18px;
-    }
-    .sb-logo{
-      width:32px;height:32px;border-radius:50%;
-      border:1px solid rgba(249,250,251,0.3);
-      box-shadow:0 0 12px rgba(249,115,91,0.7);
-    }
-    .sb-title{
-      display:flex;
-      flex-direction:column;
-    }
-    .sb-title span:nth-child(1){
-      font-size:12px;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-      color:var(--sidebar-muted);
-    }
-    .sb-title span:nth-child(2){
-      font-size:15px;
-      font-weight:700;
-    }
-    .sb-section-label{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:0.12em;
-      color:var(--sidebar-muted);
-      margin:12px 0 6px;
-    }
-    .zona-toggle{
-      background:rgba(15,23,42,0.9);
-      border-radius:8px;
-      padding:8px 9px;
-      border:1px solid rgba(249,250,251,0.06);
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      font-size:11.5px;
-    }
-    .zona-toggle-header{
-      display:flex;align-items:center;justify-content:space-between;
-      color:var(--sidebar-muted);
-    }
-    .zona-options{
-      display:flex;
-      gap:6px;
-    }
-    .zona-pill{
-      flex:1;
-      border-radius:999px;
-      padding:5px 6px;
-      text-align:center;
-      font-size:11px;
-      cursor:pointer;
-      border:1px solid rgba(249,250,251,0.16);
-      color:var(--sidebar-muted);
-      background:rgba(15,23,42,0.8);
-      transition:all .2s;
-    }
-    .zona-pill.active{
-      background:var(--sidebar-accent);
-      color:#111827;
-      border-color:var(--sidebar-accent-soft);
-      box-shadow:0 0 0 1px rgba(254,202,202,0.3);
-      font-weight:600;
-    }
-    .menu{
-      margin-top:10px;
-      list-style:none;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      font-size:13px;
-    }
-    .menu a{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 8px;
-      color:var(--sidebar-text);
-      text-decoration:none;
-      border-radius:7px;
-      border:1px solid transparent;
-      transition:background .18s,border-color .18s,transform .12s;
-      font-size:13px;
-    }
-    .menu a span.icon{
-      font-size:15px;width:18px;text-align:center;
-    }
-    .menu a:hover{
-      background:rgba(31,41,55,0.9);
-      border-color:rgba(249,250,251,0.08);
-      transform:translateX(1px);
-    }
-    .menu a.primary{
-      background:rgba(17,24,39,0.95);
-      border-color:rgba(249,250,251,0.14);
-    }
-    .menu a.active{
-      background:rgba(249,115,91,0.12);
-      border-color:var(--sidebar-accent-soft);
-    }
-    .sb-footer{
-      margin-top:auto;
-      font-size:11px;
-      color:var(--sidebar-muted);
-      border-top:1px solid rgba(55,65,81,0.9);
-      padding-top:8px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-    .sb-footer a{
-      color:var(--sidebar-accent-soft);
-      text-decoration:none;
-      font-size:12px;
-    }
-    .sb-footer a:hover{text-decoration:underline;}
-
-    /* MAIN */
     .main{
       flex:1;
-      padding:18px;
-      overflow:auto;
+      padding:12px 16px 16px;
+      display:flex;
+      justify-content:center;
     }
+    .main-inner{
+      width:100%;
+      max-width:var(--content-max);
+    }
+
+    /* Encabezado común (sidebar.html) */
+    .rm-header{
+      position:sticky;
+      top:0;
+      z-index:20;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:6px 16px;
+      background:#020617;
+      color:#f9fafb;
+      border-bottom:1px solid rgba(148,163,184,0.4);
+    }
+    .rm-header-inner{
+      width:100%;
+      max-width:var(--content-max);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .rm-header-left{display:flex;align-items:center;gap:8px;}
+    .rm-logo{
+      width:26px;height:26px;border-radius:8px;
+      border:1px solid rgba(249,250,251,0.3);
+    }
+    .rm-title{display:flex;flex-direction:column;}
+    .rm-title span:first-child{
+      font-size:10px;text-transform:uppercase;
+      letter-spacing:0.12em;color:#9ca3af;
+    }
+    .rm-title span:last-child{
+      font-size:13px;font-weight:600;
+    }
+    .rm-header-center{
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+    }
+    .rm-label{
+      font-size:10px;text-transform:uppercase;color:#9ca3af;
+    }
+    .rm-zona{display:flex;gap:4px;}
+    .zona-pill{
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:11px;
+      border:1px solid rgba(249,250,251,0.16);
+      background:#0f172a;
+      color:#e5e7eb;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .zona-pill.active{
+      background:#f9735b;
+      color:#111827;
+    }
+    .rm-header-right .btn-menu{
+      background:none;
+      border:1px solid rgba(249,250,251,0.4);
+      color:#f9fafb;
+      border-radius:6px;
+      padding:3px 8px;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    /* Popup off-canvas */
+    .menu-popup{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,0.6);
+      display:flex;
+      justify-content:flex-start;
+      align-items:stretch;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease;
+      z-index:40;
+    }
+    .menu-popup.open{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .menu-popup-inner{
+      width:240px;
+      max-width:80%;
+      background:#020617;
+      color:#f9fafb;
+      padding:14px 12px 16px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.5);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .menu-popup-close{
+      align-self:flex-end;
+      background:none;
+      border:none;
+      color:#e5e7eb;
+      font-size:18px;
+      cursor:pointer;
+      margin-bottom:4px;
+    }
+    .menu-popup-title{
+      font-size:13px;
+      margin-bottom:4px;
+    }
+    .menu-popup-nav a{
+      display:block;
+      padding:5px 4px;
+      color:#e5e7eb;
+      text-decoration:none;
+      border-radius:6px;
+      font-size:13px;
+    }
+    .menu-popup-nav a:hover{
+      background:rgba(148,163,184,0.25);
+    }
+
+    @media(max-width:900px){
+      .rm-header-inner{flex-wrap:wrap;}
+      .rm-header-center{
+        order:3;width:100%;align-items:flex-start;
+      }
+    }
+
+    /* Panel Planos */
     .panel{
       max-width:1100px;
       margin:0 auto;
@@ -182,7 +180,7 @@
       border-radius:14px;
       padding:18px 20px 20px;
       border:1px solid var(--border-soft);
-      box-shadow:0 10px 35px rgba(15,23,42,0.12);
+      box-shadow:0 6px 20px rgba(15,23,42,0.08);
       display:flex;
       flex-direction:column;
       gap:10px;
@@ -263,46 +261,11 @@
       min-height:260px;
     }
 
-    /* Responsive igual que index */
     @media(max-width:900px){
-      .layout{flex-direction:column;}
-      .sidebar{
-        width:100%;
-        height:auto;
-        position:relative;
-        flex-direction:row;
-        align-items:center;
-        justify-content:space-between;
-        padding:8px 10px;
-        gap:8px;
-      }
-      .sb-header{margin-bottom:0;}
-      .sb-title span:nth-child(2){font-size:13px;}
-      .sb-section-label{display:none;}
-      .zona-toggle{
-        flex-direction:row;
-        align-items:center;
-        padding:6px 7px;
-      }
-      .zona-toggle-header{display:none;}
-      .zona-options{gap:4px;}
-      .zona-pill{padding:4px 6px;font-size:10px;}
-      .menu{
-        flex-direction:row;
-        flex-wrap:wrap;
-        margin-top:0;
-        gap:4px;
-      }
-      .menu a{padding:4px 6px;font-size:11px;}
-      .sb-footer{display:none;}
-      .main{padding:10px 8px 12px;}
-      .panel{padding:14px 14px 16px;min-height:auto;}
+      .main{padding:10px 10px 14px;}
       #map{height:60vh;}
     }
     @media(max-width:480px){
-      .menu a span.icon{display:none;}
-      .menu a span{font-size:10px;}
-      .zona-pill{font-size:9px;}
       .panel-title h1{font-size:16px;}
       .panel-title p{font-size:12px;}
     }
@@ -310,83 +273,52 @@
 </head>
 <body>
 <div class="layout">
-  <aside class="sidebar">
-    <div class="sb-header">
-      <img src="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" class="sb-logo" alt="MapTrack" />
-      <div class="sb-title">
-        <span>RoadMap</span>
-        <span>Distribution Platform</span>
-      </div>
-    </div>
-
-    <div class="sb-section-label">Oficina</div>
-    <div class="zona-toggle">
-      <div class="zona-toggle-header">
-        <span>Selecciona zona activa</span>
-      </div>
-      <div class="zona-options">
-        <!-- mismos códigos que en index.html: 0374 y 0752 -->
-        <button class="zona-pill" id="zona-ate" onclick="setZona('0374')">Cedi Ate</button>
-        <button class="zona-pill" id="zona-chorr" onclick="setZona('0752')">Cadi Chorrillos</button>
-      </div>
-    </div>
-
-    <div class="sb-section-label">Módulos</div>
-    <ul class="menu">
-      <li><a href="index.html"><span class="icon">🏠</span><span>Inicio</span></a></li>
-      <li><a href="agenda.html"><span class="icon">📋</span><span>Agenda</span></a></li>
-      <li><a href="planos.html" class="primary active"><span class="icon">🗺️</span><span>Planos</span></a></li>
-      <li><a href="ubicame.html"><span class="icon">📍</span><span>Ubícame</span></a></li>
-      <li><a href="documentos.html"><span class="icon">📑</span><span>Documentos</span></a></li>
-    </ul>
-
-    <div class="sb-footer">
-      <span>v2.1</span>
-      <a href="https://t.me/MapTrackbot" target="_blank" rel="noopener">Telegram Bot</a>
-    </div>
-  </aside>
+  <!-- header + popup desde sidebar.html -->
+  <div id="sidebar-container"></div>
 
   <main class="main">
-    <section class="panel">
-      <header class="panel-header">
-        <div class="panel-title">
-          <h1>Planos de clientes</h1>
-          <p>Filtra por placa y cliente para ver los puntos de entrega y marcar visitas realizadas.</p>
+    <div class="main-inner">
+      <section class="panel">
+        <header class="panel-header">
+          <div class="panel-title">
+            <h1>Planos de clientes</h1>
+            <p>Filtra por placa y cliente para ver los puntos de entrega y marcar visitas realizadas.</p>
+          </div>
+          <div class="panel-meta">
+            <span class="badge-zona-main">Zona activa: <strong id="badge-zona-text">-</strong></span>
+            <span class="badge-fecha" id="fecha-entrega-badge">--/--/----</span>
+          </div>
+        </header>
+
+        <div class="filters-row">
+          <label for="placa">Placa:</label>
+          <select id="placa"></select>
+
+          <label for="cliente">Cliente:</label>
+          <select id="cliente"></select>
         </div>
-        <div class="panel-meta">
-          <span class="badge-zona-main">Zona activa: <strong id="badge-zona-text">-</strong></span>
-          <span class="badge-fecha" id="fecha-entrega-badge">--/--/----</span>
+
+        <div class="map-wrapper">
+          <div id="map"></div>
         </div>
-      </header>
-
-      <div class="filters-row">
-        <label for="placa">Placa:</label>
-        <select id="placa"></select>
-
-        <label for="cliente">Cliente:</label>
-        <select id="cliente"></select>
-      </div>
-
-      <div class="map-wrapper">
-        <div id="map"></div>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
 </div>
 
 <script>
-/* Zona compartida, alineada con index.html */
+/* zona activa, alineado con index/agenda */
+function getZona(){
+  return localStorage.getItem('maptrack_zona') || '0752';
+}
 function setZona(z){
   localStorage.setItem('maptrack_zona', z);
-  pintarZonaSidebar();
+  pintarZona();
   if (window.filtrarZonaYMapa) {
     window.filtrarZonaYMapa();
   }
 }
-function getZona(){
-  return localStorage.getItem('maptrack_zona') || '0752';
-}
-function pintarZonaSidebar(){
+function pintarZona(){
   const z = getZona();
   const ate = document.getElementById('zona-ate');
   const ch = document.getElementById('zona-chorr');
@@ -394,12 +326,16 @@ function pintarZonaSidebar(){
     ate.classList.toggle('active', z === '0374');
     ch.classList.toggle('active', z === '0752');
   }
+  const label = (z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate');
   const badge = document.getElementById('badge-zona-text');
-  if (badge) badge.textContent = (z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate');
+  if (badge) badge.textContent = label;
 }
+</script>
 
-/* --- LÓGICA MAPA (misma funcionalidad que tu versión) --- */
+<script>
+/* Lógica de planos (tu misma funcionalidad anterior) */
 const CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack_V2.1.csv';
+
 let rawData = [];
 let map, markers = [];
 let ubicameMarker = null;
@@ -618,31 +554,35 @@ function loadCSV() {
   });
 }
 
-/* Inicialización */
+/* Inicialización principal */
 document.addEventListener('DOMContentLoaded', ()=>{
-  pintarZonaSidebar();
+  if (typeof loadSidebar === 'function') {
+    loadSidebar('planos');
+  }
+  pintarZona();
+
   map = L.map('map').setView([-12.1,-77.0],12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {maxZoom:19,attribution:'&copy; OpenStreetMap'}
   ).addTo(map);
   showUserLocationOnMap(true);
   loadCSV();
+
+  document.getElementById("placa").addEventListener("change", ()=>{
+    const zona = getZona();
+    filtrarClientes(document.getElementById("placa").value, zona);
+    filtrar();
+  });
+  document.getElementById("cliente").addEventListener("change", filtrar);
 });
 
-/* API para refrescar al cambiar de zona */
+/* API pública para refrescar al cambiar zona desde header */
 window.filtrarZonaYMapa = function(){
-  pintarZonaSidebar();
+  pintarZona();
   cargarFiltrosMapa();
 };
-
-/* Listeners de filtros */
-document.getElementById("placa").addEventListener("change", ()=>{
-  const zona = getZona();
-  filtrarClientes(document.getElementById("placa").value, zona);
-  filtrar();
-});
-document.getElementById("cliente").addEventListener("change", filtrar);
 </script>
+
+<script src="layout.js"></script>
 </body>
 </html>
-
