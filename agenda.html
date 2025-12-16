@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" />
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <!-- layout compartido -->
   <script src="layout.js" defer></script>
-
   <style>
     :root{
       --sidebar-bg:#1f2933;
@@ -29,14 +27,12 @@
       background:var(--main-bg);
       color:var(--text-main);
       min-height:100vh;
-      margin:0;
     }
     .layout{
       display:flex;
       width:100%;
       min-height:100vh;
     }
-    /* SIDEBAR (misma de index, se aplica al contenido de sidebar.html) */
     .sidebar{
       width:235px;
       background:linear-gradient(180deg,#111827,#1f2933);
@@ -48,37 +44,20 @@
       top:0;
       height:100vh;
     }
-    .sb-header{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:18px;
-    }
+    .sb-header{display:flex;align-items:center;gap:8px;margin-bottom:18px;}
     .sb-logo{
       width:32px;height:32px;border-radius:50%;
       border:1px solid rgba(249,250,251,0.3);
       box-shadow:0 0 12px rgba(249,115,91,0.7);
     }
-    .sb-title{
-      display:flex;
-      flex-direction:column;
-    }
+    .sb-title{display:flex;flex-direction:column;}
     .sb-title span:nth-child(1){
-      font-size:12px;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-      color:var(--sidebar-muted);
+      font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--sidebar-muted);
     }
-    .sb-title span:nth-child(2){
-      font-size:15px;
-      font-weight:700;
-    }
+    .sb-title span:nth-child(2){font-size:15px;font-weight:700;}
     .sb-section-label{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:0.12em;
-      color:var(--sidebar-muted);
-      margin:12px 0 6px;
+      font-size:11px;text-transform:uppercase;letter-spacing:0.12em;
+      color:var(--sidebar-muted);margin:12px 0 6px;
     }
     .zona-toggle{
       background:rgba(15,23,42,0.9);
@@ -94,52 +73,29 @@
       display:flex;align-items:center;justify-content:space-between;
       color:var(--sidebar-muted);
     }
-    .zona-options{
-      display:flex;
-      gap:6px;
-    }
+    .zona-options{display:flex;gap:6px;}
     .zona-pill{
-      flex:1;
-      border-radius:999px;
-      padding:5px 6px;
-      text-align:center;
-      font-size:11px;
-      cursor:pointer;
-      border:1px solid rgba(249,250,251,0.16);
-      color:var(--sidebar-muted);
-      background:rgba(15,23,42,0.8);
-      transition:all .2s;
+      flex:1;border-radius:999px;padding:5px 6px;text-align:center;
+      font-size:11px;cursor:pointer;border:1px solid rgba(249,250,251,0.16);
+      color:var(--sidebar-muted);background:rgba(15,23,42,0.8);transition:all .2s;
     }
     .zona-pill.active{
-      background:var(--sidebar-accent);
-      color:#111827;
+      background:var(--sidebar-accent);color:#111827;
       border-color:var(--sidebar-accent-soft);
-      box-shadow:0 0 0 1px rgba(254,202,202,0.3);
-      font-weight:600;
+      box-shadow:0 0 0 1px rgba(254,202,202,0.3);font-weight:600;
     }
     .menu{
-      margin-top:10px;
-      list-style:none;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      font-size:13px;
+      margin-top:10px;list-style:none;display:flex;
+      flex-direction:column;gap:4px;font-size:13px;
     }
     .menu a{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 8px;
-      color:var(--sidebar-text);
-      text-decoration:none;
-      border-radius:7px;
-      border:1px solid transparent;
+      display:flex;align-items:center;gap:8px;
+      padding:7px 8px;color:var(--sidebar-text);text-decoration:none;
+      border-radius:7px;border:1px solid transparent;
       transition:background .18s,border-color .18s,transform .12s;
       font-size:13px;
     }
-    .menu a span.icon{
-      font-size:15px;width:18px;text-align:center;
-    }
+    .menu a span.icon{font-size:15px;width:18px;text-align:center;}
     .menu a:hover{
       background:rgba(31,41,55,0.9);
       border-color:rgba(249,250,251,0.08);
@@ -154,199 +110,101 @@
       border-color:var(--sidebar-accent-soft);
     }
     .sb-footer{
-      margin-top:auto;
-      font-size:11px;
-      color:var(--sidebar-muted);
+      margin-top:auto;font-size:11px;color:var(--sidebar-muted);
       border-top:1px solid rgba(55,65,81,0.9);
-      padding-top:8px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
+      padding-top:8px;display:flex;justify-content:space-between;align-items:center;
     }
-    .sb-footer a{
-      color:var(--sidebar-accent-soft);
-      text-decoration:none;
-      font-size:12px;
-    }
+    .sb-footer a{color:var(--sidebar-accent-soft);text-decoration:none;font-size:12px;}
     .sb-footer a:hover{text-decoration:underline;}
-
-    /* MAIN */
-    .main{
-      flex:1;
-      padding:18px;
-      overflow:auto;
-    }
+    .main{flex:1;padding:18px;overflow:auto;}
     .panel{
-      max-width:1100px;
-      margin:0 auto;
-      background:var(--card-bg);
-      border-radius:14px;
-      padding:18px 20px 20px;
+      max-width:1100px;margin:0 auto;background:var(--card-bg);
+      border-radius:14px;padding:18px 20px 20px;
       border:1px solid var(--border-soft);
       box-shadow:0 10px 35px rgba(15,23,42,0.12);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+      display:flex;flex-direction:column;gap:10px;
       min-height:calc(100vh - 36px);
     }
     .panel-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      flex-wrap:wrap;
+      display:flex;justify-content:space-between;align-items:flex-start;
+      gap:12px;flex-wrap:wrap;
     }
-    .panel-title h1{
-      font-size:18px;
-      margin-bottom:4px;
-    }
-    .panel-title p{
-      font-size:13px;
-      color:var(--text-muted);
-    }
+    .panel-title h1{font-size:18px;margin-bottom:4px;}
+    .panel-title p{font-size:13px;color:var(--text-muted);}
     .panel-meta{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-end;
-      gap:4px;
-      font-size:11px;
+      display:flex;flex-direction:column;align-items:flex-end;
+      gap:4px;font-size:11px;
     }
     .badge-zona-main{
-      font-size:11px;
-      padding:4px 8px;
-      border-radius:999px;
-      background:var(--sidebar-accent-soft);
-      color:#7c2d12;
-      border:1px solid #fed7c2;
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
+      font-size:11px;padding:4px 8px;border-radius:999px;
+      background:var(--sidebar-accent-soft);color:#7c2d12;
+      border:1px solid #fed7c2;display:inline-flex;align-items:center;gap:4px;
     }
     .badge-fecha{
-      font-size:11px;
-      padding:3px 7px;
-      border-radius:999px;
-      background:#e5f3ff;
-      color:#1d4ed8;
-      border:1px solid #bfdbfe;
-      font-family:monospace;
+      font-size:11px;padding:3px 7px;border-radius:999px;
+      background:#e5f3ff;color:#1d4ed8;
+      border:1px solid #bfdbfe;font-family:monospace;
     }
-    .buscador-container {
-      display:flex;
-      align-items:center;
-      max-width:260px;
-      gap:6px;
-      margin-top:6px;
+    .buscador-container{
+      display:flex;align-items:center;max-width:260px;
+      gap:6px;margin-top:6px;
     }
-    .search-box {
-      flex:1;
-      display:flex;
-      align-items:center;
-      background:#f9fafb;
-      border:1px solid #d1d5db;
-      border-radius:999px;
-      overflow:hidden;
+    .search-box{
+      flex:1;display:flex;align-items:center;
+      background:#f9fafb;border:1px solid #d1d5db;
+      border-radius:999px;overflow:hidden;
     }
-    .search-box input {
-      flex-grow:1;
-      font-size:12px;
-      padding:5px 8px;
-      border:none;
-      outline:none;
-      background:transparent;
-      color:var(--text-main);
+    .search-box input{
+      flex-grow:1;font-size:12px;padding:5px 8px;
+      border:none;outline:none;background:transparent;color:var(--text-main);
     }
-    .search-box input::placeholder {
-      color:#9ca3af;
-      font-size:12px;
+    .search-box input::placeholder{color:#9ca3af;font-size:12px;}
+    .search-box button{
+      font-size:11px;padding:5px 10px;color:#111827;
+      background:var(--sidebar-accent);border:none;cursor:pointer;
+      font-weight:600;border-radius:999px;margin-right:3px;
     }
-    .search-box button {
-      font-size:11px;
-      padding:5px 10px;
-      color:#111827;
-      background:var(--sidebar-accent);
-      border:none;
-      cursor:pointer;
-      font-weight:600;
-      border-radius:999px;
-      margin-right:3px;
-    }
-    .search-box button:hover { opacity:.9; }
+    .search-box button:hover{opacity:.9;}
     .table-wrapper{
-      flex:1;
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      background:#f9fafb;
-      overflow:auto;
+      flex:1;border-radius:10px;border:1px solid var(--border-soft);
+      background:#f9fafb;overflow:auto;
       box-shadow:inset 0 0 6px rgba(15,23,42,0.1);
     }
     table{
-      border-collapse:separate;
-      border-spacing:0 2px;
-      width:100%;
-      min-width:520px;
-      font-size:11px;
-      background:white;
+      border-collapse:separate;border-spacing:0 2px;
+      width:100%;min-width:520px;font-size:11px;background:white;
     }
     thead th{
-      position:sticky;
-      top:0;
-      background:#f9735b;
-      color:white;
-      text-align:left;
-      padding:5px 8px;
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:0.04em;
-      z-index:2;
+      position:sticky;top:0;background:#f9735b;color:white;
+      text-align:left;padding:5px 8px;font-size:11px;
+      text-transform:uppercase;letter-spacing:0.04em;z-index:2;
     }
     tbody td{
-      padding:4px 8px;
-      white-space:nowrap;
-      border-top:1px solid #f3f4f6;
-      border-bottom:1px solid #f3f4f6;
+      padding:4px 8px;white-space:nowrap;
+      border-top:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;
     }
-    tbody tr:nth-child(even){
-      background:#f9fafb;
-    }
-    tbody tr:hover{
-      background:#fee2e2;
-    }
+    tbody tr:nth-child(even){background:#f9fafb;}
+    tbody tr:hover{background:#fee2e2;}
     tr.resaltado{
       background:#ffe4e6 !important;
-      font-weight:600;
-      color:#b91c1c;
+      font-weight:600;color:#b91c1c;
     }
-
-    /* Responsive igual que index */
     @media(max-width:900px){
       .layout{flex-direction:column;}
       .sidebar{
-        width:100%;
-        height:auto;
-        position:relative;
-        flex-direction:row;
-        align-items:center;
-        justify-content:space-between;
-        padding:8px 10px;
-        gap:8px;
+        width:100%;height:auto;position:relative;
+        flex-direction:row;align-items:center;justify-content:space-between;
+        padding:8px 10px;gap:8px;
       }
       .sb-header{margin-bottom:0;}
       .sb-title span:nth-child(2){font-size:13px;}
       .sb-section-label{display:none;}
-      .zona-toggle{
-        flex-direction:row;
-        align-items:center;
-        padding:6px 7px;
-      }
+      .zona-toggle{flex-direction:row;align-items:center;padding:6px 7px;}
       .zona-toggle-header{display:none;}
       .zona-options{gap:4px;}
       .zona-pill{padding:4px 6px;font-size:10px;}
       .menu{
-        flex-direction:row;
-        flex-wrap:wrap;
-        margin-top:0;
-        gap:4px;
+        flex-direction:row;flex-wrap:wrap;margin-top:0;gap:4px;
       }
       .menu a{padding:4px 6px;font-size:11px;}
       .sb-footer{display:none;}
@@ -365,7 +223,6 @@
 </head>
 <body>
 <div class="layout">
-
   <!-- aquí se inyecta sidebar.html -->
   <div id="sidebar-container"></div>
 
@@ -409,7 +266,22 @@
 </div>
 
 <script>
-/* Zona compartida */
+const CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack_V2.1.csv';
+const COL_PLACA = 'Vehicle Key/Placa';
+const COL_CODIGO_CLIENTE = 'Customer Account # / Cliente';
+const COL_NOMBRE_CLIENTE = 'Customer Name/Solic';
+const COL_ERROR = 'Customer Name2';
+const COL_CITY = 'City';
+const COL_ADDRESS = 'Address';
+const COL_FECHA = 'Fecha de Entrega';
+const COL_CONSIDERA = 'Considera';
+const COL_LAT = 'Latitude';
+const COL_LNG = 'Longitude';
+
+let dataRowsRaw = [];
+let dataRows = [];
+let buscadorGlobal = '';
+
 function setZona(z){
   localStorage.setItem('maptrack_zona', z);
   pintarZonaSidebar();
@@ -430,23 +302,6 @@ function pintarZonaSidebar(){
   if (badge) badge.textContent = (z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate');
 }
 
-/* Agenda lógica */
-const CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack_V2.1.csv';
-const COL_PLACA = 'Vehicle Key/Placa',
-      COL_CODIGO_CLIENTE = 'Customer Account # / Cliente',
-      COL_NOMBRE_CLIENTE = 'Customer Name/Solic',
-      COL_ERROR = 'Customer Name2',
-      COL_CITY = 'City',
-      COL_ADDRESS = 'Address',
-      COL_FECHA = 'Fecha de Entrega',
-      COL_CONSIDERA = 'Considera',
-      COL_LAT = 'Latitude',
-      COL_LNG = 'Longitude';
-
-let dataRowsRaw = [];
-let dataRows = [];
-let buscadorGlobal = '';
-
 function toDDMMYYYY(fechaStr) {
   if (!fechaStr) return '';
   if (/^d{4}-d{1,2}-d{1,2}$/.test(fechaStr.trim())) {
@@ -457,7 +312,7 @@ function toDDMMYYYY(fechaStr) {
   let [p1,p2,p3] = fechaStr.trim().split(sep);
   if (p3 && p3.length===4){
     let d=parseInt(p1),m=parseInt(p2),y=parseInt(p3);
-    if(m>12)[d,m]=[m,d];
+    if (m>12)[d,m]=[m,d];
     return `${d.toString().padStart(2,'0')}/${m.toString().padStart(2,'0')}/${y}`;
   }
   return fechaStr;
@@ -479,17 +334,19 @@ function getUnique(arr) {
 function mostrarFechaEntrega(rows) {
   let fechas = [...new Set(rows.map(r => r.FechaEntrega).filter(f => f))];
   fechas.sort((a, b) => {
-    let [da, ma, aa] = a.split('/').map(Number), [db, mb, ab] = b.split('/').map(Number);
-    let dA = new Date(aa, ma - 1, da), dB = new Date(ab, mb - 1, db);
+    let [da, ma, aa] = a.split('/').map(Number);
+    let [db, mb, ab] = b.split('/').map(Number);
+    let dA = new Date(aa, ma - 1, da);
+    let dB = new Date(ab, mb - 1, db);
     return dA - dB;
   });
   let fechaMostrar = fechas.length ? fechas[0] : '';
-  let textoFecha = fechaMostrar ? fechaMostrar : '--/--/----';
-  document.getElementById('fecha-entrega-badge').textContent = textoFecha;
+  document.getElementById('fecha-entrega-badge').textContent =
+    fechaMostrar || '--/--/----';
 }
 
 function match(row) {
-  if (buscadorGlobal && buscadorGlobal !== '') {
+  if (buscadorGlobal) {
     let val = [
       row.Cliente, row.Solicitante, row.RutaVenta, row.Placa,
       row.Asignacion, row.Telefono, row.Direccion, row.Pedido
@@ -534,7 +391,6 @@ function filtrarZonaYRender() {
   renderTable();
 }
 
-/* Búsqueda */
 function onGlobalSearchInput(){
   buscadorGlobal = document.getElementById('buscador-principal').value.trim().toLowerCase();
   renderTable();
@@ -545,7 +401,6 @@ function nuevaBusqueda(){
   renderTable();
 }
 
-/* Carga CSV */
 function loadCSV() {
   Papa.parse(CSV_URL, {
     download: true, header: true, skipEmptyLines: true,
@@ -554,7 +409,8 @@ function loadCSV() {
       dataRowsRaw = rows.map(row => {
         let E = row[COL_NOMBRE_CLIENTE]||'';
         let F = row[COL_ERROR]||'';
-        let fullSolic = (F && !['0', '#N/A', '(blank)', '', ' '].includes(F)) ? `${E} - ${F}` : E;
+        let fullSolic = (F && !['0', '#N/A', '(blank)', '', ' '].includes(F))
+          ? `${E} - ${F}` : E;
         let address = row[COL_ADDRESS]||'';
         let city = row[COL_CITY]||'';
         let dirCity = address + (city ? ' - ' + city : '');
@@ -585,12 +441,22 @@ function loadCSV() {
   });
 }
 
-/* Init: aquí se llama a loadSidebar('agenda') */
 document.addEventListener('DOMContentLoaded', ()=>{
   if (typeof loadSidebar === 'function') {
-    loadSidebar('agenda');
+    loadSidebar('agenda').then(() => {
+      // marcar Agenda como activo
+      const enlaces = document.querySelectorAll('.menu a');
+      enlaces.forEach(a => a.classList.remove('active','primary'));
+      const linkAgenda = Array.from(enlaces).find(a => a.href.includes('agenda.html'));
+      if (linkAgenda) {
+        linkAgenda.classList.add('primary','active');
+      }
+      pintarZonaSidebar();
+    });
+  } else {
+    pintarZonaSidebar();
   }
-  pintarZonaSidebar();
+
   const input = document.getElementById('buscador-principal');
   if (input) input.addEventListener('input', onGlobalSearchInput);
   loadCSV();
