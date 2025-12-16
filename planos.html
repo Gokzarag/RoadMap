@@ -184,7 +184,8 @@
       display:flex;
       flex-direction:column;
       gap:10px;
-      min-height:calc(100vh - 36px);
+      /* que ocupe buena parte de la pantalla */
+      min-height:calc(100vh - 48px);
     }
     .panel-header{
       display:flex;
@@ -247,23 +248,28 @@
       font-size:12px;
       min-width:110px;
     }
+
     .map-wrapper{
-      flex:1;
+      flex:1;                    /* que se coma todo el resto del alto */
+      margin-top:6px;
       border-radius:10px;
       overflow:hidden;
       border:1px solid var(--border-soft);
       background:#e5e7eb;
       box-shadow:inset 0 0 6px rgba(15,23,42,0.18);
+      display:flex;
     }
     #map{
+      flex:1;
       width:100%;
       height:100%;
-      min-height:260px;
+      min-height:360px;          /* más alto en desktop */
     }
 
     @media(max-width:900px){
       .main{padding:10px 10px 14px;}
-      #map{height:60vh;}
+      .panel{padding:14px 14px 16px;min-height:auto;}
+      #map{min-height:60vh;}
     }
     @media(max-width:480px){
       .panel-title h1{font-size:16px;}
@@ -333,7 +339,7 @@ function pintarZona(){
 </script>
 
 <script>
-/* Lógica de planos (tu misma funcionalidad anterior) */
+/* Lógica de planos (igual que antes) */
 const CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack_V2.1.csv';
 
 let rawData = [];
