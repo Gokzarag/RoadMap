@@ -1,25 +1,34 @@
-<!-- Encabezado común -->
 <header class="rm-header">
-  <div class="rm-header-left">
-    <button id="btn-menu" class="btn-menu" aria-label="Mostrar menú de módulos">☰</button>
-    <img src="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png"
-         class="rm-logo" alt="MapTrack" />
-    <div class="rm-title">
-      <span>RoadMap</span>
-      <span>Distribution Platform</span>
-    </div>
-  </div>
+  <div class="rm-header-inner">
+    <!-- Branding + menú -->
+    <div class="rm-brand-row">
+      <div class="rm-brand-left">
+        <button id="btn-menu" class="btn-menu" aria-label="Mostrar menú de módulos">☰</button>
 
-  <div class="rm-header-center">
-    <span class="rm-label">Oficina</span>
-    <div class="rm-zona">
-      <button class="zona-pill" id="zona-ate" onclick="setZona('0374')">Cedi Ate</button>
-      <button class="zona-pill" id="zona-chorr" onclick="setZona('0752')">Cadi Chorrillos</button>
-    </div>
-  </div>
+        <div class="rm-logo-badge">
+          <img src="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png"
+               class="rm-logo" alt="MapTrack" />
+        </div>
 
-  <div class="rm-header-right">
-    
+        <div class="rm-title-block">
+          <span class="rm-app-main">ROADMAP</span>
+          <span class="rm-app-sub">Distribution Platform</span>
+        </div>
+      </div>
+
+      <div class="rm-brand-right">
+        <span class="rm-env-chip">Operación diaria</span>
+      </div>
+    </div>
+
+    <!-- Cinta de oficina / zona activa -->
+    <div class="rm-office-row">
+      <span class="rm-chip-label">OFICINA</span>
+      <div class="rm-zona">
+        <button class="zona-pill" id="zona-ate"  onclick="setZona('0374')">Cedi Ate</button>
+        <button class="zona-pill" id="zona-chorr" onclick="setZona('0752')">Cadi Chorrillos</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -39,7 +48,7 @@
 </div>
 
 <style>
-  /* Barra fija y centrada */
+  /* CONTENEDOR PRINCIPAL DEL HEADER */
   .rm-header{
     position:fixed;
     top:0;
@@ -47,48 +56,63 @@
     right:0;
     z-index:40;
     display:flex;
-    justify-content:center;        /* centra el contenido interior */
-    padding:8px 0 10px;            /* altura cómoda + respiro inferior */
-    background:#020617;
+    justify-content:center;
+    padding:10px 0 8px;
+    background:radial-gradient(circle at 0 0,#0f172a 0,#020617 46%,#020617 100%);
     color:#f9fafb;
-    border-bottom:1px solid rgba(148,163,184,0.4);
+    border-bottom:1px solid rgba(148,163,184,0.5);
   }
-
   .rm-header-inner{
     width:100%;
-    max-width:var(--content-max, 1120px);
+    max-width:1120px;
     padding:0 24px;
     display:flex;
-    align-items:flex-end;          /* título arriba, zona un poco más abajo */
+    flex-direction:column;
+    gap:6px;
+  }
+
+  /* FILA SUPERIOR: BRANDING */
+  .rm-brand-row{
+    display:flex;
+    align-items:center;
     justify-content:space-between;
     gap:16px;
   }
-
-  /* Izquierda: hamburguesa + logo + título */
-  .rm-header-left{
+  .rm-brand-left{
     display:flex;
     align-items:center;
     gap:10px;
   }
 
   .btn-menu{
-    background:none;
-    border:1px solid rgba(249,250,251,0.55);
+    background:rgba(15,23,42,0.9);
+    border:1px solid rgba(249,250,251,0.35);
     color:#f9fafb;
-    border-radius:6px;
-    padding:4px 9px;
+    border-radius:9px;
+    padding:5px 10px;
     font-size:15px;
     cursor:pointer;
+    box-shadow:0 0 0 1px rgba(15,23,42,0.4);
   }
   .btn-menu:hover{
-    background:rgba(15,23,42,0.9);
+    background:rgba(15,23,42,1);
   }
 
+  .rm-logo-badge{
+    width:32px;
+    height:32px;
+    border-radius:999px;
+    background:radial-gradient(circle at 30% 0,#f9735b 0,#b91c1c 40%,#7f1d1d 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 0 0 2px rgba(15,23,42,0.95),0 0 18px rgba(248,113,113,0.55);
+  }
   .rm-logo{
-    width:28px;
-    height:28px;
-    border-radius:8px;
-    border:1px solid rgba(249,250,251,0.35);
+    width:22px;
+    height:22px;
+    border-radius:999px;
+    border:1px solid rgba(249,250,251,0.65);
   }
 
   .rm-title-block{
@@ -98,7 +122,7 @@
   }
   .rm-app-main{
     font-size:12px;
-    letter-spacing:0.18em;
+    letter-spacing:0.19em;
     text-transform:uppercase;
     font-weight:700;
   }
@@ -108,15 +132,29 @@
     opacity:0.85;
   }
 
-  /* Centro: etiqueta OFICINA + zona activa, bien separada del título */
-  .rm-header-center{
+  .rm-brand-right{
     display:flex;
-    flex-direction:column;
     align-items:center;
-    gap:4px;
-    transform:translateY(3px);     /* baja un poco el bloque del filtro */
+  }
+  .rm-env-chip{
+    padding:3px 10px;
+    border-radius:999px;
+    background:rgba(15,23,42,0.9);
+    border:1px solid rgba(148,163,184,0.8);
+    font-size:10px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:#e5e7eb;
   }
 
+  /* FILA INFERIOR: CINTA DE OFICINA */
+  .rm-office-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-top:2px;
+  }
   .rm-chip-label{
     padding:2px 10px;
     border-radius:999px;
@@ -126,38 +164,36 @@
     text-transform:uppercase;
     color:#e5e7eb;
     opacity:0.9;
+    background:rgba(15,23,42,0.9);
   }
-
   .rm-zona{
     display:flex;
     gap:6px;
   }
   .zona-pill{
     border-radius:999px;
-    padding:4px 10px;
+    padding:4px 11px;
     font-size:11px;
     border:1px solid rgba(249,250,251,0.18);
     background:#0f172a;
     color:#e5e7eb;
     cursor:pointer;
     white-space:nowrap;
-    transition:background .15s,border-color .15s,transform .1s;
+    transition:background .15s,border-color .15s,transform .1s,box-shadow .15s;
   }
   .zona-pill:hover{
     background:#111827;
     transform:translateY(-1px);
+    box-shadow:0 4px 10px rgba(15,23,42,0.7);
   }
   .zona-pill.active{
     background:#f9735b;
     color:#111827;
     border-color:#fed7c2;
+    box-shadow:0 4px 10px rgba(248,113,113,0.55);
   }
 
-  .rm-header-right{
-    min-width:40px; /* reserva espacio por si luego agregas usuario/fecha */
-  }
-
-  /* Popup lateral de módulos */
+  /* POPUP DE MÓDULOS */
   .menu-popup{
     position:fixed;
     inset:0;
@@ -174,7 +210,6 @@
     opacity:1;
     pointer-events:auto;
   }
-
   .menu-popup-inner{
     width:240px;
     max-width:80%;
@@ -213,16 +248,14 @@
 
   @media(max-width:900px){
     .rm-header-inner{
-      flex-wrap:wrap;
-      align-items:flex-start;
-      gap:10px;
+      padding:0 12px;
     }
-    .rm-header-center{
-      order:3;
-      width:100%;
-      align-items:flex-start;
-      margin-top:4px;
-      transform:none;
+    .rm-brand-row{
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .rm-office-row{
+      flex-wrap:wrap;
     }
   }
 </style>
