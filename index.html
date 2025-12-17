@@ -490,10 +490,7 @@ function pintarZona(){
   const z = getZona();
   const ate = document.getElementById('zona-ate');
   const ch = document.getElementById('zona-chorr');
-  if (ate && ch){
-    ate.classList.toggle('active', z === '0374');
-    ch.classList.toggle('active', z === '0752');
-  }
+
   const label = (z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate');
   const badge = document.getElementById('badge-zona-text');
   const badgeKpi = document.getElementById('badge-zona-kpi');
@@ -551,6 +548,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 </body>
 </html>
+
 
 
 
