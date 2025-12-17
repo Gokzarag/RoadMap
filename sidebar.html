@@ -1,8 +1,7 @@
-<!-- Encabezado común -->
 <header class="rm-header">
   <div class="rm-header-inner">
-    <!-- Branding -->
-    <div class="rm-brand-left">
+    <!-- Branding + selector en una sola fila -->
+    <div class="rm-header-left">
       <button id="btn-menu" class="btn-menu" aria-label="Mostrar menú de módulos">☰</button>
 
       <div class="rm-logo-shell">
@@ -14,27 +13,25 @@
         <span class="rm-app-main">ROADMAP</span>
         <span class="rm-app-sub">Distribution Platform</span>
       </div>
+
+      <!-- OFICINA + selector compactos -->
+      <div class="rm-office-inline">
+        <span class="rm-office-label">Oficina</span>
+        <select id="select-zona" class="rm-zona-select" onchange="onZonaChange(this.value)">
+          <option value="0374">Cedi Ate</option>
+          <option value="0752">Cadi Chorrillos</option>
+        </select>
+      </div>
     </div>
 
-    <!-- Selector de oficina -->
-    <div class="rm-header-center">
-      <label for="select-zona" class="rm-chip-label">OFICINA</label>
-      <select id="select-zona" class="rm-zona-select" onchange="onZonaChange(this.value)">
-        <option value="0374">Cedi Ate</option>
-        <option value="0752">Cadi Chorrillos</option>
-      </select>
-    </div>
-
-    <!-- Lado derecho reservado -->
     <div class="rm-header-right"></div>
   </div>
 </header>
 
 <!-- Popup de módulos -->
 <div id="menu-popup" class="menu-popup">
-  <div class="menu-popup-inner">
+  <div class="menu-popup-panel">
     <button id="menu-close" class="menu-popup-close" aria-label="Cerrar menú">✕</button>
-    <h3 class="menu-popup-title">Módulos</h3>
     <nav class="menu-popup-nav">
       <a href="index.html">Inicio</a>
       <a href="agenda.html">Agenda</a>
@@ -46,11 +43,10 @@
 </div>
 
 <script>
-  // Sincroniza el <select> con tu lógica existente de zona
+  // Sincroniza el select con tu zona actual
   function onZonaChange(z){
-    setZona(z);           // ya lo tienes definido en cada página
+    setZona(z);
   }
-
   document.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById('select-zona');
     if (!sel || typeof getZona !== 'function') return;
@@ -58,8 +54,8 @@
     if (current) sel.value = current;
   });
 </script>
+
 <style>
-  /* Barra fija, limpia y centrada */
   .rm-header{
     position:fixed;
     top:0;
@@ -68,7 +64,7 @@
     z-index:40;
     display:flex;
     justify-content:center;
-    padding:10px 0 8px;
+    padding:8px 0;
     background:#020617;
     color:#f9fafb;
     border-bottom:1px solid rgba(148,163,184,0.4);
@@ -83,13 +79,17 @@
     gap:16px;
   }
 
-  /* Branding izquierda */
-  .rm-brand-left{
+  .rm-header-left{
     display:flex;
     align-items:center;
     gap:10px;
   }
+  .rm-header-right{
+    min-width:40px;
+  }
+
   .btn-menu{
+    position:relative;
     background:rgba(15,23,42,1);
     border:1px solid rgba(249,250,251,0.35);
     color:#f9fafb;
@@ -135,27 +135,23 @@
     opacity:0.85;
   }
 
-  /* Centro: label + select armonioso */
-  .rm-header-center{
+  /* Oficina inline, sin caja grande */
+  .rm-office-inline{
     display:flex;
-    flex-direction:column;
     align-items:center;
-    gap:4px;
+    gap:6px;
+    margin-left:18px;
   }
-  .rm-chip-label{
-    padding:2px 10px;
-    border-radius:999px;
-    border:1px solid rgba(248,250,252,0.35);
-    font-size:10px;
-    letter-spacing:0.16em;
+  .rm-office-label{
+    font-size:11px;
     text-transform:uppercase;
+    letter-spacing:0.14em;
     color:#e5e7eb;
-    background:#020617;
+    opacity:0.9;
   }
-
   .rm-zona-select{
-    min-width:170px;
-    padding:5px 12px;
+    min-width:150px;
+    padding:4px 28px 4px 10px;
     border-radius:999px;
     border:1px solid rgba(148,163,184,0.9);
     background:#020617;
@@ -179,54 +175,47 @@
     box-shadow:0 0 0 1px rgba(248,113,113,0.4);
   }
 
-  .rm-header-right{
-    min-width:40px;
-  }
-
-  /* Popup lateral */
+  /* Popup anclado bajo la hamburguesa */
   .menu-popup{
     position:fixed;
     inset:0;
-    background:rgba(15,23,42,0.6);
-    display:flex;
-    justify-content:flex-start;
-    align-items:stretch;
-    opacity:0;
     pointer-events:none;
-    transition:opacity .2s ease;
     z-index:45;
   }
-  .menu-popup.open{
-    opacity:1;
-    pointer-events:auto;
-  }
-  .menu-popup-inner{
-    width:240px;
-    max-width:80%;
+  .menu-popup-panel{
+    position:absolute;
+    top:42px;          /* justo debajo del header/hamburguesa */
+    left:24px;         /* alineado con padding del header */
     background:#020617;
     color:#f9fafb;
-    padding:14px 12px 16px;
-    box-shadow:0 8px 30px rgba(0,0,0,0.5);
-    display:flex;
+    border-radius:10px;
+    padding:8px 10px;
+    border:1px solid rgba(148,163,184,0.6);
+    box-shadow:0 10px 30px rgba(0,0,0,0.55);
+    min-width:140px;
+    max-width:220px;
+    display:none;
     flex-direction:column;
-    gap:8px;
+    gap:4px;
   }
+
+  .menu-popup.open .menu-popup-panel{
+    display:flex;
+    pointer-events:auto;
+  }
+
   .menu-popup-close{
     align-self:flex-end;
     background:none;
     border:none;
     color:#e5e7eb;
-    font-size:18px;
+    font-size:16px;
     cursor:pointer;
-    margin-bottom:4px;
-  }
-  .menu-popup-title{
-    font-size:13px;
-    margin-bottom:4px;
+    margin-bottom:2px;
   }
   .menu-popup-nav a{
     display:block;
-    padding:5px 4px;
+    padding:4px 4px;
     color:#e5e7eb;
     text-decoration:none;
     border-radius:6px;
@@ -239,12 +228,9 @@
   @media(max-width:900px){
     .rm-header-inner{
       padding:0 12px;
-      gap:10px;
     }
-    .rm-header-center{
-      order:3;
-      width:100%;
-      align-items:flex-start;
+    .rm-office-inline{
+      margin-left:10px;
     }
   }
 </style>
