@@ -1,35 +1,32 @@
 <!-- Encabezado común -->
 <header class="rm-header">
   <div class="rm-header-inner">
-    <!-- Fila branding -->
-    <div class="rm-brand-row">
-      <div class="rm-brand-left">
-        <button id="btn-menu" class="btn-menu" aria-label="Mostrar menú de módulos">☰</button>
+    <!-- Branding -->
+    <div class="rm-brand-left">
+      <button id="btn-menu" class="btn-menu" aria-label="Mostrar menú de módulos">☰</button>
 
-        <div class="rm-logo-badge">
-          <img src="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png"
-               class="rm-logo" alt="MapTrack" />
-        </div>
-
-        <div class="rm-title-block">
-          <span class="rm-app-main">ROADMAP</span>
-          <span class="rm-app-sub">Distribution Platform</span>
-        </div>
+      <div class="rm-logo-shell">
+        <img src="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png"
+             class="rm-logo" alt="MapTrack" />
       </div>
 
-      <div class="rm-brand-right">
-        <!-- reservado para usuario/fecha futuro -->
+      <div class="rm-title-block">
+        <span class="rm-app-main">ROADMAP</span>
+        <span class="rm-app-sub">Distribution Platform</span>
       </div>
     </div>
 
-    <!-- Fila zona / oficina -->
-    <div class="rm-office-row">
-      <span class="rm-chip-label">OFICINA</span>
-      <div class="rm-zona">
-        <button class="zona-pill" id="zona-ate"  onclick="setZona('0374')">Cedi Ate</button>
-        <button class="zona-pill" id="zona-chorr" onclick="setZona('0752')">Cadi Chorrillos</button>
-      </div>
+    <!-- Selector de oficina -->
+    <div class="rm-header-center">
+      <label for="select-zona" class="rm-chip-label">OFICINA</label>
+      <select id="select-zona" class="rm-zona-select" onchange="onZonaChange(this.value)">
+        <option value="0374">Cedi Ate</option>
+        <option value="0752">Cadi Chorrillos</option>
+      </select>
     </div>
+
+    <!-- Lado derecho reservado -->
+    <div class="rm-header-right"></div>
   </div>
 </header>
 
@@ -48,8 +45,21 @@
   </div>
 </div>
 
+<script>
+  // Sincroniza el <select> con tu lógica existente de zona
+  function onZonaChange(z){
+    setZona(z);           // ya lo tienes definido en cada página
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('select-zona');
+    if (!sel || typeof getZona !== 'function') return;
+    const current = getZona();
+    if (current) sel.value = current;
+  });
+</script>
 <style>
-  /* Barra principal fija */
+  /* Barra fija, limpia y centrada */
   .rm-header{
     position:fixed;
     top:0;
@@ -59,64 +69,53 @@
     display:flex;
     justify-content:center;
     padding:10px 0 8px;
-    background:linear-gradient(135deg,#020617 0,#020617 60%,#020617 100%);
+    background:#020617;
     color:#f9fafb;
-    border-bottom:1px solid rgba(148,163,184,0.45);
+    border-bottom:1px solid rgba(148,163,184,0.4);
   }
   .rm-header-inner{
     width:100%;
     max-width:1120px;
     padding:0 24px;
     display:flex;
-    flex-direction:column;
-    gap:6px;
-  }
-
-  /* FILA SUPERIOR – BRANDING */
-  .rm-brand-row{
-    display:flex;
     align-items:center;
     justify-content:space-between;
     gap:16px;
   }
+
+  /* Branding izquierda */
   .rm-brand-left{
     display:flex;
     align-items:center;
     gap:10px;
   }
-  .rm-brand-right{
-    min-width:40px;
-  }
-
   .btn-menu{
-    background:rgba(15,23,42,0.95);
+    background:rgba(15,23,42,1);
     border:1px solid rgba(249,250,251,0.35);
     color:#f9fafb;
     border-radius:999px;
     padding:5px 10px;
     font-size:15px;
     cursor:pointer;
-    box-shadow:0 0 0 1px rgba(15,23,42,0.5);
   }
   .btn-menu:hover{
     background:#020617;
   }
 
-  .rm-logo-badge{
-    width:32px;
-    height:32px;
-    border-radius:999px;
-    background:radial-gradient(circle at 30% 0,#f9735b 0,#b91c1c 40%,#7f1d1d 100%);
+  .rm-logo-shell{
+    width:30px;
+    height:30px;
+    border-radius:8px;
+    background:#020617;
+    border:1px solid rgba(249,250,251,0.25);
     display:flex;
     align-items:center;
     justify-content:center;
-    box-shadow:0 0 0 2px rgba(15,23,42,0.95),0 0 18px rgba(248,113,113,0.45);
   }
   .rm-logo{
     width:22px;
     height:22px;
-    border-radius:999px;
-    border:1px solid rgba(249,250,251,0.7);
+    border-radius:6px;
   }
 
   .rm-title-block{
@@ -136,53 +135,55 @@
     opacity:0.85;
   }
 
-  /* FILA INFERIOR – OFICINA / ZONA */
-  .rm-office-row{
+  /* Centro: label + select armonioso */
+  .rm-header-center{
     display:flex;
+    flex-direction:column;
     align-items:center;
-    justify-content:center;
-    gap:8px;
-    margin-top:2px;
+    gap:4px;
   }
   .rm-chip-label{
     padding:2px 10px;
     border-radius:999px;
-    border:1px solid rgba(248,250,252,0.3);
+    border:1px solid rgba(248,250,252,0.35);
     font-size:10px;
     letter-spacing:0.16em;
     text-transform:uppercase;
     color:#e5e7eb;
-    opacity:0.9;
-    background:rgba(15,23,42,0.9);
-  }
-  .rm-zona{
-    display:flex;
-    gap:6px;
-  }
-  .zona-pill{
-    border-radius:999px;
-    padding:4px 12px;
-    font-size:11px;
-    border:1px solid rgba(249,250,251,0.2);
-    background:#0f172a;
-    color:#e5e7eb;
-    cursor:pointer;
-    white-space:nowrap;
-    transition:background .15s,border-color .15s,box-shadow .15s,transform .1s;
-  }
-  .zona-pill:hover{
-    background:#111827;
-    transform:translateY(-1px);
-    box-shadow:0 4px 10px rgba(15,23,42,0.65);
-  }
-  .zona-pill.active{
-    background:#f9735b;
-    color:#111827;
-    border-color:#fed7c2;
-    box-shadow:0 4px 10px rgba(248,113,113,0.5);
+    background:#020617;
   }
 
-  /* POPUP DE MÓDULOS */
+  .rm-zona-select{
+    min-width:170px;
+    padding:5px 12px;
+    border-radius:999px;
+    border:1px solid rgba(148,163,184,0.9);
+    background:#020617;
+    color:#f9fafb;
+    font-size:12px;
+    outline:none;
+    appearance:none;
+    -moz-appearance:none;
+    -webkit-appearance:none;
+    background-image:
+      linear-gradient(45deg,transparent 50%,#e5e7eb 50%),
+      linear-gradient(135deg,#e5e7eb 50%,transparent 50%);
+    background-position:
+      calc(100% - 16px) 55%,
+      calc(100% - 10px) 55%;
+    background-size:6px 6px;
+    background-repeat:no-repeat;
+  }
+  .rm-zona-select:focus{
+    border-color:#f9735b;
+    box-shadow:0 0 0 1px rgba(248,113,113,0.4);
+  }
+
+  .rm-header-right{
+    min-width:40px;
+  }
+
+  /* Popup lateral */
   .menu-popup{
     position:fixed;
     inset:0;
@@ -238,14 +239,12 @@
   @media(max-width:900px){
     .rm-header-inner{
       padding:0 12px;
+      gap:10px;
     }
-    .rm-brand-row{
-      flex-wrap:wrap;
-      gap:8px;
-    }
-    .rm-office-row{
-      flex-wrap:wrap;
-      gap:6px;
+    .rm-header-center{
+      order:3;
+      width:100%;
+      align-items:flex-start;
     }
   }
 </style>
