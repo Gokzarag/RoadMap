@@ -42,30 +42,29 @@
     }
 
     /* Encabezado común (sidebar.html) */
-    .rm-header{
-      position:fixed;
-      top:0;
-      left:0;
-      rigth:0;
-      z-index:40;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:6px 16px;
-      background:#020617;
-      color:#f9fafb;
-      border-bottom:1px solid rgba(148,163,184,0.4);
-    }
-    .rm-header-inner{
-      width:100%;
-      max-width:var(--content-max);
-      margin:0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
+.rm-header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:40;
+  display:flex;
+  justify-content:center;      /* centra el inner horizontalmente */
+  padding:10px 0;              /* sin padding lateral; lo pondremos en el inner */
+  background:#020617;
+  color:#f9fafb;
+  border-bottom:1px solid rgba(148,163,184,0.4);
+}
+
+.rm-header-inner{
+  width:100%;
+  max-width:var(--content-max); /* vuelve a usar el mismo ancho que el contenido */
+  padding:0 24px;               /* margen lateral dentro de la barra */
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
     .rm-header-left{display:flex;align-items:center;gap:8px;}
     .rm-logo{
       width:26px;height:26px;border-radius:8px;
@@ -376,5 +375,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 </body>
 </html>
+
 
 
