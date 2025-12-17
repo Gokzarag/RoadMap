@@ -342,13 +342,7 @@ function setZona(z){
   pintarZona();
 }
 function pintarZona(){
-  const z = getZona();
-  const ate = document.getElementById('zona-ate');
-  const ch = document.getElementById('zona-chorr');
-  if (ate && ch){
-    ate.classList.toggle('active', z === '0374');
-    ch.classList.toggle('active', z === '0752');
-  }
+
   const label = (z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate');
   const badge = document.getElementById('badge-zona-text');
   if (badge) badge.textContent = label;
@@ -522,6 +516,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 <script src="layout.js"></script>
 </body>
 </html>
+
 
 
 
