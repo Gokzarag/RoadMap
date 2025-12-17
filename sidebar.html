@@ -43,15 +43,34 @@
 </div>
 
 <script>
-  // Sincroniza el select con tu zona actual
+  // Cuando cambias el select, disparas tu lógica de zona
   function onZonaChange(z){
-    setZona(z);
+    if (typeof setZona === 'function') {
+      setZona(z);
+    } else {
+      // fallback: solo guardar la zona
+      localStorage.setItem('maptrack_zona', z);
+    }
   }
+
+  // Sincroniza el select con la zona guardada
   document.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById('select-zona');
-    if (!sel || typeof getZona !== 'function') return;
-    const current = getZona();
-    if (current) sel.value = current;
+    if (!sel) return;
+
+    // Si existe getZona() en la página, úsalo para leer la zona actual
+    let current = null;
+    if (typeof getZona === 'function') {
+      current = getZona();
+    } else {
+      current = localStorage.getItem('maptrack_zona') || '0752';
+    }
+    sel.value = current;
+
+    // Si al cargar no se ha pintado nada aún, forzamos pintarZona en esa zona
+    if (typeof pintarZona === 'function') {
+      pintarZona();
+    }
   });
 </script>
 
