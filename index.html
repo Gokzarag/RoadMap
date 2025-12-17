@@ -32,7 +32,7 @@
     }
     .main{
       flex:1;
-      padding:70px 16px 16px;
+      padding:72px 16px 16px;
       display:flex;
       justify-content:center;
     }
@@ -42,30 +42,28 @@
     }
 
     /* Encabezado común (cargado desde sidebar.html) */
-    .rm-header{
-      position:fixed;
-      top:0;
-      left:0;
-      rigth:0;
-      z-index:40;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:10px 16px;
-      background:#020617;
-      color:#f9fafb;
-      border-bottom:1px solid rgba(148,163,184,0.4);
-    }
-    .rm-header-inner{
-      width:100%;
-      max-width:var(--content-max);
-      margin:0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
+.rm-header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:40;
+  display:flex;
+  align-items:center;
+  padding:10px 24px;              /* alto y “grosor” lateral de la barra */
+  background:#020617;
+  color:#f9fafb;
+  border-bottom:1px solid rgba(148,163,184,0.4);
+}
+
+/* inner a todo el ancho */
+.rm-header-inner{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
     .rm-header-left{
       display:flex;align-items:center;gap:8px;
     }
@@ -552,6 +550,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 </body>
 </html>
+
 
 
 
