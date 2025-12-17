@@ -38,3 +38,191 @@
   </div>
 </div>
 
+<style>
+  /* Barra fija y centrada */
+  .rm-header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:40;
+    display:flex;
+    justify-content:center;        /* centra el contenido interior */
+    padding:8px 0 10px;            /* altura cómoda + respiro inferior */
+    background:#020617;
+    color:#f9fafb;
+    border-bottom:1px solid rgba(148,163,184,0.4);
+  }
+
+  .rm-header-inner{
+    width:100%;
+    max-width:var(--content-max, 1120px);
+    padding:0 24px;
+    display:flex;
+    align-items:flex-end;          /* título arriba, zona un poco más abajo */
+    justify-content:space-between;
+    gap:16px;
+  }
+
+  /* Izquierda: hamburguesa + logo + título */
+  .rm-header-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .btn-menu{
+    background:none;
+    border:1px solid rgba(249,250,251,0.55);
+    color:#f9fafb;
+    border-radius:6px;
+    padding:4px 9px;
+    font-size:15px;
+    cursor:pointer;
+  }
+  .btn-menu:hover{
+    background:rgba(15,23,42,0.9);
+  }
+
+  .rm-logo{
+    width:28px;
+    height:28px;
+    border-radius:8px;
+    border:1px solid rgba(249,250,251,0.35);
+  }
+
+  .rm-title-block{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .rm-app-main{
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .rm-app-sub{
+    font-size:11px;
+    color:#e5e7eb;
+    opacity:0.85;
+  }
+
+  /* Centro: etiqueta OFICINA + zona activa, bien separada del título */
+  .rm-header-center{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    transform:translateY(3px);     /* baja un poco el bloque del filtro */
+  }
+
+  .rm-chip-label{
+    padding:2px 10px;
+    border-radius:999px;
+    border:1px solid rgba(248,250,252,0.3);
+    font-size:10px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:#e5e7eb;
+    opacity:0.9;
+  }
+
+  .rm-zona{
+    display:flex;
+    gap:6px;
+  }
+  .zona-pill{
+    border-radius:999px;
+    padding:4px 10px;
+    font-size:11px;
+    border:1px solid rgba(249,250,251,0.18);
+    background:#0f172a;
+    color:#e5e7eb;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s,border-color .15s,transform .1s;
+  }
+  .zona-pill:hover{
+    background:#111827;
+    transform:translateY(-1px);
+  }
+  .zona-pill.active{
+    background:#f9735b;
+    color:#111827;
+    border-color:#fed7c2;
+  }
+
+  .rm-header-right{
+    min-width:40px; /* reserva espacio por si luego agregas usuario/fecha */
+  }
+
+  /* Popup lateral de módulos */
+  .menu-popup{
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,0.6);
+    display:flex;
+    justify-content:flex-start;
+    align-items:stretch;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+    z-index:45;
+  }
+  .menu-popup.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .menu-popup-inner{
+    width:240px;
+    max-width:80%;
+    background:#020617;
+    color:#f9fafb;
+    padding:14px 12px 16px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.5);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .menu-popup-close{
+    align-self:flex-end;
+    background:none;
+    border:none;
+    color:#e5e7eb;
+    font-size:18px;
+    cursor:pointer;
+    margin-bottom:4px;
+  }
+  .menu-popup-title{
+    font-size:13px;
+    margin-bottom:4px;
+  }
+  .menu-popup-nav a{
+    display:block;
+    padding:5px 4px;
+    color:#e5e7eb;
+    text-decoration:none;
+    border-radius:6px;
+    font-size:13px;
+  }
+  .menu-popup-nav a:hover{
+    background:rgba(148,163,184,0.25);
+  }
+
+  @media(max-width:900px){
+    .rm-header-inner{
+      flex-wrap:wrap;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .rm-header-center{
+      order:3;
+      width:100%;
+      align-items:flex-start;
+      margin-top:4px;
+      transform:none;
+    }
+  }
+</style>
