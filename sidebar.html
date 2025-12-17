@@ -1,6 +1,7 @@
+<!-- Encabezado común -->
 <header class="rm-header">
   <div class="rm-header-inner">
-    <!-- Branding + menú -->
+    <!-- Fila branding -->
     <div class="rm-brand-row">
       <div class="rm-brand-left">
         <button id="btn-menu" class="btn-menu" aria-label="Mostrar menú de módulos">☰</button>
@@ -17,11 +18,11 @@
       </div>
 
       <div class="rm-brand-right">
-        <span class="rm-env-chip">Operación diaria</span>
+        <!-- reservado para usuario/fecha futuro -->
       </div>
     </div>
 
-    <!-- Cinta de oficina / zona activa -->
+    <!-- Fila zona / oficina -->
     <div class="rm-office-row">
       <span class="rm-chip-label">OFICINA</span>
       <div class="rm-zona">
@@ -48,7 +49,7 @@
 </div>
 
 <style>
-  /* CONTENEDOR PRINCIPAL DEL HEADER */
+  /* Barra principal fija */
   .rm-header{
     position:fixed;
     top:0;
@@ -58,9 +59,9 @@
     display:flex;
     justify-content:center;
     padding:10px 0 8px;
-    background:radial-gradient(circle at 0 0,#0f172a 0,#020617 46%,#020617 100%);
+    background:linear-gradient(135deg,#020617 0,#020617 60%,#020617 100%);
     color:#f9fafb;
-    border-bottom:1px solid rgba(148,163,184,0.5);
+    border-bottom:1px solid rgba(148,163,184,0.45);
   }
   .rm-header-inner{
     width:100%;
@@ -71,7 +72,7 @@
     gap:6px;
   }
 
-  /* FILA SUPERIOR: BRANDING */
+  /* FILA SUPERIOR – BRANDING */
   .rm-brand-row{
     display:flex;
     align-items:center;
@@ -83,19 +84,22 @@
     align-items:center;
     gap:10px;
   }
+  .rm-brand-right{
+    min-width:40px;
+  }
 
   .btn-menu{
-    background:rgba(15,23,42,0.9);
+    background:rgba(15,23,42,0.95);
     border:1px solid rgba(249,250,251,0.35);
     color:#f9fafb;
-    border-radius:9px;
+    border-radius:999px;
     padding:5px 10px;
     font-size:15px;
     cursor:pointer;
-    box-shadow:0 0 0 1px rgba(15,23,42,0.4);
+    box-shadow:0 0 0 1px rgba(15,23,42,0.5);
   }
   .btn-menu:hover{
-    background:rgba(15,23,42,1);
+    background:#020617;
   }
 
   .rm-logo-badge{
@@ -106,13 +110,13 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    box-shadow:0 0 0 2px rgba(15,23,42,0.95),0 0 18px rgba(248,113,113,0.55);
+    box-shadow:0 0 0 2px rgba(15,23,42,0.95),0 0 18px rgba(248,113,113,0.45);
   }
   .rm-logo{
     width:22px;
     height:22px;
     border-radius:999px;
-    border:1px solid rgba(249,250,251,0.65);
+    border:1px solid rgba(249,250,251,0.7);
   }
 
   .rm-title-block{
@@ -132,22 +136,7 @@
     opacity:0.85;
   }
 
-  .rm-brand-right{
-    display:flex;
-    align-items:center;
-  }
-  .rm-env-chip{
-    padding:3px 10px;
-    border-radius:999px;
-    background:rgba(15,23,42,0.9);
-    border:1px solid rgba(148,163,184,0.8);
-    font-size:10px;
-    letter-spacing:0.16em;
-    text-transform:uppercase;
-    color:#e5e7eb;
-  }
-
-  /* FILA INFERIOR: CINTA DE OFICINA */
+  /* FILA INFERIOR – OFICINA / ZONA */
   .rm-office-row{
     display:flex;
     align-items:center;
@@ -172,25 +161,25 @@
   }
   .zona-pill{
     border-radius:999px;
-    padding:4px 11px;
+    padding:4px 12px;
     font-size:11px;
-    border:1px solid rgba(249,250,251,0.18);
+    border:1px solid rgba(249,250,251,0.2);
     background:#0f172a;
     color:#e5e7eb;
     cursor:pointer;
     white-space:nowrap;
-    transition:background .15s,border-color .15s,transform .1s,box-shadow .15s;
+    transition:background .15s,border-color .15s,box-shadow .15s,transform .1s;
   }
   .zona-pill:hover{
     background:#111827;
     transform:translateY(-1px);
-    box-shadow:0 4px 10px rgba(15,23,42,0.7);
+    box-shadow:0 4px 10px rgba(15,23,42,0.65);
   }
   .zona-pill.active{
     background:#f9735b;
     color:#111827;
     border-color:#fed7c2;
-    box-shadow:0 4px 10px rgba(248,113,113,0.55);
+    box-shadow:0 4px 10px rgba(248,113,113,0.5);
   }
 
   /* POPUP DE MÓDULOS */
@@ -256,6 +245,7 @@
     }
     .rm-office-row{
       flex-wrap:wrap;
+      gap:6px;
     }
   }
 </style>
