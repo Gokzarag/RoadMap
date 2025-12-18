@@ -42,29 +42,28 @@
     }
 
     /* Encabezado común (cargado desde sidebar.html) */
-.rm-header{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  z-index:40;
-  display:flex;
-  justify-content:center;      /* centra el inner horizontalmente */
-  padding:10px 0;              /* sin padding lateral; lo pondremos en el inner */
-  background:#020617;
-  color:#f9fafb;
-  border-bottom:1px solid rgba(148,163,184,0.4);
-}
-
-.rm-header-inner{
-  width:100%;
-  max-width:var(--content-max); /* vuelve a usar el mismo ancho que el contenido */
-  padding:0 24px;               /* margen lateral dentro de la barra */
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
+    .rm-header{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:40;
+      display:flex;
+      justify-content:center;
+      padding:10px 0;
+      background:#020617;
+      color:#f9fafb;
+      border-bottom:1px solid rgba(148,163,184,0.4);
+    }
+    .rm-header-inner{
+      width:100%;
+      max-width:var(--content-max);
+      padding:0 24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
     .rm-header-left{
       display:flex;align-items:center;gap:8px;
     }
@@ -215,7 +214,6 @@
       gap:4px;
     }
 
-    /* Mod cards inicio */
     .grid-modulos{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
@@ -255,7 +253,6 @@
     }
     .mod-card a:hover{ opacity:.93; }
 
-    /* KPI cards: 6 en una fila en desktop */
     .grid-kpi{
       display:grid;
       grid-template-columns:repeat(6,minmax(0,1fr));
@@ -310,7 +307,6 @@
     }
     table.kpi-table tbody tr:nth-child(even){background:#f9fafb;}
 
-    /* Layout inferior KPI */
     .kpi-bottom-layout{
       display:grid;
       grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);
@@ -324,7 +320,7 @@
     }
     #heatmap-container{
       width:100%;
-      height:340px; /* más alto para alinearse mejor con la tabla */
+      height:340px;
       border-radius:9px;
       overflow:hidden;
       border:1px solid var(--border-soft);
@@ -346,7 +342,7 @@
 
     @media(max-width:1024px){
       .grid-kpi{
-        grid-template-columns:repeat(3,minmax(0,1fr)); /* se rompen en 2 filas */
+        grid-template-columns:repeat(3,minmax(0,1fr));
       }
     }
     @media(max-width:900px){
@@ -366,7 +362,6 @@
 </head>
 <body>
 <div class="layout">
-  <!-- aquí se inyecta sidebar.html (encabezado + popup) -->
   <div id="sidebar-container"></div>
 
   <main class="main">
@@ -422,7 +417,6 @@
           </div>
         </div>
 
-        <!-- contenedor de los 6 KPIs -->
         <div class="grid-kpi" id="kpi-cards"></div>
 
         <div class="kpi-bottom-layout">
@@ -474,10 +468,12 @@
   </main>
 </div>
 
-<!-- lógica de zona activa -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
 <script src="kpi.js"></script>
 
-<!-- lógica de zona activa -->
 <script>
 function getZona(){
   return localStorage.getItem('maptrack_zona') || '0752';
@@ -501,6 +497,36 @@ function pintarZona(){
   if (badge) badge.textContent = label;
   if (badgeKpi) badgeKpi.textContent = label;
 }
+
+let heatMap, heatLayer;
+function renderHeatmap(points){
+  if (typeof L === 'undefined') return;
+  const container = document.getElementById('heatmap-container');
+  if (!container) return;
+
+  const center = [-12.1, -77.1];
+
+  if (!heatMap){
+    heatMap = L.map('heatmap-container').setView(center, 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(heatMap);
+  }
+  if (heatLayer){
+    heatMap.removeLayer(heatLayer);
+  }
+  if (points.length > 0){
+    heatLayer = L.heatLayer(points, {
+      radius: 18,
+      blur: 15,
+      maxZoom: 17
+    }).addTo(heatMap);
+    const latlngs = points.map(p => [p[0], p[1]]);
+    const bounds = L.latLngBounds(latlngs);
+    heatMap.fitBounds(bounds, {padding:[20,20]});
+  }
+}
 </script>
 
 <script src="layout.js"></script>
@@ -515,7 +541,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 </body>
 </html>
-
 
 
 
