@@ -475,10 +475,14 @@
 </div>
 
 <!-- lógica de zona activa -->
+<script src="kpi.js"></script>
+
+<!-- lógica de zona activa -->
 <script>
 function getZona(){
   return localStorage.getItem('maptrack_zona') || '0752';
 }
+
 function setZona(z){
   localStorage.setItem('maptrack_zona', z);
   pintarZona();
@@ -486,56 +490,19 @@ function setZona(z){
     loadKPI();
   }
 }
+
 function pintarZona(){
   const z = getZona();
-  const ate = document.getElementById('zona-ate');
-  const ch = document.getElementById('zona-chorr');
-
   const label = (z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate');
+
   const badge = document.getElementById('badge-zona-text');
   const badgeKpi = document.getElementById('badge-zona-kpi');
+
   if (badge) badge.textContent = label;
   if (badgeKpi) badgeKpi.textContent = label;
 }
 </script>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-
-<script>
-let heatMap, heatLayer;
-function renderHeatmap(points){
-  if (typeof L === 'undefined') return;
-  const container = document.getElementById('heatmap-container');
-  if (!container) return;
-
-  const center = [-12.1, -77.1];
-
-  if (!heatMap){
-    heatMap = L.map('heatmap-container').setView(center, 11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '&copy; OpenStreetMap'
-    }).addTo(heatMap);
-  }
-  if (heatLayer){
-    heatMap.removeLayer(heatLayer);
-  }
-  if (points.length > 0){
-    heatLayer = L.heatLayer(points, {
-      radius: 18,
-      blur: 15,
-      maxZoom: 17
-    }).addTo(heatMap);
-    const latlngs = points.map(p => [p[0], p[1]]);
-    const bounds = L.latLngBounds(latlngs);
-    heatMap.fitBounds(bounds, {padding:[20,20]});
-  }
-}
-</script>
-
-<script src="kpi.js"></script>
 <script src="layout.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
@@ -548,6 +515,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 </body>
 </html>
+
 
 
 
