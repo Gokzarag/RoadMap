@@ -1,6 +1,5 @@
 <header class="rm-header">
   <div class="rm-header-inner">
-    <!-- Branding + selector en una sola fila -->
     <div class="rm-header-left">
       <button id="btn-menu" class="btn-menu" aria-label="Mostrar menú de módulos">☰</button>
 
@@ -14,7 +13,6 @@
         <span class="rm-app-sub">Distribution Platform</span>
       </div>
 
-      <!-- OFICINA + selector compactos -->
       <div class="rm-office-inline">
         <span class="rm-office-label">Oficina</span>
         <select id="select-zona" class="rm-zona-select" onchange="onZonaChange(this.value)">
@@ -28,7 +26,6 @@
   </div>
 </header>
 
-<!-- Popup de módulos -->
 <div id="menu-popup" class="menu-popup">
   <div class="menu-popup-panel">
     <button id="menu-close" class="menu-popup-close" aria-label="Cerrar menú">✕</button>
@@ -43,7 +40,6 @@
 </div>
 
 <script>
-  // Cuando cambias el select, disparas tu lógica de zona
   function onZonaChange(z){
     if (typeof setZona === 'function') {
       setZona(z);
@@ -52,7 +48,6 @@
     }
   }
 
-  // Sincroniza el select con la zona guardada
   document.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById('select-zona');
     if (!sel) return;
@@ -94,7 +89,6 @@
     justify-content:space-between;
     gap:16px;
   }
-
   .rm-header-left{
     display:flex;
     align-items:center;
@@ -103,7 +97,6 @@
   .rm-header-right{
     min-width:40px;
   }
-
   .btn-menu{
     position:relative;
     background:rgba(15,23,42,1);
@@ -117,7 +110,6 @@
   .btn-menu:hover{
     background:#020617;
   }
-
   .rm-logo-shell{
     width:30px;
     height:30px;
@@ -133,7 +125,6 @@
     height:22px;
     border-radius:6px;
   }
-
   .rm-title-block{
     display:flex;
     flex-direction:column;
@@ -150,8 +141,6 @@
     color:#e5e7eb;
     opacity:0.85;
   }
-
-  /* Oficina inline, sin caja grande */
   .rm-office-inline{
     display:flex;
     align-items:center;
@@ -190,8 +179,6 @@
     border-color:#f9735b;
     box-shadow:0 0 0 1px rgba(248,113,113,0.4);
   }
-
-  /* Popup anclado bajo la hamburguesa */
   .menu-popup{
     position:fixed;
     inset:0;
@@ -214,12 +201,10 @@
     flex-direction:column;
     gap:4px;
   }
-
   .menu-popup.open .menu-popup-panel{
     display:flex;
     pointer-events:auto;
   }
-
   .menu-popup-close{
     align-self:flex-end;
     background:none;
@@ -240,7 +225,6 @@
   .menu-popup-nav a:hover{
     background:rgba(148,163,184,0.25);
   }
-
   @media(max-width:900px){
     .rm-header-inner{
       padding:0 12px;
