@@ -36,7 +36,7 @@
     }
     .main{
       flex:1;
-      padding:60px 16px 16px;
+      padding:72px 16px 16px;
       display:flex;
       justify-content:center;
     }
@@ -47,30 +47,29 @@
       flex-direction:column;
     }
 
-    /* Encabezado común (sidebar.html) */
-.rm-header{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  z-index:40;
-  display:flex;
-  justify-content:center;      /* centra el inner horizontalmente */
-  padding:10px 0;              /* sin padding lateral; lo pondremos en el inner */
-  background:#020617;
-  color:#f9fafb;
-  border-bottom:1px solid rgba(148,163,184,0.4);
-}
-
-.rm-header-inner{
-  width:100%;
-  max-width:var(--content-max); /* vuelve a usar el mismo ancho que el contenido */
-  padding:0 24px;               /* margen lateral dentro de la barra */
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
+    /* Header compartido (sidebar.html) */
+    .rm-header{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:40;
+      display:flex;
+      justify-content:center;
+      padding:10px 0;
+      background:#020617;
+      color:#f9fafb;
+      border-bottom:1px solid rgba(148,163,184,0.4);
+    }
+    .rm-header-inner{
+      width:100%;
+      max-width:var(--content-max);
+      padding:0 24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
     .rm-header-left{display:flex;align-items:center;gap:8px;}
     .rm-logo{
       width:26px;height:26px;border-radius:8px;
@@ -174,7 +173,7 @@
       }
     }
 
-    /* Panel Ubícame como flex para que el mapa crezca */
+    /* Panel Ubícame */
     .panel{
       flex:1;
       display:flex;
@@ -274,7 +273,7 @@
     }
 
     .map-wrapper{
-      flex:1;                /* ocupa todo el alto restante */
+      flex:1;
       margin-top:6px;
       border-radius:10px;
       overflow:hidden;
@@ -333,6 +332,7 @@
   </main>
 </div>
 
+<!-- Lógica de zona (igual que en las otras páginas) -->
 <script>
 function getZona(){
   return localStorage.getItem('maptrack_zona') || '0752';
@@ -342,7 +342,7 @@ function setZona(z){
   pintarZona();
 }
 function pintarZona(){
-
+  const z = getZona();
   const label = (z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate');
   const badge = document.getElementById('badge-zona-text');
   if (badge) badge.textContent = label;
@@ -516,7 +516,3 @@ document.addEventListener('DOMContentLoaded', ()=>{
 <script src="layout.js"></script>
 </body>
 </html>
-
-
-
-
