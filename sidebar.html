@@ -15,7 +15,8 @@
 
       <div class="rm-office-inline">
         <span class="rm-office-label">Oficina</span>
-        <select id="select-zona" class="rm-zona-select" onchange="onZonaChange(this.value)">
+        <!-- SIN onchange en el HTML -->
+        <select id="select-zona" class="rm-zona-select">
           <option value="0374">Cedi Ate</option>
           <option value="0752">Cadi Chorrillos</option>
         </select>
@@ -40,7 +41,7 @@
 </div>
 
 <script>
-  // se ejecuta cuando cambias el select
+  // Lógica de cambio de zona (llamada desde layout.js)
   function onZonaChange(z){
     if (typeof setZona === 'function') {
       setZona(z);
@@ -48,29 +49,6 @@
       localStorage.setItem('maptrack_zona', z);
     }
   }
-
-  // sincroniza el select con la zona guardada y pinta la zona
-  document.addEventListener('DOMContentLoaded', () => {
-    const sel = document.getElementById('select-zona');
-    if (!sel) return;
-
-    let current = null;
-    if (typeof getZona === 'function') {
-      current = getZona();
-    } else {
-      current = localStorage.getItem('maptrack_zona') || '0752';
-    }
-    sel.value = current;
-
-    if (typeof pintarZona === 'function') {
-      pintarZona();
-    }
-
-    // inicializa popup menú (layout.js debe definir initPopupMenu)
-    if (typeof initPopupMenu === 'function') {
-      initPopupMenu();
-    }
-  });
 </script>
 
 <style>
