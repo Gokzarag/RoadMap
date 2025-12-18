@@ -47,30 +47,29 @@
       flex-direction:column;
     }
 
-    /* Header compartido */
-.rm-header{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  z-index:40;
-  display:flex;
-  justify-content:center;      /* centra el inner horizontalmente */
-  padding:10px 0;              /* sin padding lateral; lo pondremos en el inner */
-  background:#020617;
-  color:#f9fafb;
-  border-bottom:1px solid rgba(148,163,184,0.4);
-}
-
-.rm-header-inner{
-  width:100%;
-  max-width:var(--content-max); /* vuelve a usar el mismo ancho que el contenido */
-  padding:0 24px;               /* margen lateral dentro de la barra */
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
+    /* Header (viene de sidebar.html) */
+    .rm-header{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:40;
+      display:flex;
+      justify-content:center;
+      padding:10px 0;
+      background:#020617;
+      color:#f9fafb;
+      border-bottom:1px solid rgba(148,163,184,0.4);
+    }
+    .rm-header-inner{
+      width:100%;
+      max-width:var(--content-max);
+      padding:0 24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
     .rm-header-left{display:flex;align-items:center;gap:8px;}
     .rm-logo{
       width:26px;height:26px;border-radius:8px;
@@ -174,7 +173,7 @@
       }
     }
 
-    /* Panel: lo hacemos flex para que el mapa crezca al máximo */
+    /* Panel principal */
     .panel{
       flex:1;
       display:flex;
@@ -185,7 +184,7 @@
       padding:18px 20px 20px;
       border:1px solid var(--border-soft);
       box-shadow:0 6px 20px rgba(15,23,42,0.08);
-      min-height:0; /* clave para que el map-wrapper tome la altura */
+      min-height:0;
     }
     .panel-header{
       display:flex;
@@ -250,7 +249,7 @@
     }
 
     .map-wrapper{
-      flex:1;                 /* ocupa todo lo que queda */
+      flex:1;
       margin-top:6px;
       border-radius:10px;
       overflow:hidden;
@@ -312,6 +311,7 @@
   </main>
 </div>
 
+<!-- LÓGICA DE ZONA COMPARTIDA -->
 <script>
 function getZona(){
   return localStorage.getItem('maptrack_zona') || '0752';
@@ -324,7 +324,7 @@ function setZona(z){
   }
 }
 function pintarZona(){
-
+  const z = getZona();
   const label = (z === '0752' ? 'Cadi Chorrillos' : 'Cedi Ate');
   const badge = document.getElementById('badge-zona-text');
   if (badge) badge.textContent = label;
@@ -573,6 +573,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById("cliente").addEventListener("change", filtrar);
 });
 
+// función que se llama al cambiar de zona desde el header
 window.filtrarZonaYMapa = function(){
   pintarZona();
   cargarFiltrosMapa();
@@ -582,7 +583,3 @@ window.filtrarZonaYMapa = function(){
 <script src="layout.js"></script>
 </body>
 </html>
-
-
-
-
