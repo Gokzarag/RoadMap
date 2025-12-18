@@ -40,6 +40,7 @@
 </div>
 
 <script>
+  // se ejecuta cuando cambias el select
   function onZonaChange(z){
     if (typeof setZona === 'function') {
       setZona(z);
@@ -48,6 +49,7 @@
     }
   }
 
+  // sincroniza el select con la zona guardada y pinta la zona
   document.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById('select-zona');
     if (!sel) return;
@@ -62,6 +64,11 @@
 
     if (typeof pintarZona === 'function') {
       pintarZona();
+    }
+
+    // inicializa popup menú (layout.js debe definir initPopupMenu)
+    if (typeof initPopupMenu === 'function') {
+      initPopupMenu();
     }
   });
 </script>
