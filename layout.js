@@ -8,35 +8,56 @@ async function loadSidebar(activePage){
     const html = await resp.text();
     container.innerHTML = html;
 
-    // aplicar zona guardada
-    if (typeof pintarZona === 'function'){
-      pintarZona();
-    }
-
-    // inicializar popup
+    // conectar select de zona y popup
+    wireZonaSelect();
     initPopupMenu();
 
-    // podrías resaltar módulo activo más adelante si lo deseas
-    // buscando el <a> correspondiente por href
+    // pintar zona en la página actual, si existe
+    if (typeof pintarZona === 'function') {
+      pintarZona();
+    }
   }catch(e){
     console.error('Error cargando sidebar:', e);
   }
 }
 
+// Conecta el change del select al cambio de zona
+function wireZonaSelect(){
+  const sel = document.getElementById('select-zona');
+  if (!sel) return;
+
+  // valor inicial desde getZona/localStorage
+  let current = null;
+  if (typeof getZona === 'function') {
+    current = getZona();
+  } else {
+    current = localStorage.getItem('maptrack_zona') || '0752';
+  }
+  sel.value = current;
+
+  sel.addEventListener('change', (e) => {
+    const z = e.target.value;
+    if (typeof onZonaChange === 'function') {
+      onZonaChange(z);
+    } else if (typeof setZona === 'function') {
+      setZona(z);
+    } else {
+      localStorage.setItem('maptrack_zona', z);
+    }
+  });
+}
+
 // Manejo del popup de módulos
 function initPopupMenu(){
-  const btn   = document.getElementById('btn-menu');
+  const btn = document.getElementById('btn-menu');
   const popup = document.getElementById('menu-popup');
   const close = document.getElementById('menu-close');
-
   if (!btn || !popup || !close) return;
 
   const toggle = () => popup.classList.toggle('open');
-
   btn.addEventListener('click', toggle);
   close.addEventListener('click', toggle);
 
-  // cerrar al hacer clic fuera del panel
   popup.addEventListener('click', e => {
     if (e.target === popup){
       popup.classList.remove('open');
