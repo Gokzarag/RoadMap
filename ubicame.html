@@ -47,7 +47,7 @@
       flex-direction:column;
     }
 
-    /* Header compartido (sidebar.html) */
+    /* Header (sidebar.html) */
     .rm-header{
       position:fixed;
       top:0;
@@ -222,8 +222,10 @@
 
     .buscador-box{
       display:flex;
-      flex-direction:column;
-      gap:8px;
+      flex-direction:row;
+      flex-wrap:wrap;
+      align-items:flex-end;
+      gap:8px 12px;
       margin-top:10px;
       padding:10px 10px 10px;
       border-radius:10px;
@@ -231,6 +233,7 @@
       background:#f9fafb;
     }
     .buscador-box label{
+      flex-basis:100%;
       font-size:12px;
       font-weight:600;
       color:var(--text-muted);
@@ -240,7 +243,7 @@
       border-radius:7px;
       border:1px solid #d1d5db;
       font-size:12px;
-      width:190px;
+      width:160px;
     }
     #buscarClienteBtn{
       padding:6px 12px;
@@ -251,10 +254,10 @@
       font-size:12px;
       font-weight:600;
       cursor:pointer;
-      align-self:flex-start;
     }
     #buscarClienteBtn:hover{opacity:.9;}
     #resultadoCliente{
+      flex-basis:100%;
       margin-top:4px;
       padding:8px 9px;
       border-radius:7px;
@@ -293,7 +296,7 @@
     @media(max-width:900px){
       .main{padding:10px 10px 14px;}
       .panel{padding:14px 14px 16px;}
-      .map-wrapper{min-height:60vh;}
+      .map-wrapper{min-height:70vh;}
     }
     @media(max-width:480px){
       .panel-title h1{font-size:16px;}
@@ -332,7 +335,7 @@
   </main>
 </div>
 
-<!-- Lógica de zona (igual que en las otras páginas) -->
+<!-- Zona activa -->
 <script>
 function getZona(){
   return localStorage.getItem('maptrack_zona') || '0752';
@@ -435,9 +438,21 @@ function buscarClienteSigma() {
     return;
   }
 
-  const nombre = cliente[7] || 'N/D';
-  const direccion = cliente[14] || 'N/D';
-  const distrito = cliente[16] || 'N/D';
+  // Formato solicitado
+  const codCliente = (cliente[0] || '').toString().trim();
+  const nombreBase = cliente[7] || 'N/D';
+  const extra1 = (cliente[8] || '').toString().trim();
+  const extra2 = (cliente[9] || '').toString().trim();
+  let nombreFull = `${codCliente} ${nombreBase}`;
+  if (extra1 || extra2){
+    const extras = [extra1, extra2].filter(x => x).join(' ');
+    nombreFull += ` - ${extras}`;
+  }
+
+  const direccion = `${cliente[14] || 'N/D'} - ${cliente[17] || 'N/D'}`;
+  const interlocutor = cliente[26] || 'N/D';
+  const diaReparto = cliente[48] || 'N/D';
+
   const lat = parseFloat(cliente[28]);
   const lng = parseFloat(cliente[29]);
 
@@ -449,19 +464,18 @@ function buscarClienteSigma() {
   }
 
   resultadoDiv.innerHTML = `
-    <strong>Cliente encontrado:</strong><br>
-    Código: ${codigo}<br>
-    Nombre: ${nombre}<br>
-    Dirección: ${direccion}<br>
-    Distrito: ${distrito}
+    <strong>Cliente:</strong> ${nombreFull}<br>
+    <strong>Dirección:</strong> ${direccion}<br>
+    <strong>Interlocutor:</strong> ${interlocutor}<br>
+    <strong>Día reparto:</strong> ${diaReparto}
   `;
   resultadoDiv.className = 'exito';
   resultadoDiv.style.display = 'block';
 
-  mostrarClienteEnMapa(lat, lng, nombre, direccion, distrito);
+  mostrarClienteEnMapa(lat, lng, nombreFull, direccion);
 }
 
-function mostrarClienteEnMapa(lat, lng, nombre, direccion, distrito) {
+function mostrarClienteEnMapa(lat, lng, nombre, direccion) {
   if (!ubicameMap) return;
 
   if (ubicameMarker) {
@@ -473,7 +487,6 @@ function mostrarClienteEnMapa(lat, lng, nombre, direccion, distrito) {
     <div style="font-size:11px; line-height:1.3; min-width:220px;">
       <div style="font-weight:bold; color:#e95567; margin-bottom:4px;">📍 ${nombre}</div>
       <div style="color:#374151; margin-bottom:2px;">📍 ${direccion}</div>
-      <div style="color:#6b7280; margin-bottom:6px;">🏛️ ${distrito}</div>
       <a href="${gmaps}" target="_blank" rel="noopener" style="color:#075985; font-weight:600; font-size:10px;">🗺️ Abrir en Google Maps</a>
     </div>
   `;
@@ -510,6 +523,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
   showUserLocationOnMap(true, ubicameMap);
 
   loadSigmaCSV();
+
+  // Enter para buscar
+  const input = document.getElementById('codigoClienteInput');
+  if (input){
+    input.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter'){
+        e.preventDefault();
+        buscarClienteSigma();
+      }
+    });
+  }
 });
 </script>
 
