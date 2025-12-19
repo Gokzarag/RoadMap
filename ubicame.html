@@ -450,7 +450,7 @@ function buscarClienteSigma() {
   }
 
   const direccion = `${cliente[14] || 'N/D'} - ${cliente[17] || 'N/D'}`;
-  const interlocutor = cliente[26] || 'N/D';
+  const interlocutor = `${cliente[26] || 'N/D'} - ${cliente[46] || 'N/D'}`;
   const ruta = `${cliente[12] || 'N/D'} - ${cliente[21] || 'N/D'}`;
   const diaReparto = cliente[48] || 'N/D';
 
@@ -542,5 +542,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 <script src="layout.js"></script>
 </body>
 </html>
+
 
 
