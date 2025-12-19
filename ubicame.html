@@ -451,6 +451,7 @@ function buscarClienteSigma() {
 
   const direccion = `${cliente[14] || 'N/D'} - ${cliente[17] || 'N/D'}`;
   const interlocutor = cliente[26] || 'N/D';
+  const ruta = `${cliente[12] || 'N/D'} - ${cliente[21] || 'N/D'}`;
   const diaReparto = cliente[48] || 'N/D';
 
   const lat = parseFloat(cliente[28]);
@@ -485,7 +486,7 @@ function mostrarClienteEnMapa(lat, lng, nombre, direccion) {
   const gmaps = `https://www.google.com/maps?q=${lat},${lng}`;
   const popupContent = `
     <div style="font-size:11px; line-height:1.3; min-width:220px;">
-      <div style="font-weight:bold; color:#e95567; margin-bottom:4px;">📍 ${nombre}</div>
+      <div style="font-weight:bold; color:#e95567; margin-bottom:4px;">👤 ${nombre}</div>
       <div style="color:#374151; margin-bottom:2px;">📍 ${direccion}</div>
       <a href="${gmaps}" target="_blank" rel="noopener" style="color:#075985; font-weight:600; font-size:10px;">🗺️ Abrir en Google Maps</a>
     </div>
@@ -540,3 +541,4 @@ document.addEventListener('DOMContentLoaded', ()=>{
 <script src="layout.js"></script>
 </body>
 </html>
+
