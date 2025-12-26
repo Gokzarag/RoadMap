@@ -36,7 +36,7 @@
     }
     .main{
       flex:1;
-      padding:72px 16px 16px;
+      padding:72px 12px 12px;
       display:flex;
       justify-content:center;
     }
@@ -64,7 +64,7 @@
     .rm-header-inner{
       width:100%;
       max-width:var(--content-max);
-      padding:0 24px;
+      padding:0 16px;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -178,10 +178,10 @@
       flex:1;
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap:8px;
       background:var(--card-bg);
       border-radius:14px;
-      padding:18px 20px 20px;
+      padding:14px 14px 16px;
       border:1px solid var(--border-soft);
       box-shadow:0 6px 20px rgba(15,23,42,0.08);
       min-height:0;
@@ -190,7 +190,7 @@
       display:flex;
       justify-content:space-between;
       align-items:flex-start;
-      gap:12px;
+      gap:10px;
       flex-wrap:wrap;
     }
     .panel-title h1{
@@ -219,9 +219,9 @@
     .buscador-box{
       display:flex;
       flex-direction:column;
-      gap:8px;
-      margin-top:10px;
-      padding:10px;
+      gap:6px;
+      margin-top:4px;
+      padding:8px 8px 10px;
       border-radius:10px;
       border:1px solid var(--border-soft);
       background:#f9fafb;
@@ -240,10 +240,10 @@
     }
     .buscador-actions-inline{
       display:flex;
-      gap:6px;
+      gap:4px;
     }
     .buscador-actions-inline button{
-      padding:4px 10px;
+      padding:4px 8px;
       border-radius:999px;
       border:1px solid var(--border-soft);
       background:#e5e7eb;
@@ -256,20 +256,21 @@
 
     .buscador-item{
       display:flex;
-      flex-wrap:wrap;
-      align-items:flex-end;
+      flex-wrap:nowrap;
+      align-items:center;
       gap:6px;
-      margin-bottom:6px;
+      margin-bottom:4px;
     }
     .buscador-item .codigoClienteInput{
       padding:6px 9px;
       border-radius:7px;
       border:1px solid #d1d5db;
       font-size:12px;
-      width:160px;
+      flex:1;
+      min-width:0;
     }
     .buscador-item .buscarClienteBtn{
-      padding:6px 12px;
+      padding:6px 10px;
       border-radius:999px;
       border:none;
       background:var(--sidebar-accent);
@@ -277,12 +278,13 @@
       font-size:12px;
       font-weight:600;
       cursor:pointer;
+      white-space:nowrap;
     }
     .buscador-item .buscarClienteBtn:hover{opacity:.9;}
 
     .map-wrapper{
       flex:1;
-      margin-top:6px;
+      margin-top:4px;
       border-radius:10px;
       overflow:hidden;
       border:1px solid var(--border-soft);
@@ -295,8 +297,7 @@
     #ubicame-map{
       flex:1;
       width:100%;
-      height:100%;
-      min-height:0;
+      height:420px;
     }
 
     /* Popup negro personalizado */
@@ -314,12 +315,12 @@
     }
 
     @media(max-width:900px){
-      .main{padding:10px 10px 14px;}
-      .panel{padding:14px 14px 16px;}
-      .map-wrapper{min-height:70vh;}
+      .main{padding:66px 8px 10px;}
+      #ubicame-map{height:65vh;}
     }
     @media(max-width:480px){
       .panel-title h1{font-size:16px;}
+      .rm-header-inner{padding:0 10px;}
     }
   </style>
 </head>
@@ -359,7 +360,7 @@
         </header>
 
         <div class="map-wrapper">
-          <div id="ubicame-map"></div>
+         <div id="ubicame-map"></div>
         </div>
       </section>
     </div>
