@@ -268,6 +268,7 @@
       flex-wrap:wrap;
       gap:6px;
       margin-top:4px;
+      justify-content:flex-end;
     }
     #addSearchBtn,
     #clearSearchBtn{
@@ -293,7 +294,7 @@
       box-shadow:inset 0 0 6px rgba(15,23,42,0.18);
       display:flex;
       min-height:0;
-      position:relative; /* para tooltip */
+      position:relative;
     }
     #ubicame-map{
       flex:1;
@@ -305,8 +306,8 @@
     /* Tooltip sobre el mapa */
     .map-tooltip{
       position:absolute;
-      left:10px;
-      top:10px;
+      left:14px;
+      top:14px;
       z-index:1000;
       background:rgba(15,23,42,0.94);
       color:#f9fafb;
@@ -377,7 +378,6 @@
 
         <div class="map-wrapper">
           <div id="ubicame-map"></div>
-          <!-- Tooltip sobre el mapa -->
           <div id="map-tooltip" class="map-tooltip" style="display:none;"></div>
         </div>
       </section>
@@ -407,7 +407,7 @@ const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/
 let sigmaData = [];
 let ubicameMap = null;
 let ubicameUserMarker = null;
-let ubicameMarkers = []; // aquí estarán todos los marcadores de clientes
+let ubicameMarkers = [];
 
 function makeCustomMarker(color){
   const svg=encodeURIComponent(
@@ -461,7 +461,6 @@ function showUserLocationOnMap(enable, mapInstance = ubicameMap) {
   );
 }
 
-// Buscar cliente a partir de un input específico
 function buscarClienteSigmaDesdeInput(inputEl) {
   const codigo = inputEl.value.trim();
   const tooltipDiv = document.getElementById('map-tooltip');
@@ -511,7 +510,7 @@ function buscarClienteSigmaDesdeInput(inputEl) {
   tooltipDiv.style.display = 'block';
   tooltipDiv.innerHTML = `
     <div>
-      <div><strong>Cliente:</strong> ${nombreFull}</div>
+      <div style="margin-bottom:4px;"><strong>Cliente:</strong> ${nombreFull}</div>
       <div><strong>Dirección:</strong> <a href="${gmaps}" target="_blank" rel="noopener">${direccionTxt}</a></div>
       <div><strong>Interlocutor:</strong> ${interlocutor}</div>
       <div><strong>Ruta Venta:</strong> ${ruta}</div>
@@ -525,20 +524,9 @@ function buscarClienteSigmaDesdeInput(inputEl) {
 function mostrarClienteEnMapa(lat, lng, nombre, direccion) {
   if (!ubicameMap) return;
 
-  const gmaps = `https://www.google.com/maps?q=${lat},${lng}`;
-  const popupContent = `
-    <div style="font-size:11px; line-height:1.3; min-width:220px;">
-      <div style="font-weight:bold; color:#e95567; margin-bottom:4px;">👤 ${nombre}</div>
-      <div style="color:#374151; margin-bottom:2px;">
-        📍 <a href="${gmaps}" target="_blank" rel="noopener" style="color:#075985; font-weight:600; font-size:10px;">${direccion}</a>
-      </div>
-      <div style="font-size:10px; color:#4b5563;">🗺️ Haz clic en la dirección para abrir en Google Maps</div>
-    </div>
-  `;
-
   const mk = L.marker([lat, lng], {
     icon: makeCustomMarker('#e95567')
-  }).bindPopup(popupContent);
+  });
 
   mk.addTo(ubicameMap);
   ubicameMarkers.push(mk);
@@ -571,7 +559,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   const cont = document.getElementById('buscadores-container');
 
-  // click en botón "Ubicar" de cada fila
   cont.addEventListener('click', (e)=>{
     if (e.target.classList.contains('buscarClienteBtn')) {
       const parent = e.target.closest('.buscador-item');
@@ -580,7 +567,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   });
 
-  // Enter en cualquier input
   cont.addEventListener('keydown', (e)=>{
     if (e.key === 'Enter' && e.target.classList.contains('codigoClienteInput')) {
       e.preventDefault();
@@ -590,7 +576,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   });
 
-  // Botón +
   document.getElementById('addSearchBtn').addEventListener('click', ()=>{
     const newItem = document.createElement('div');
     newItem.className = 'buscador-item';
@@ -603,18 +588,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if (nuevoInput) nuevoInput.focus();
   });
 
-  // Botón limpiar
   document.getElementById('clearSearchBtn').addEventListener('click', ()=>{
-    // borrar marcadores
     ubicameMarkers.forEach(m => ubicameMap.removeLayer(m));
     ubicameMarkers = [];
 
-    // ocultar tooltip
     const tooltipDiv = document.getElementById('map-tooltip');
     tooltipDiv.style.display = 'none';
     tooltipDiv.innerHTML = '';
 
-    // resetear campos: dejar solo uno vacío
     cont.innerHTML = '';
     const baseItem = document.createElement('div');
     baseItem.className = 'buscador-item';
