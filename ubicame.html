@@ -197,10 +197,6 @@
       font-size:18px;
       margin-bottom:4px;
     }
-    .panel-title p{
-      font-size:13px;
-      color:var(--text-muted);
-    }
     .panel-meta{
       display:flex;
       flex-direction:column;
@@ -223,18 +219,39 @@
     .buscador-box{
       display:flex;
       flex-direction:column;
-      gap:8px 12px;
+      gap:8px;
       margin-top:10px;
-      padding:10px 10px 10px;
+      padding:10px;
       border-radius:10px;
       border:1px solid var(--border-soft);
       background:#f9fafb;
       font-size:12px;
     }
+    .buscador-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+    }
     .buscador-box label{
       font-size:12px;
       font-weight:600;
       color:var(--text-muted);
+    }
+    .buscador-actions-inline{
+      display:flex;
+      gap:6px;
+    }
+    .buscador-actions-inline button{
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--border-soft);
+      background:#e5e7eb;
+      font-size:11px;
+      cursor:pointer;
+    }
+    .buscador-actions-inline button:hover{
+      background:#d1d5db;
     }
 
     .buscador-item{
@@ -263,27 +280,6 @@
     }
     .buscador-item .buscarClienteBtn:hover{opacity:.9;}
 
-    .buscador-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      margin-top:4px;
-      justify-content:flex-end;
-    }
-    #addSearchBtn,
-    #clearSearchBtn{
-      padding:5px 10px;
-      border-radius:999px;
-      border:1px solid var(--border-soft);
-      background:#e5e7eb;
-      font-size:11px;
-      cursor:pointer;
-    }
-    #addSearchBtn:hover,
-    #clearSearchBtn:hover{
-      background:#d1d5db;
-    }
-
     .map-wrapper{
       flex:1;
       margin-top:6px;
@@ -303,31 +299,18 @@
       min-height:0;
     }
 
-    /* Tooltip sobre el mapa */
-    .map-tooltip{
-      position:absolute;
-      left:14px;
-      top:14px;
-      z-index:1000;
-      background:rgba(15,23,42,0.94);
-      color:#f9fafb;
-      padding:8px 10px;
-      border-radius:8px;
-      max-width:260px;
-      font-size:11px;
-      line-height:1.35;
-      box-shadow:0 8px 20px rgba(0,0,0,0.45);
+    /* Popup negro personalizado */
+    .leaflet-popup.rm-dark-popup .leaflet-popup-content-wrapper{
+      background:transparent;
+      box-shadow:none;
+      border-radius:0;
+      padding:0;
     }
-    .map-tooltip strong{
-      color:#f9735b;
+    .leaflet-popup.rm-dark-popup .leaflet-popup-content{
+      margin:0;
     }
-    .map-tooltip a{
-      color:#bfdbfe;
-      text-decoration:none;
-      font-weight:600;
-    }
-    .map-tooltip a:hover{
-      text-decoration:underline;
+    .leaflet-popup.rm-dark-popup .leaflet-popup-tip{
+      display:none;
     }
 
     @media(max-width:900px){
@@ -337,7 +320,6 @@
     }
     @media(max-width:480px){
       .panel-title h1{font-size:16px;}
-      .panel-title p{font-size:12px;}
     }
   </style>
 </head>
@@ -352,21 +334,21 @@
         <header class="panel-header">
           <div class="panel-title">
             <h1>Ubicar cliente Sigma</h1>
-            <p>Ingresa el código (deudor Sigma) y visualiza su ubicación con acceso directo a Google Maps.</p>
 
             <div class="buscador-box">
-              <label>Clientes (Deudor Sigma):</label>
+              <div class="buscador-row">
+                <label>Clientes (Deudor Sigma):</label>
+                <div class="buscador-actions-inline">
+                  <button id="addSearchBtn">➕ Añadir</button>
+                  <button id="clearSearchBtn">🧹 Limpiar</button>
+                </div>
+              </div>
 
               <div id="buscadores-container">
                 <div class="buscador-item">
                   <input type="text" class="codigoClienteInput" placeholder="Ej: 123456" autocomplete="off" spellcheck="false" />
                   <button class="buscarClienteBtn">🔍 Ubicar</button>
                 </div>
-              </div>
-
-              <div class="buscador-actions">
-                <button id="addSearchBtn">➕ Añadir búsqueda</button>
-                <button id="clearSearchBtn">🧹 Limpiar</button>
               </div>
             </div>
           </div>
@@ -378,7 +360,6 @@
 
         <div class="map-wrapper">
           <div id="ubicame-map"></div>
-          <div id="map-tooltip" class="map-tooltip" style="display:none;"></div>
         </div>
       </section>
     </div>
@@ -461,15 +442,51 @@ function showUserLocationOnMap(enable, mapInstance = ubicameMap) {
   );
 }
 
+function mostrarClienteEnMapa(lat, lng, nombre, direccionTxt, interlocutor, ruta, diaReparto) {
+  if (!ubicameMap) return;
+
+  const gmaps = `https://www.google.com/maps?q=${lat},${lng}`;
+  const popupContent = `
+    <div style="
+      background:rgba(15,23,42,0.95);
+      color:#f9fafb;
+      padding:6px 8px;
+      border-radius:6px;
+      font-size:11px;
+      line-height:1.3;
+      max-width:260px;
+    ">
+      <div style="margin-bottom:2px;"><span style="font-weight:bold;color:#f9735b;">Cliente:</span> ${nombre}</div>
+      <div><span style="font-weight:bold;color:#f9735b;">Dirección:</span> <a href="${gmaps}" target="_blank" rel="noopener" style="color:#bfdbfe;text-decoration:none;">${direccionTxt}</a></div>
+      <div><span style="font-weight:bold;color:#f9735b;">Interlocutor:</span> ${interlocutor}</div>
+      <div><span style="font-weight:bold;color:#f9735b;">Ruta Venta:</span> ${ruta}</div>
+      <div><span style="font-weight:bold;color:#f9735b;">Día reparto:</span> ${diaReparto}</div>
+    </div>
+  `;
+
+  const mk = L.marker([lat, lng], {
+    icon: makeCustomMarker('#e95567')
+  }).addTo(ubicameMap);
+
+  mk.bindPopup(popupContent, {
+    closeButton:false,
+    autoClose:false,
+    closeOnClick:false,
+    className:'rm-dark-popup'
+  }).openPopup();
+
+  ubicameMarkers.push(mk);
+}
+
+function ajustarVistaMarcadores() {
+  if (!ubicameMap || ubicameMarkers.length === 0) return;
+  const group = L.featureGroup(ubicameMarkers);
+  ubicameMap.fitBounds(group.getBounds(), {padding:[30,30]});
+}
+
 function buscarClienteSigmaDesdeInput(inputEl) {
   const codigo = inputEl.value.trim();
-  const tooltipDiv = document.getElementById('map-tooltip');
-
-  if (!codigo) {
-    tooltipDiv.style.display = 'block';
-    tooltipDiv.innerHTML = '<span style="color:#fecaca;">Ingresa un código de cliente válido.</span>';
-    return;
-  }
+  if (!codigo) return;
 
   const cliente = sigmaData.find(row => {
     const deudor = (row[0] || '').toString().trim();
@@ -477,8 +494,7 @@ function buscarClienteSigmaDesdeInput(inputEl) {
   });
 
   if (!cliente) {
-    tooltipDiv.style.display = 'block';
-    tooltipDiv.innerHTML = `<span style="color:#fecaca;">Cliente ${codigo} no encontrado en el catálogo Sigma.</span>`;
+    alert(`Cliente ${codigo} no encontrado en el catálogo Sigma.`);
     return;
   }
 
@@ -501,36 +517,12 @@ function buscarClienteSigmaDesdeInput(inputEl) {
   const lng = parseFloat(cliente[29]);
 
   if (isNaN(lat) || isNaN(lng)) {
-    tooltipDiv.style.display = 'block';
-    tooltipDiv.innerHTML = `<span style="color:#fecaca;">Cliente ${codigo} no tiene coordenadas válidas.</span>`;
+    alert(`Cliente ${codigo} no tiene coordenadas válidas.`);
     return;
   }
 
-  const gmaps = `https://www.google.com/maps?q=${lat},${lng}`;
-  tooltipDiv.style.display = 'block';
-  tooltipDiv.innerHTML = `
-    <div>
-      <div style="margin-bottom:4px;"><strong>Cliente:</strong> ${nombreFull}</div>
-      <div><strong>Dirección:</strong> <a href="${gmaps}" target="_blank" rel="noopener">${direccionTxt}</a></div>
-      <div><strong>Interlocutor:</strong> ${interlocutor}</div>
-      <div><strong>Ruta Venta:</strong> ${ruta}</div>
-      <div><strong>Día reparto:</strong> ${diaReparto}</div>
-    </div>
-  `;
-
-  mostrarClienteEnMapa(lat, lng, nombreFull, direccionTxt);
-}
-
-function mostrarClienteEnMapa(lat, lng, nombre, direccion) {
-  if (!ubicameMap) return;
-
-  const mk = L.marker([lat, lng], {
-    icon: makeCustomMarker('#e95567')
-  });
-
-  mk.addTo(ubicameMap);
-  ubicameMarkers.push(mk);
-  ubicameMap.setView([lat, lng], 17);
+  mostrarClienteEnMapa(lat, lng, nombreFull, direccionTxt, interlocutor, ruta, diaReparto);
+  ajustarVistaMarcadores();
 }
 
 function loadSigmaCSV() {
@@ -591,10 +583,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('clearSearchBtn').addEventListener('click', ()=>{
     ubicameMarkers.forEach(m => ubicameMap.removeLayer(m));
     ubicameMarkers = [];
-
-    const tooltipDiv = document.getElementById('map-tooltip');
-    tooltipDiv.style.display = 'none';
-    tooltipDiv.innerHTML = '';
 
     cont.innerHTML = '';
     const baseItem = document.createElement('div');
