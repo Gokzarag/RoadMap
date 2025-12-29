@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>RoadMap - Filtros Planning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" />
+
+  <!-- Librerías -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    :root{
+      --sidebar-accent:#f9735b;
+      --sidebar-accent-soft:#fde3dd;
+      --main-bg:#f4f5f7;
+      --card-bg:#ffffff;
+      --border-soft:#e5e7eb;
+      --text-main:#111827;
+      --text-muted:#6b7280;
+      --font:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      --content-max:1120px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:var(--font);
+      background:var(--main-bg);
+      color:var(--text-main);
+      min-height:100vh;
+      margin:0;
+    }
+    .layout{
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+    }
+    .main{
+      flex:1;
+      padding:72px 12px 12px;
+      display:flex;
+      justify-content:center;
+    }
+    .main-inner{
+      width:100%;
+      max-width:var(--content-max);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    /* Header (sidebar.html) */
+    .rm-header{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:40;
+      display:flex;
+      justify-content:center;
+      padding:10px 0;
+      background:#020617;
+      color:#f9fafb;
+      border-bottom:1px solid rgba(148,163,184,0.4);
+    }
+    .rm-header-inner{
+      width:100%;
+      max-width:var(--content-max);
+      padding:0 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .rm-header-left{display:flex;align-items:center;gap:8px;}
+    .rm-logo{
+      width:26px;height:26px;border-radius:8px;
+      border:1px solid rgba(249,250,251,0.3);
+    }
+    .rm-title{display:flex;flex-direction:column;}
+    .rm-title span:first-child{
+      font-size:10px;text-transform:uppercase;
+      letter-spacing:0.12em;color:#9ca3af;
+    }
+    .rm-title span:last-child{
+      font-size:13px;font-weight:600;
+    }
+    .rm-header-center{
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+    }
+    .rm-label{
+      font-size:10px;text-transform:uppercase;color:#9ca3af;
+    }
+    .rm-zona{display:flex;gap:4px;}
+    .zona-pill{
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:11px;
+      border:1px solid rgba(249,250,251,0.16);
+      background:#0f172a;
+      color:#e5e7eb;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .zona-pill.active{
+      background:#f9735b;
+      color:#111827;
+    }
+    .rm-header-right .btn-menu{
+      background:none;
+      border:1px solid rgba(249,250,251,0.4);
+      color:#f9fafb;
+      border-radius:6px;
+      padding:3px 8px;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    .menu-popup{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,0.6);
+      display:flex;
+      justify-content:flex-start;
+      align-items:stretch;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease;
+      z-index:40;
+    }
+    .menu-popup.open{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .menu-popup-inner{
+      width:240px;
+      max-width:80%;
+      background:#020617;
+      color:#f9fafb;
+      padding:14px 12px 16px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.5);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .menu-popup-close{
+      align-self:flex-end;
+      background:none;
+      border:none;
+      color:#e5e7eb;
+      font-size:18px;
+      cursor:pointer;
+      margin-bottom:4px;
+    }
+    .menu-popup-title{
+      font-size:13px;
+      margin-bottom:4px;
+    }
+    .menu-popup-nav a{
+      display:block;
+      padding:5px 4px;
+      color:#e5e7eb;
+      text-decoration:none;
+      border-radius:6px;
+      font-size:13px;
+    }
+    .menu-popup-nav a:hover{
+      background:rgba(148,163,184,0.25);
+    }
+
+    @media(max-width:900px){
+      .rm-header-inner{flex-wrap:wrap;}
+      .rm-header-center{
+        order:3;width:100%;align-items:flex-start;
+      }
+    }
+
+    /* Panel */
+    .panel{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      background:var(--card-bg);
+      border-radius:14px;
+      padding:14px 14px 16px;
+      border:1px solid var(--border-soft);
+      box-shadow:0 6px 20px rgba(15,23,42,0.08);
+      min-height:0;
+    }
+    .panel-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .panel-title h1{
+      font-size:18px;
+      margin-bottom:4px;
+    }
+    .panel-title p{
+      font-size:12px;
+      color:var(--text-muted);
+    }
+    .panel-meta{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:4px;
+      font-size:11px;
+    }
+
+    .uploader-box{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid var(--border-soft);
+      background:#f9fafb;
+      font-size:12px;
+    }
+    .uploader-box label{
+      font-weight:600;
+      color:var(--text-muted);
+    }
+    .uploader-box input[type="file"]{
+      font-size:12px;
+    }
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:6px 12px;
+      font-size:12px;
+      cursor:pointer;
+      font-weight:600;
+      white-space:nowrap;
+    }
+    .btn-primary{
+      background:var(--sidebar-accent);
+      color:#111827;
+    }
+    .btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .status-text{
+      font-size:11px;
+      color:var(--text-muted);
+    }
+
+    .results-summary{
+      font-size:12px;
+      color:var(--text-muted);
+    }
+
+    .table-wrapper{
+      margin-top:6px;
+      border-radius:10px;
+      border:1px solid var(--border-soft);
+      overflow:auto;
+      max-height:60vh;
+      background:#f9fafb;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:11px;
+    }
+    thead{
+      position:sticky;
+      top:0;
+      background:#111827;
+      color:#f9fafb;
+      z-index:1;
+    }
+    th,td{
+      padding:4px 6px;
+      border-bottom:1px solid #e5e7eb;
+      text-align:left;
+      white-space:nowrap;
+    }
+    tbody tr:nth-child(even){
+      background:#f3f4f6;
+    }
+    .badge-out{
+      display:inline-flex;
+      padding:2px 6px;
+      border-radius:999px;
+      background:#fee2e2;
+      color:#b91c1c;
+      font-size:10px;
+      font-weight:600;
+    }
+    .badge-ok{
+      display:inline-flex;
+      padding:2px 6px;
+      border-radius:999px;
+      background:#dcfce7;
+      color:#15803d;
+      font-size:10px;
+      font-weight:600;
+    }
+
+    @media(max-width:900px){
+      .main{padding:66px 8px 10px;}
+      .panel{padding:12px 10px 14px;}
+      .uploader-box{flex-direction:column;align-items:flex-start;}
+      .uploader-box input[type="file"]{width:100%;}
+    }
+  </style>
+</head>
+
+<body>
+<div class="layout">
+  <div id="sidebar-container"></div>
+
+  <main class="main">
+    <div class="main-inner">
+      <section class="panel">
+        <header class="panel-header">
+          <div class="panel-title">
+            <h1>Filtros Planner</h1>
+            <p>Sube el archivo del planner y detecta clientes fuera de ruta según el catálogo Sigma.</p>
+          </div>
+          <div class="panel-meta">
+            <span class="status-text" id="status-text">Catálogo Sigma: cargando…</span>
+          </div>
+        </header>
+
+        <div class="uploader-box">
+          <label for="plannerFile">Archivo Planner (.csv, .txt, .xls, .xlsx):</label>
+          <input type="file" id="plannerFile" accept=".csv,.txt,.xls,.xlsx" />
+          <button class="btn btn-primary" id="btnProcesar" disabled>Procesar</button>
+        </div>
+
+        <div class="results-summary" id="results-summary"></div>
+
+        <div class="table-wrapper" id="table-wrapper" style="display:none;">
+          <table id="result-table">
+            <thead>
+              <tr>
+                <th>Ce.</th>
+                <th>Come</th>
+                <th>Ruta</th>
+                <th>Interlocutor</th>
+                <th>Placa</th>
+                <th>Cliente</th>
+                <th>Nombre cliente</th>
+                <th>Fecha entrega</th>
+                <th>Día entrega</th>
+                <th>Días catálogo</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
+
+let sigmaByDeudor = new Map();
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  if (typeof loadSidebar === 'function') {
+    loadSidebar('planner');
+  }
+  cargarCatalogoSigmaRemoto();
+  configurarEventos();
+});
+
+// Carga del catálogo Sigma desde GitHub (igual Ubícame)
+function cargarCatalogoSigmaRemoto(){
+  const status = document.getElementById('status-text');
+  status.textContent = 'Catálogo Sigma: cargando…';
+
+  Papa.parse(SIGMA_CSV_URL,{
+    download:true,
+    header:false,
+    skipEmptyLines:true,
+    complete:(res)=>{
+      sigmaByDeudor.clear();
+      res.data.forEach(row=>{
+        const deudor = (row[0] || '').toString().trim();
+        if (deudor){
+          sigmaByDeudor.set(deudor,row);
+        }
+      });
+      status.textContent = `Catálogo Sigma: ${sigmaByDeudor.size} clientes cargados.`;
+      habilitarBotonProcesar();
+    },
+    error:(err)=>{
+      console.error('Error catálogo Sigma',err);
+      status.textContent = 'Error cargando catálogo Sigma.';
+    }
+  });
+}
+
+function configurarEventos(){
+  const fileInput   = document.getElementById('plannerFile');
+  fileInput.addEventListener('change', habilitarBotonProcesar);
+
+  document.getElementById('btnProcesar').addEventListener('click', ()=>{
+    const file = fileInput.files && fileInput.files[0];
+    if (!file){
+      alert('Selecciona un archivo del planner.');
+      return;
+    }
+    procesarArchivoPlanner(file);
+  });
+}
+
+function habilitarBotonProcesar(){
+  const fileInput = document.getElementById('plannerFile');
+  const btn = document.getElementById('btnProcesar');
+  const ok = sigmaByDeudor.size > 0 && fileInput.files.length > 0;
+  btn.disabled = !ok;
+}
+
+// --- Procesar planner (csv/txt/xls/xlsx) ---
+function procesarArchivoPlanner(file){
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'csv' || ext === 'txt'){
+    Papa.parse(file,{
+      header:false,
+      skipEmptyLines:true,
+      complete:(res)=>procesarFilasPlanner(res.data)
+    });
+  } else if (ext === 'xls' || ext === 'xlsx'){
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data,{type:'array'});
+      const firstSheet = wb.SheetNames[0];
+      const ws = wb.Sheets[firstSheet];
+      const json = XLSX.utils.sheet_to_json(ws,{header:1,raw:false});
+      procesarFilasPlanner(json);
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    alert('Formato no soportado. Usa CSV, TXT, XLS o XLSX.');
+  }
+}
+
+// Mapear letra de día a índice 0-6 (L‑S)
+function letraDiaAIndice(letra){
+  switch(letra){
+    case 'L': return 0;
+    case 'M': return 1;
+    case 'X': return 2;
+    case 'J': return 3;
+    case 'V': return 4;
+    case 'S': return 5;
+    default: return -1;
+  }
+}
+
+// Índice de día desde dd/mm/yyyy (0=Lunes)
+function fechaAIndiceDia(fechaStr){
+  const partes = fechaStr.split('/');
+  if (partes.length !== 3) return -1;
+  const d = parseInt(partes[0],10);
+  const m = parseInt(partes[1],10) - 1;
+  const y = parseInt(partes[2],10);
+  if (isNaN(d) || isNaN(m) || isNaN(y)) return -1;
+  const dt = new Date(y,m,d);
+  const jsDay = dt.getDay(); // 0=Dom
+  const map = {0:6,1:0,2:1,3:2,4:3,5:4,6:5};
+  return map[jsDay];
+}
+
+// Procesar filas del planner y cruzar con Sigma
+function procesarFilasPlanner(rows){
+  const tbody = document.querySelector('#result-table tbody');
+  tbody.innerHTML = '';
+
+  let fueraRuta = 0;
+  let totalConsiderado = 0;
+
+  for (let i=1;i<rows.length;i++){
+    const row = rows[i];
+
+    const ce   = (row[0] || '').toString().trim();
+    const come = (row[1] || '').toString().trim();
+    const ruta = (row[2] || '').toString().trim();
+    const interlocutor = (row[3] || '').toString().trim();
+    const placa = (row[4] || '').toString().trim();
+    const cliente = (row[5] || '').toString().trim();       // índice 4 de tu descripción
+    const nombreCliente = (row[6] || '').toString().trim();
+    const feEntrega = (row[15] || '').toString().trim();    // dd/mm/yyyy
+
+    if (!ce.includes('DET')) continue; // solo DET
+
+    const filaSigma = sigmaByDeudor.get(cliente);
+    const diasDespacho = filaSigma ? (filaSigma[48] || '').toString().trim() : '';
+
+    const idxDiaEntrega = fechaAIndiceDia(feEntrega);
+    const letraDiaEntrega = ['L','M','X','J','V','S','D'][idxDiaEntrega] || '';
+
+    let estado = 'Sin info catálogo';
+    let fuera = false;
+
+    if (diasDespacho){
+      const letras = diasDespacho.split('');
+      const tieneDia = letras.some(l=>{
+        const idx = letraDiaAIndice(l);
+        return idx === idxDiaEntrega;
+      });
+      if (tieneDia){
+        estado = 'En ruta';
+      } else {
+        estado = 'Fuera de ruta';
+        fuera = true;
+      }
+    }
+
+    if (diasDespacho){
+      totalConsiderado++;
+      if (fuera) fueraRuta++;
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${ce}</td>
+      <td>${come}</td>
+      <td>${ruta}</td>
+      <td>${interlocutor}</td>
+      <td>${placa}</td>
+      <td>${cliente}</td>
+      <td>${nombreCliente}</td>
+      <td>${feEntrega}</td>
+      <td>${letraDiaEntrega}</td>
+      <td>${diasDespacho}</td>
+      <td>${estado === 'Fuera de ruta'
+            ? '<span class="badge-out">Fuera de ruta</span>'
+            : (estado === 'En ruta'
+                ? '<span class="badge-ok">En ruta</span>'
+                : estado)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  const summary = document.getElementById('results-summary');
+  document.getElementById('table-wrapper').style.display = 'block';
+
+  if (totalConsiderado > 0){
+    summary.textContent = `Registros analizados: ${totalConsiderado}. Fuera de ruta: ${fueraRuta}.`;
+  } else {
+    summary.textContent = 'No se encontraron registros con información de despacho en catálogo.';
+  }
+}
+</script>
+
+<script src="layout.js"></script>
+</body>
+</html>
