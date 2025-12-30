@@ -207,8 +207,8 @@
 </div>
 
 <script>
-const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
-const DEBUG = false; // pon true si quieres ver trazas en consola
+const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/RoadMap/main/CatalogoSigma_SAMPLE.csv';
+const DEBUG = false; // true para ver trazas en consola
 
 let sigmaByDeudor = new Map(); // deudor -> fila catálogo
 
@@ -226,18 +226,17 @@ function cargarCatalogoSigma(){
 
   Papa.parse(SIGMA_CSV_URL,{
     download:true,
-    header:false,
+    header:true,            // CatalogoSigma_SAMPLE tiene cabecera
     skipEmptyLines:true,
     complete:(res)=>{
       sigmaByDeudor.clear();
       res.data.forEach(row=>{
-        const deudor = (row[0] || '').toString().trim(); // índice 0 catálogo
-        if (deudor){
-          sigmaByDeudor.set(deudor,row);
-        }
+        const deudor = (row['Deudor'] || row[0] || '').toString().trim();
+        if (!deudor) return;
+        sigmaByDeudor.set(deudor, row);
       });
       status.textContent = `Catálogo Sigma: ${sigmaByDeudor.size} clientes cargados.`;
-      if (DEBUG) console.log('Sigma cargado, filas:', res.data.length);
+      if (DEBUG) console.log('Sigma SAMPLE cargado, filas:', res.data.length);
       habilitarBotonProcesar();
     },
     error:(err)=>{
@@ -282,7 +281,7 @@ function procesarArchivoPlanner(file){
     Papa.parse(file,{
       header:false,
       skipEmptyLines:false,
-      delimiter:'\t',
+      delimiter:'\t',   // PREVIA_SAMPLE.txt es tabulado
       complete:(res)=>procesarFilasPlanner(res.data)
     });
   } else if (ext === 'xls' || ext === 'xlsx'){
@@ -362,11 +361,14 @@ function procesarFilasPlanner(rows){
     if (!letraDiaEntrega) continue;
 
     const filaSigma = sigmaByDeudor.get(codigo);
-    let diasDespacho = filaSigma ? (filaSigma[48] || '').toString() : '';
+    if (!filaSigma) continue;
+
+    // días despacho: campo FV Z3 (columna AW, índice 48); en CSV con cabecera lector lo tiene como nombre de columna
+    let diasDespacho = (filaSigma['FV Z3'] || filaSigma[48] || '').toString();
     diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim();
     if (!diasDespacho) continue;
 
-    if (codigo === '11667295'){
+    if (DEBUG && codigo === '11667295'){
       console.log('DEBUG 11667295 -> fecha:', fechaEntregaRaw,
                   'diaEntrega:', letraDiaEntrega,
                   'diasCatalogo:', diasDespacho);
