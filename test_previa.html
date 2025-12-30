@@ -31,7 +31,7 @@
         delimiter: '\t',
         complete: function (res) {
           var rows = res.data;
-          var txt = 'Filas leidas: ' + rows.length + '\ln';
+          var txt = 'Filas leidas: ' + rows.length + '\n';
 
           for (var i = 0; i < 3 && i < rows.length; i++) {
             var r = rows[i];
@@ -42,7 +42,7 @@
             txt += 'Fila ' + i + ': canal=' + canal +
                    ' | cod=' + cod +
                    ' | fecha=' + fecha +
-                   ' | kg=' + kg + '\ln';
+                   ' | kg=' + kg + '\n';
           }
 
           out.textContent = txt;
