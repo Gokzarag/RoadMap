@@ -208,7 +208,7 @@
 
 <script>
 const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
-const DEBUG = false; // pon en true si quieres ver trazas
+const DEBUG = false; // pon true si quieres ver trazas en consola
 
 let sigmaByDeudor = new Map(); // deudor -> fila catálogo
 
@@ -342,8 +342,8 @@ function procesarFilasPlanner(rows){
   tbody.innerHTML = '';
 
   const agregados = new Map();
-
   const startIdx = encontrarInicioDatos(rows);
+
   if (DEBUG) console.log('Inicio datos en fila:', startIdx);
 
   for (let i=startIdx;i<rows.length;i++){
@@ -362,8 +362,15 @@ function procesarFilasPlanner(rows){
     if (!letraDiaEntrega) continue;
 
     const filaSigma = sigmaByDeudor.get(codigo);
-    const diasDespacho = filaSigma ? (filaSigma[48] || '').toString().trim() : '';
+    let diasDespacho = filaSigma ? (filaSigma[48] || '').toString() : '';
+    diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim();
     if (!diasDespacho) continue;
+
+    if (codigo === '11667295'){
+      console.log('DEBUG 11667295 -> fecha:', fechaEntregaRaw,
+                  'diaEntrega:', letraDiaEntrega,
+                  'diasCatalogo:', diasDespacho);
+    }
 
     const enRuta = diasDespacho.split('').some(l => l === letraDiaEntrega);
     if (enRuta) continue; // solo fuera de ruta
