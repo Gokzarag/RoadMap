@@ -224,7 +224,7 @@
     }
     .uploader-box label{
       font-weight:600;
-      color:var(--text-muted);
+      color:#4b5563;
     }
     .uploader-box input[type="file"]{
       font-size:12px;
@@ -285,13 +285,6 @@
     }
     tbody tr:nth-child(even){
       background:#f3f4f6;
-    }
-
-    @media(max-width:900px){
-      .main{padding:66px 8px 10px;}
-      .panel{padding:12px 10px 14px;}
-      .uploader-box{flex-direction:column;align-items:flex-start;}
-      .uploader-box input[type="file"]{width:100%;}
     }
   </style>
 </head>
@@ -406,10 +399,18 @@ function habilitarBotonProcesar(){
 function procesarArchivoPlanner(file){
   const ext = file.name.split('.').pop().toLowerCase();
 
-  if (ext === 'csv' || ext === 'txt'){
+  if (ext === 'csv'){
     Papa.parse(file,{
       header:false,
       skipEmptyLines:true,
+      complete:(res)=>procesarFilasPlanner(res.data)
+    });
+  } else if (ext === 'txt'){
+    // PREVIA.TXT viene tabulado
+    Papa.parse(file,{
+      header:false,
+      skipEmptyLines:true,
+      delimiter:'\t',
       complete:(res)=>procesarFilasPlanner(res.data)
     });
   } else if (ext === 'xls' || ext === 'xlsx'){
@@ -431,8 +432,8 @@ function procesarArchivoPlanner(file){
 // Convertir fecha (col 16) a letra de día (L,M,X,J,V,S)
 function obtenerLetraDiaDesdeFecha(fechaStr){
   if (!fechaStr) return '';
-  // Puede venir 30.12.2025 o 30/12/2025
-  fechaStr = fechaStr.replace(/./g,'/');
+  // Puede venir 30.12.2025 o 30/12.2025
+  fechaStr = fechaStr.replace(/./g,'/').trim();
   const partes = fechaStr.split('/');
   if (partes.length !== 3) return '';
   const d = parseInt(partes[0],10);
@@ -451,7 +452,7 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
     case 4: return 'J';
     case 5: return 'V';
     case 6: return 'S';
-    default: return ''; // domingo no se usa
+    default: return '';
   }
 }
 
@@ -465,17 +466,16 @@ function procesarFilasPlanner(rows){
   for (let i=1;i<rows.length;i++){
     const row = rows[i];
 
-    const canal = (row[1] || '').toString().trim();     // índice 1
-    if (!canal.includes('DET')) continue;              // solo canal DET
+    const canal = (row[1] || '').toString().trim();       // índice 1
+    if (!canal.includes('DET')) continue;                // solo canal DET
 
-    const rutaVentas   = (row[2] || '').toString().trim();  // índice 2
-    const codigo       = (row[5] || '').toString().trim();  // índice 5
-    const clienteNombre= (row[6] || '').toString().trim();  // índice 6
-
+    const rutaVentas    = (row[2] || '').toString().trim();  // índice 2
+    const codigo        = (row[5] || '').toString().trim();  // índice 5
+    const clienteNombre = (row[6] || '').toString().trim();  // índice 6
     if (!codigo) continue;
 
-    // Fecha de entrega en col 16
-    const fechaEntregaRaw = (row[16] || '').toString().trim();
+    // Fecha de entrega en col 16 (ej: 30.12.2025)
+    const fechaEntregaRaw = (row[16] || '').toString();
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
     if (!letraDiaEntrega) continue;
 
@@ -484,9 +484,9 @@ function procesarFilasPlanner(rows){
     const diasDespacho = filaSigma ? (filaSigma[48] || '').toString().trim() : '';
     if (!diasDespacho) continue;
 
-    // Verificar si día entrega está dentro de días de despacho
+    // Verificar si día de entrega está dentro de días de despacho
     const enRuta = diasDespacho.split('').some(l => l === letraDiaEntrega);
-    if (enRuta) continue; // solo queremos fuera de ruta
+    if (enRuta) continue; // solo queremos FUERA de ruta
 
     // Kg pedido col 17
     const kgStr = (row[17] || '0').toString().replace(',','.');
