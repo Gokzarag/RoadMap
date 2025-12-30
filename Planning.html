@@ -13,7 +13,6 @@
   <style>
     :root{
       --sidebar-accent:#f9735b;
-      --sidebar-accent-soft:#fde3dd;
       --main-bg:#f4f5f7;
       --card-bg:#ffffff;
       --border-soft:#e5e7eb;
@@ -49,133 +48,6 @@
       gap:10px;
     }
 
-    /* Header (sidebar.html) */
-    .rm-header{
-      position:fixed;
-      top:0;
-      left:0;
-      right:0;
-      z-index:40;
-      display:flex;
-      justify-content:center;
-      padding:10px 0;
-      background:#020617;
-      color:#f9fafb;
-      border-bottom:1px solid rgba(148,163,184,0.4);
-    }
-    .rm-header-inner{
-      width:100%;
-      max-width:var(--content-max);
-      padding:0 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .rm-header-left{display:flex;align-items:center;gap:8px;}
-    .rm-logo{
-      width:26px;height:26px;border-radius:8px;
-      border:1px solid rgba(249,250,251,0.3);
-    }
-    .rm-title{display:flex;flex-direction:column;}
-    .rm-title span:first-child{
-      font-size:10px;text-transform:uppercase;
-      letter-spacing:0.12em;color:#9ca3af;
-    }
-    .rm-title span:last-child{
-      font-size:13px;font-weight:600;
-    }
-    .rm-header-center{
-      display:flex;flex-direction:column;align-items:center;gap:2px;
-    }
-    .rm-label{
-      font-size:10px;text-transform:uppercase;color:#9ca3af;
-    }
-    .rm-zona{display:flex;gap:4px;}
-    .zona-pill{
-      border-radius:999px;
-      padding:3px 8px;
-      font-size:11px;
-      border:1px solid rgba(249,250,251,0.16);
-      background:#0f172a;
-      color:#e5e7eb;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-    .zona-pill.active{
-      background:#f9735b;
-      color:#111827;
-    }
-    .rm-header-right .btn-menu{
-      background:none;
-      border:1px solid rgba(249,250,251,0.4);
-      color:#f9fafb;
-      border-radius:6px;
-      padding:3px 8px;
-      font-size:16px;
-      cursor:pointer;
-    }
-
-    .menu-popup{
-      position:fixed;
-      inset:0;
-      background:rgba(15,23,42,0.6);
-      display:flex;
-      justify-content:flex-start;
-      align-items:stretch;
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .2s ease;
-      z-index:40;
-    }
-    .menu-popup.open{
-      opacity:1;
-      pointer-events:auto;
-    }
-    .menu-popup-inner{
-      width:240px;
-      max-width:80%;
-      background:#020617;
-      color:#f9fafb;
-      padding:14px 12px 16px;
-      box-shadow:0 8px 30px rgba(0,0,0,0.5);
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .menu-popup-close{
-      align-self:flex-end;
-      background:none;
-      border:none;
-      color:#e5e7eb;
-      font-size:18px;
-      cursor:pointer;
-      margin-bottom:4px;
-    }
-    .menu-popup-title{
-      font-size:13px;
-      margin-bottom:4px;
-    }
-    .menu-popup-nav a{
-      display:block;
-      padding:5px 4px;
-      color:#e5e7eb;
-      text-decoration:none;
-      border-radius:6px;
-      font-size:13px;
-    }
-    .menu-popup-nav a:hover{
-      background:rgba(148,163,184,0.25);
-    }
-
-    @media(max-width:900px){
-      .rm-header-inner{flex-wrap:wrap;}
-      .rm-header-center{
-        order:3;width:100%;align-items:flex-start;
-      }
-    }
-
-    /* Panel */
     .panel{
       flex:1;
       display:flex;
@@ -295,7 +167,6 @@
     }
   </style>
 </head>
-
 <body>
 <div class="layout">
   <div id="sidebar-container"></div>
@@ -340,9 +211,11 @@
     </div>
   </main>
 </div>
-
 <script>
 const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
+
+// activar para ver trazas en la consola del navegador
+const DEBUG = true;
 
 let sigmaByDeudor = new Map(); // deudor -> fila catálogo
 
@@ -372,6 +245,7 @@ function cargarCatalogoSigma(){
         }
       });
       status.textContent = `Catálogo Sigma: ${sigmaByDeudor.size} clientes cargados.`;
+      if (DEBUG) console.log('Sigma cargado, filas:', res.data.length);
       habilitarBotonProcesar();
     },
     error:(err)=>{
@@ -405,6 +279,7 @@ function habilitarBotonProcesar(){
 // --- Procesar planner (csv/txt/xls/xlsx) ---
 function procesarArchivoPlanner(file){
   const ext = file.name.split('.').pop().toLowerCase();
+  if (DEBUG) console.log('Procesando archivo', file.name, 'ext=', ext);
 
   if (ext === 'csv'){
     Papa.parse(file,{
@@ -413,7 +288,7 @@ function procesarArchivoPlanner(file){
       complete:(res)=>procesarFilasPlanner(res.data)
     });
   } else if (ext === 'txt'){
-    // PREVIA.TXT viene tabulado y puede tener línea vacía tras cabecera
+    // PREVIA.TXT viene tabulado, puede tener línea vacía tras cabecera
     Papa.parse(file,{
       header:false,
       skipEmptyLines:false,
@@ -462,19 +337,18 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
   }
 }
 
-// Obtener índice de primera fila de datos (saltando cabecera y líneas vacías)
+// Encontrar primera fila de datos (ignora cabeceras y vacías)
 function encontrarInicioDatos(rows){
   for (let i=0;i<rows.length;i++){
     const row = rows[i];
     const canal = (row[1] || '').toString().trim();
     const codigo = (row[5] || '').toString().trim();
     const fechaEntrega = (row[16] || '').toString().trim();
-    // Una fila de datos válida tendrá algo en canal, código y fecha
     if (canal && codigo && fechaEntrega){
       return i;
     }
   }
-  return 1; // fallback
+  return 1;
 }
 
 // Procesar filas: canal DET, match col 5 planner vs 0 catálogo, validar día y agrupar fuera de ruta
@@ -482,22 +356,35 @@ function procesarFilasPlanner(rows){
   const tbody = document.querySelector('#result-table tbody');
   tbody.innerHTML = '';
 
-  const agregados = new Map(); // key: código -> {canal,codigo,cliente,ruta,diaDespacho,kg}
+  if (DEBUG){
+    console.log('Filas totales planner:', rows.length);
+    console.log('Ejemplo filas[0]:', rows[0]);
+  }
 
+  const agregados = new Map(); // key: código -> {canal,codigo,cliente,ruta,diaDespacho,kg}
   const startIdx = encontrarInicioDatos(rows);
+
+  if (DEBUG) console.log('Inicio de datos estimado en fila:', startIdx);
+
+  let debugCont = 0;
 
   for (let i=startIdx;i<rows.length;i++){
     const row = rows[i];
 
     const canal = (row[1] || '').toString().trim();       // índice 1
-    if (!canal || !canal.includes('DET')) continue;      // solo canal DET
-
     const rutaVentas    = (row[2] || '').toString().trim();  // índice 2
     const codigo        = (row[5] || '').toString().trim();  // índice 5
     const clienteNombre = (row[6] || '').toString().trim();  // índice 6
+    const fechaEntregaRaw = (row[16] || '').toString();
+
+    if (DEBUG && debugCont < 10){
+      console.log('Fila', i, {canal, codigo, fechaEntregaRaw});
+      debugCont++;
+    }
+
+    if (!canal || !canal.includes('DET')) continue;      // solo canal DET
     if (!codigo) continue;
 
-    const fechaEntregaRaw = (row[16] || '').toString();
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
     if (!letraDiaEntrega) continue;
 
@@ -506,9 +393,12 @@ function procesarFilasPlanner(rows){
     const diasDespacho = filaSigma ? (filaSigma[48] || '').toString().trim() : '';
     if (!diasDespacho) continue;
 
-    // Verificar si día de entrega está dentro de días de despacho
     const enRuta = diasDespacho.split('').some(l => l === letraDiaEntrega);
-    if (enRuta) continue; // solo fuera de ruta
+
+    // *** IMPORTANTE ***
+    // De momento NO filtramos fuera de ruta para validar que haya match.
+    // Cuando veas filas en la tabla, descomenta el if para filtrar solo fuera de ruta.
+    // if (enRuta) continue;
 
     // Kg pedido col 17
     const kgStr = (row[17] || '0').toString().replace(',','.');
@@ -531,6 +421,8 @@ function procesarFilasPlanner(rows){
 
   const valores = Array.from(agregados.values());
 
+  if (DEBUG) console.log('Registros agregados (sin filtrar fuera de ruta):', valores.length);
+
   valores.forEach(item=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -546,11 +438,10 @@ function procesarFilasPlanner(rows){
 
   const summary = document.getElementById('results-summary');
   document.getElementById('table-wrapper').style.display = 'block';
-  summary.textContent = `Clientes DET fuera de ruta encontrados: ${valores.length}.`;
+  summary.textContent = `Clientes DET con match en catálogo: ${valores.length}.`;
 }
 </script>
 
 <script src="layout.js"></script>
 </body>
 </html>
-
