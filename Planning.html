@@ -286,6 +286,13 @@
     tbody tr:nth-child(even){
       background:#f3f4f6;
     }
+
+    @media(max-width:900px){
+      .main{padding:66px 8px 10px;}
+      .panel{padding:12px 10px 14px;}
+      .uploader-box{flex-direction:column;align-items:flex-start;}
+      .uploader-box input[type="file"]{width:100%;}
+    }
   </style>
 </head>
 
@@ -402,14 +409,14 @@ function procesarArchivoPlanner(file){
   if (ext === 'csv'){
     Papa.parse(file,{
       header:false,
-      skipEmptyLines:true,
+      skipEmptyLines:false,
       complete:(res)=>procesarFilasPlanner(res.data)
     });
   } else if (ext === 'txt'){
-    // PREVIA.TXT viene tabulado
+    // PREVIA.TXT viene tabulado y puede tener línea vacía tras cabecera
     Papa.parse(file,{
       header:false,
-      skipEmptyLines:true,
+      skipEmptyLines:false,
       delimiter:'\t',
       complete:(res)=>procesarFilasPlanner(res.data)
     });
@@ -432,8 +439,7 @@ function procesarArchivoPlanner(file){
 // Convertir fecha (col 16) a letra de día (L,M,X,J,V,S)
 function obtenerLetraDiaDesdeFecha(fechaStr){
   if (!fechaStr) return '';
-  // Puede venir 30.12.2025 o 30/12.2025
-  fechaStr = fechaStr.replace(/./g,'/').trim();
+  fechaStr = fechaStr.toString().trim().replace(/./g,'/');
   const partes = fechaStr.split('/');
   if (partes.length !== 3) return '';
   const d = parseInt(partes[0],10);
@@ -456,6 +462,21 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
   }
 }
 
+// Obtener índice de primera fila de datos (saltando cabecera y líneas vacías)
+function encontrarInicioDatos(rows){
+  for (let i=0;i<rows.length;i++){
+    const row = rows[i];
+    const canal = (row[1] || '').toString().trim();
+    const codigo = (row[5] || '').toString().trim();
+    const fechaEntrega = (row[16] || '').toString().trim();
+    // Una fila de datos válida tendrá algo en canal, código y fecha
+    if (canal && codigo && fechaEntrega){
+      return i;
+    }
+  }
+  return 1; // fallback
+}
+
 // Procesar filas: canal DET, match col 5 planner vs 0 catálogo, validar día y agrupar fuera de ruta
 function procesarFilasPlanner(rows){
   const tbody = document.querySelector('#result-table tbody');
@@ -463,18 +484,19 @@ function procesarFilasPlanner(rows){
 
   const agregados = new Map(); // key: código -> {canal,codigo,cliente,ruta,diaDespacho,kg}
 
-  for (let i=1;i<rows.length;i++){
+  const startIdx = encontrarInicioDatos(rows);
+
+  for (let i=startIdx;i<rows.length;i++){
     const row = rows[i];
 
     const canal = (row[1] || '').toString().trim();       // índice 1
-    if (!canal.includes('DET')) continue;                // solo canal DET
+    if (!canal || !canal.includes('DET')) continue;      // solo canal DET
 
     const rutaVentas    = (row[2] || '').toString().trim();  // índice 2
     const codigo        = (row[5] || '').toString().trim();  // índice 5
     const clienteNombre = (row[6] || '').toString().trim();  // índice 6
     if (!codigo) continue;
 
-    // Fecha de entrega en col 16 (ej: 30.12.2025)
     const fechaEntregaRaw = (row[16] || '').toString();
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
     if (!letraDiaEntrega) continue;
@@ -486,7 +508,7 @@ function procesarFilasPlanner(rows){
 
     // Verificar si día de entrega está dentro de días de despacho
     const enRuta = diasDespacho.split('').some(l => l === letraDiaEntrega);
-    if (enRuta) continue; // solo queremos FUERA de ruta
+    if (enRuta) continue; // solo fuera de ruta
 
     // Kg pedido col 17
     const kgStr = (row[17] || '0').toString().replace(',','.');
@@ -531,3 +553,4 @@ function procesarFilasPlanner(rows){
 <script src="layout.js"></script>
 </body>
 </html>
+
