@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test Catálogo Sigma</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <h1>Test Catálogo Sigma</h1>
+  <p id="estado">Cargando catálogo...</p>
+  <pre id="salida"></pre>
+
+  <script>
+    const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
+
+    Papa.parse(SIGMA_CSV_URL,{
+      download:true,
+      header:false,
+      skipEmptyLines:true,
+      complete:(res)=>{
+        const data = res.data;
+        document.getElementById('estado').textContent =
+          'Filas leídas del catálogo: ' + data.length;
+
+        // Mostrar las primeras 3 filas y sus columnas 0 y 48
+        let txt = '';
+        for (let i=0;i<3 && i<data.length;i++){
+          const row = data[i];
+          const cod = (row[0] || '').toString().trim();
+          const dias = (row[48] || '').toString().trim();
+          txt += `Fila ${i}: cod=${cod} | dias=${dias}
+`;
+        }
+        document.getElementById('salida').textContent = txt;
+      },
+      error:(err)=>{
+        document.getElementById('estado').textContent =
+          'Error cargando catálogo: ' + err;
+      }
+    });
+  </script>
+</body>
+</html>
