@@ -1,55 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Test PREVIA</title>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <h1>Test PREVIA</h1>
 
-  <input type="file" id="file" accept=".txt,.csv" />
-  <!-- OJO: sin disabled -->
+  <input type="file" id="file" accept=".txt,.csv">
   <button id="btn">Leer</button>
 
-  <pre id="salida"></pre>
+  <pre id="out"></pre>
 
   <script>
-    const input  = document.getElementById('file');
-    const btn    = document.getElementById('btn');
-    const salida = document.getElementById('salida');
+    var input = document.getElementById('file');
+    var btn   = document.getElementById('btn');
+    var out   = document.getElementById('out');
 
-    btn.addEventListener('click', ()=>{
-      const file = input.files[0];
-      if (!file){
-        alert('Selecciona primero PREVIA.TXT');
+    btn.addEventListener('click', function () {
+      var file = input.files[0];
+      if (!file) {
+        alert('Selecciona PREVIA.TXT');
         return;
       }
 
-      Papa.parse(file,{
-        header:false,
-        skipEmptyLines:false,
-        delimiter:'\t', // PREVIA es tabulado
-        complete:(res)=>{
-          const rows = res.data;
-          let txt = 'Filas leídas: ' + rows.length + '
+      Papa.parse(file, {
+        header: false,
+        skipEmptyLines: false,
+        delimiter: '\t',
+        complete: function (res) {
+          var rows = res.data;
+          var txt = 'Filas leidas: ' + rows.length + '
 
 ';
 
-          // Mostrar primeras 3 filas: canal (1), código (6), fecha (17), kg (18)
-          for (let i=0;i<3 && i<rows.length;i++){
-            const r = rows[i];
-            const canal = (r[1]  || '').toString().trim();
-            const cod   = (r[6]  || '').toString().trim();
-            const fecha = (r[17] || '').toString().trim();
-            const kg    = (r[18] || '').toString().trim();
-            txt += `Fila ${i}: canal=${canal} | cod=${cod} | fecha=${fecha} | kg=${kg}
-`;
+          for (var i = 0; i < 3 && i < rows.length; i++) {
+            var r = rows[i];
+            var canal = (r[1]  || '').toString().trim();
+            var cod   = (r[6]  || '').toString().trim();
+            var fecha = (r[17] || '').toString().trim();
+            var kg    = (r[18] || '').toString().trim();
+            txt += 'Fila ' + i + ': canal=' + canal +
+                   ' | cod=' + cod +
+                   ' | fecha=' + fecha +
+                   ' | kg=' + kg + '
+';
           }
-          salida.textContent = txt;
+
+          out.textContent = txt;
         },
-        error:(err)=>{
-          salida.textContent = 'Error: ' + err;
+        error: function (err) {
+          out.textContent = 'Error: ' + err;
         }
       });
     });
