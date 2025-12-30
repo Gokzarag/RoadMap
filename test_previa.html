@@ -11,46 +11,48 @@
   <button id="btn" disabled>Leer</button>
   <pre id="salida"></pre>
 
-  <script>
-    const input = document.getElementById('file');
-    const btn = document.getElementById('btn');
-    const salida = document.getElementById('salida');
+<script>
+  const input = document.getElementById('file');
+  const btn = document.getElementById('btn');
+  const salida = document.getElementById('salida');
 
-    input.addEventListener('change', ()=>{
-      btn.disabled = input.files.length === 0;
-    });
+  // Botón siempre habilitado
+  btn.disabled = false;
 
-    btn.addEventListener('click', ()=>{
-      const file = input.files[0];
-      if (!file) return;
+  btn.addEventListener('click', ()=>{
+    const file = input.files[0];
+    if (!file){
+      alert('Selecciona primero PREVIA_SAMPLE.txt');
+      return;
+    }
 
-      Papa.parse(file,{
-        header:false,
-        skipEmptyLines:false,
-        delimiter:'\t', // PREVIA es tabulado
-        complete:(res)=>{
-          const rows = res.data;
-          let txt = 'Filas leídas: ' + rows.length + '
+    Papa.parse(file,{
+      header:false,
+      skipEmptyLines:false,
+      delimiter:'\t', // PREVIA es tabulado
+      complete:(res)=>{
+        const rows = res.data;
+        let txt = 'Filas leídas: ' + rows.length + '
 
 ';
 
-          // Mostrar primeras 3 filas: canal (1), código cliente (6), fecha entrega (17), kg (18)
-          for (let i=0;i<3 && i<rows.length;i++){
-            const r = rows[i];
-            const canal = (r[1] || '').toString().trim();
-            const cod   = (r[6] || '').toString().trim();
-            const fecha = (r[17] || '').toString().trim();
-            const kg    = (r[18] || '').toString().trim();
-            txt += `Fila ${i}: canal=${canal} | cod=${cod} | fecha=${fecha} | kg=${kg}
+        for (let i=0;i<3 && i<rows.length;i++){
+          const r = rows[i];
+          const canal = (r[1] || '').toString().trim();
+          const cod   = (r[6] || '').toString().trim();
+          const fecha = (r[17] || '').toString().trim();
+          const kg    = (r[18] || '').toString().trim();
+          txt += `Fila ${i}: canal=${canal} | cod=${cod} | fecha=${fecha} | kg=${kg}
 `;
-          }
-          salida.textContent = txt;
-        },
-        error:(err)=>{
-          salida.textContent = 'Error: ' + err;
         }
-      });
+        salida.textContent = txt;
+      },
+      error:(err)=>{
+        salida.textContent = 'Error: ' + err;
+      }
     });
-  </script>
+  });
+</script>
+  
 </body>
 </html>
