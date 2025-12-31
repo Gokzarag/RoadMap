@@ -361,18 +361,21 @@ function procesarFilasPlanner(rows){
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
     if (!letraDiaEntrega) continue;
 
-    const filaSigma = sigmaByDeudor.get(codigo);
-    if (!filaSigma) continue;
+const filaSigma = sigmaByDeudor.get(codigo);
+if (!filaSigma) continue;
 
-    let diasDespacho = (filaSigma[48] || '').toString(); // FV Z3
-    diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim();
-    if (!diasDespacho) continue;
+let diasDespacho = (filaSigma[48] || '').toString();
+diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim();
+if (!diasDespacho) continue;
 
-    if (DEBUG && codigo === '11667295'){
-      console.log('DEBUG 11667295 -> fecha:', fechaEntregaRaw,
-                  'diaEntrega:', letraDiaEntrega,
-                  'diasCatalogo:', diasDespacho);
-    }
+if (codigo === '11667295') {
+  console.log('DEBUG 11667295',
+    'canal=', canal,
+    'fechaEntregaRaw=', fechaEntregaRaw,
+    'letraDiaEntrega=', letraDiaEntrega,
+    'diasDespacho=', diasDespacho
+  );
+}
 
     const enRuta = diasDespacho.split('').some(l => l === letraDiaEntrega);
     if (enRuta) continue; // solo fuera de ruta
@@ -419,4 +422,5 @@ function procesarFilasPlanner(rows){
 <script src="layout.js"></script>
 </body>
 </html>
+
 
