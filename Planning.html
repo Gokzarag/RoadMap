@@ -194,6 +194,7 @@
                 <th>Código</th>
                 <th>Cliente</th>
                 <th>Ruta ventas</th>
+                <th>Fecha entrega (PREVIA)</th>
                 <th>Día despacho</th>
                 <th>Kg pedido</th>
               </tr>
@@ -304,7 +305,7 @@ function procesarArchivoPlanner(file){
 // Convierte la fecha dd.mm.yyyy o dd/mm/yyyy a letra de día (L,M,X,J,V,S)
 function obtenerLetraDiaDesdeFecha(fechaStr){
   if (!fechaStr) return '';
-  fechaStr = fechaStr.toString().trim().replace(/[.-]/g,'/'); // corregido
+  fechaStr = fechaStr.toString().trim().replace(/[.-]/g,'/'); // admite 30.12.2025
   const partes = fechaStr.split('/');
   if (partes.length !== 3) return '';
   const d = parseInt(partes[0],10);
@@ -359,7 +360,7 @@ function procesarFilasPlanner(rows){
     const clienteNombre = (row[7] || '').toString().trim(); // Nombre cliente
     if (!codigo) continue;
 
-    const fechaEntregaRaw = (row[17] || '').toString();     // Fe.entrega
+    const fechaEntregaRaw = (row[17] || '').toString();     // Fe.entrega (PREVIA)
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
     if (!letraDiaEntrega) continue;
 
@@ -367,10 +368,10 @@ function procesarFilasPlanner(rows){
     if (!filaSigma) continue;
 
     let diasDespacho = (filaSigma[48] || '').toString(); // FV Z3
-    diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim(); // corregido
+    diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim();
     if (!diasDespacho) continue;
 
-    // DEBUG para el cliente fuera de ruta conocido
+    // DEBUG opcional para un cliente concreto
     if (codigo === '11669648') {
       console.log(
         'DEBUG CLIENTE FUERA RUTA',
@@ -381,7 +382,7 @@ function procesarFilasPlanner(rows){
       );
     }
 
-    // Lógica equivalente a: IF(IFERROR(FIND(@Y;@X);0)>0;"Programar";"Fuera de ruta")
+    // IF(IFERROR(FIND(@Y;@X);0)>0;"Programar";"Fuera de ruta")
     const enRuta = diasDespacho.indexOf(letraDiaEntrega) >= 0;
     if (enRuta) {
       continue; // Programar -> no se muestra
@@ -397,6 +398,8 @@ function procesarFilasPlanner(rows){
         codigo,
         cliente: clienteNombre,
         ruta: rutaVentas,
+        fechaEntrega: fechaEntregaRaw,
+        letraEntrega: letraDiaEntrega,
         diaDespacho: diasDespacho,
         kg: 0
       };
@@ -408,12 +411,14 @@ function procesarFilasPlanner(rows){
   const valores = Array.from(agregados.values());
 
   valores.forEach(item=>{
+    const fechaConLetra = `${item.fechaEntrega} (${item.letraEntrega})`;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${item.canal}</td>
       <td>${item.codigo}</td>
       <td>${item.cliente}</td>
       <td>${item.ruta}</td>
+      <td>${fechaConLetra}</td>
       <td>${item.diaDespacho}</td>
       <td>${item.kg.toFixed(3)}</td>
     `;
@@ -429,4 +434,3 @@ function procesarFilasPlanner(rows){
 <script src="layout.js"></script>
 </body>
 </html>
-
