@@ -327,7 +327,7 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
 function encontrarInicioDatos(rows){
   for (let i=0;i<rows.length;i++){
     const row = rows[i];
-    const canal = (row[2] || '').toString().trim();   // Canal en índice 2 (Come)
+    const canal = (row[2] || '').toString().trim();   // Canal (Come)
     const codigo = (row[6] || '').toString().trim();  // Cliente
     const fechaEntrega = (row[17] || '').toString().trim(); // Fe.entrega
     if (canal && codigo && fechaEntrega){
@@ -361,24 +361,28 @@ function procesarFilasPlanner(rows){
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
     if (!letraDiaEntrega) continue;
 
-const filaSigma = sigmaByDeudor.get(codigo);
-if (!filaSigma) continue;
+    const filaSigma = sigmaByDeudor.get(codigo);
+    if (!filaSigma) continue;
 
-let diasDespacho = (filaSigma[48] || '').toString();
-diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim();
-if (!diasDespacho) continue;
+    let diasDespacho = (filaSigma[48] || '').toString(); // FV Z3
+    diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim();
+    if (!diasDespacho) continue;
 
-if (codigo === '11667295') {
-  console.log('DEBUG 11667295',
-    'canal=', canal,
-    'fechaEntregaRaw=', fechaEntregaRaw,
-    'letraDiaEntrega=', letraDiaEntrega,
-    'diasDespacho=', diasDespacho
-  );
-}
+    if (DEBUG && codigo === '11667295'){
+      console.log('DEBUG 11667295',
+        'fechaEntregaRaw=', fechaEntregaRaw,
+        'letraDiaEntrega=', letraDiaEntrega,
+        'diasDespacho=', diasDespacho
+      );
+    }
 
-    const enRuta = diasDespacho.split('').some(l => l === letraDiaEntrega);
-    if (enRuta) continue; // solo fuera de ruta
+    // Lógica equivalente a: IF(IFERROR(FIND(@Y;@X);0)>0;"Programar";"Fuera de ruta")
+    const enRuta = diasDespacho.indexOf(letraDiaEntrega) >= 0;
+    if (enRuta) {
+      // Programar -> no se muestra en la tabla
+      continue;
+    }
+    // Si no está el día en FV Z3, es "Fuera de ruta" y se muestra
 
     const kgStr = (row[18] || '0').toString().replace(',','.');
     const kg = parseFloat(kgStr) || 0;
@@ -422,5 +426,4 @@ if (codigo === '11667295') {
 <script src="layout.js"></script>
 </body>
 </html>
-
 
