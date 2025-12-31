@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>RoadMap - Filtros Planning</title>
+  <title>RoadMap - Filtros Planner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" />
 
@@ -207,8 +207,8 @@
 </div>
 
 <script>
-const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/RoadMap/main/Catalogo%20Sigma.csv';
-const DEBUG = false; // true para ver trazas en consola
+const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
+const DEBUG = false;
 
 let sigmaByDeudor = new Map(); // deudor -> fila catálogo
 
@@ -226,17 +226,18 @@ function cargarCatalogoSigma(){
 
   Papa.parse(SIGMA_CSV_URL,{
     download:true,
-    header:true,            // CatalogoSigma_SAMPLE tiene cabecera
+    header:false,
     skipEmptyLines:true,
     complete:(res)=>{
       sigmaByDeudor.clear();
       res.data.forEach(row=>{
-        const deudor = (row['Deudor'] || row[0] || '').toString().trim();
-        if (!deudor) return;
-        sigmaByDeudor.set(deudor, row);
+        const deudor = (row[0] || '').toString().trim(); // código cliente
+        if (deudor){
+          sigmaByDeudor.set(deudor,row);
+        }
       });
       status.textContent = `Catálogo Sigma: ${sigmaByDeudor.size} clientes cargados.`;
-      if (DEBUG) console.log('Sigma SAMPLE cargado, filas:', res.data.length);
+      if (DEBUG) console.log('Sigma cargado, filas:', res.data.length);
       habilitarBotonProcesar();
     },
     error:(err)=>{
@@ -281,7 +282,7 @@ function procesarArchivoPlanner(file){
     Papa.parse(file,{
       header:false,
       skipEmptyLines:false,
-      delimiter:'\t',   // PREVIA_SAMPLE.txt es tabulado
+      delimiter:'\t', // PREVIA.TXT es tabulado
       complete:(res)=>procesarFilasPlanner(res.data)
     });
   } else if (ext === 'xls' || ext === 'xlsx'){
@@ -326,9 +327,9 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
 function encontrarInicioDatos(rows){
   for (let i=0;i<rows.length;i++){
     const row = rows[i];
-    const canal = (row[1] || '').toString().trim();   // B
-    const codigo = (row[6] || '').toString().trim();  // G
-    const fechaEntrega = (row[17] || '').toString().trim(); // R
+    const canal = (row[2] || '').toString().trim();   // Canal en índice 2 (Come)
+    const codigo = (row[6] || '').toString().trim();  // Cliente
+    const fechaEntrega = (row[17] || '').toString().trim(); // Fe.entrega
     if (canal && codigo && fechaEntrega){
       return i;
     }
@@ -348,23 +349,22 @@ function procesarFilasPlanner(rows){
   for (let i=startIdx;i<rows.length;i++){
     const row = rows[i];
 
-    const canal = (row[1] || '').toString().trim();      // B
+    const canal = (row[2] || '').toString().trim();      // Canal (Come)
     if (!canal || !canal.includes('DET')) continue;
 
-    const rutaVentas    = (row[3] || '').toString().trim(); // D
-    const codigo        = (row[6] || '').toString().trim(); // G
-    const clienteNombre = (row[7] || '').toString().trim(); // H
+    const rutaVentas    = (row[3] || '').toString().trim(); // Ruta
+    const codigo        = (row[6] || '').toString().trim(); // Cliente
+    const clienteNombre = (row[7] || '').toString().trim(); // Nombre cliente
     if (!codigo) continue;
 
-    const fechaEntregaRaw = (row[17] || '').toString();     // R
+    const fechaEntregaRaw = (row[17] || '').toString();     // Fe.entrega
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
     if (!letraDiaEntrega) continue;
 
     const filaSigma = sigmaByDeudor.get(codigo);
     if (!filaSigma) continue;
 
-    // días despacho: campo FV Z3 (columna AW, índice 48); en CSV con cabecera lector lo tiene como nombre de columna
-    let diasDespacho = (filaSigma['FV Z3'] || filaSigma[48] || '').toString();
+    let diasDespacho = (filaSigma[48] || '').toString(); // FV Z3
     diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim();
     if (!diasDespacho) continue;
 
