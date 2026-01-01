@@ -9,6 +9,8 @@
   <!-- Librerías -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- html2canvas para screenshot del mapa -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -149,7 +151,6 @@
       color:var(--text-muted);
     }
 
-    /* Layout tabla + mapa (más alto) */
     .content-split{
       display:flex;
       gap:10px;
@@ -705,9 +706,9 @@ function procesarFilasPlanner(rows){
 
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[0];      // planner de un solo día
+    const f = fechasEntrega[0];             // planner de un solo día
     const letra = obtenerLetraDiaDesdeFecha(f);
-    fechaTexto = `${f} (${letra})`;  // sin “Fe.entrega”
+    fechaTexto = `${f} (${letra})`;         // ej: 02.01.2026 (V)
   }
   document.getElementById('results-summary').textContent =
     `Clientes DET fuera de ruta: ${valoresFueraRuta.length} | Fecha: ${fechaTexto}`;
@@ -885,45 +886,34 @@ function copiarTablaImagen(){
   },'image/png');
 }
 
-/* Captura de mapa usando canvas interno de Leaflet */
+/* Captura de mapa con html2canvas (incluye leyenda) */
 function copiarMapaImagen(){
-  const mapDiv = document.getElementById('map');
   const mapPanel = document.getElementById('mapPanel');
-  const innerCanvas = mapDiv.querySelector('canvas');
-  if (!innerCanvas){
-    alert('No se encontró el canvas del mapa.');
+  if (!mapPanel){
+    alert('No se encontró el panel del mapa.');
     return;
   }
 
-  const rect = mapPanel.getBoundingClientRect();
-  const mapRect = mapDiv.getBoundingClientRect();
-  const scale = window.devicePixelRatio || 1;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = rect.width * scale;
-  canvas.height = rect.height * scale;
-  const ctx = canvas.getContext('2d');
-
-  ctx.scale(scale,scale);
-  ctx.fillStyle = '#f9fafb';
-  ctx.fillRect(0,0,rect.width,rect.height);
-
-  const offsetX = mapRect.left - rect.left;
-  const offsetY = mapRect.top - rect.top;
-  ctx.drawImage(innerCanvas, offsetX, offsetY, mapRect.width, mapRect.height);
-
-  canvas.toBlob(blob=>{
-    if (!blob){
-      alert('No se pudo generar la imagen del mapa.');
-      return;
-    }
-    const item = new ClipboardItem({'image/png': blob});
-    navigator.clipboard.write([item]).then(()=>{
-      alert('Imagen del mapa copiada. Pega con Ctrl+V.');
-    }).catch(()=>{
-      alert('No se pudo copiar la imagen del mapa al portapapeles.');
-    });
-  },'image/png');
+  html2canvas(mapPanel,{
+    useCORS:true,
+    logging:false,
+    scale:window.devicePixelRatio || 1
+  }).then(canvas=>{
+    canvas.toBlob(blob=>{
+      if (!blob){
+        alert('No se pudo generar la imagen del mapa.');
+        return;
+      }
+      const item = new ClipboardItem({'image/png': blob});
+      navigator.clipboard.write([item]).then(()=>{
+        alert('Imagen del mapa copiada. Pega con Ctrl+V.');
+      }).catch(()=>{
+        alert('No se pudo copiar la imagen del mapa al portapapeles.');
+      });
+    },'image/png');
+  }).catch(()=>{
+    alert('No se pudo capturar el mapa.');
+  });
 }
 </script>
 
