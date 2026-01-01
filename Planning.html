@@ -110,8 +110,8 @@
     .btn{
       border:none;
       border-radius:999px;
-      padding:6px 10px;
-      font-size:13px;
+      padding:4px 8px;
+      font-size:11px;
       cursor:pointer;
       font-weight:600;
       white-space:nowrap;
@@ -127,11 +127,11 @@
     .btn-icon{
       background:#e5e7eb;
       color:#111827;
-      width:28px;
-      height:28px;
+      width:24px;
+      height:24px;
       border-radius:999px;
       padding:0;
-      font-size:14px;
+      font-size:13px;
     }
     .btn:disabled{
       opacity:.6;
@@ -140,11 +140,6 @@
 
     .status-text{
       font-size:11px;
-      color:var(--text-muted);
-    }
-
-    .results-summary{
-      font-size:12px;
       color:var(--text-muted);
     }
 
@@ -171,17 +166,25 @@
     .table-panel{
       border-radius:10px;
       border:1px solid var(--border-soft);
-      padding:8px;
+      padding:6px;
       background:#f9fafb;
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:4px;
       height:100%;
+    }
+    .table-header-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:6px;
+      font-size:10px;
+      color:#4b5563;
     }
     .table-actions{
       display:flex;
       flex-wrap:wrap;
-      gap:6px;
+      gap:4px;
       justify-content:flex-end;
     }
 
@@ -224,15 +227,15 @@
     .map-panel{
       border-radius:10px;
       border:1px solid var(--border-soft);
-      padding:8px;
+      padding:6px;
       background:#f9fafb;
       height:100%;
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:4px;
     }
     .map-title{
-      font-size:11px;
+      font-size:10px;
       color:#4b5563;
       font-weight:600;
     }
@@ -274,16 +277,17 @@
           <button class="btn btn-primary" id="btnProcesar" disabled>Procesar</button>
         </div>
 
-        <div class="results-summary" id="results-summary"></div>
-
         <!-- Tabla + mapa lado a lado -->
         <div class="content-split">
           <div class="content-left">
             <div class="table-panel" id="table-panel" style="display:none;">
-              <div class="table-actions">
-                <button class="btn btn-icon" id="btnCsv" title="Descargar CSV">💾</button>
-                <button class="btn btn-icon" id="btnCopyTable" title="Copiar como tabla Excel">📋</button>
-                <button class="btn btn-icon" id="btnCopyImage" title="Copiar como imagen">🖼</button>
+              <div class="table-header-row">
+                <span id="results-summary">Clientes DET fuera de ruta encontrados: 0.</span>
+                <div class="table-actions">
+                  <button class="btn btn-icon" id="btnCsv" title="Descargar CSV">💾</button>
+                  <button class="btn btn-icon" id="btnCopyTable" title="Copiar como tabla Excel">📋</button>
+                  <button class="btn btn-icon" id="btnCopyImage" title="Copiar como imagen">🖼</button>
+                </div>
               </div>
 
               <div class="table-wrapper" id="table-wrapper">
@@ -307,7 +311,9 @@
 
           <div class="content-right">
             <div class="map-panel">
-              <div class="map-title">Mapa clientes DET (verde = en ruta, rojo = fuera de ruta)</div>
+              <div class="map-title">
+                Mapa clientes (Azul = FSE, Amarillo = DET en ruta, Rojo = DET fuera de ruta)
+              </div>
               <div id="map"></div>
             </div>
           </div>
@@ -321,15 +327,16 @@
 const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
 const DEBUG = false;
 
-// Índices de columnas de lat/long en catálogo Sigma (ajusta si es necesario)
-const COL_LAT = 44; // columna 45 en Excel
-const COL_LON = 45; // columna 46 en Excel
+// Índices lat/long confirmados
+const COL_LAT = 28; // columna 29 en Excel
+const COL_LON = 29; // columna 30 en Excel
 
 let sigmaByDeudor = new Map(); // deudor -> fila catálogo
 let ultimosValoresTabla = [];  // para exportar
 let mapa = null;
-let capaVerdes = null;
-let capaRojos = null;
+let capaFSE = null;
+let capaDetEnRuta = null;
+let capaDetFueraRuta = null;
 let markersByCodigo = new Map();
 
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -345,13 +352,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
 /* --------- Mapa Leaflet --------- */
 
 function initMapa(){
-  mapa = L.map('map').setView([-12.0464, -77.0428], 11); // Lima aproximado [web:257]
+  mapa = L.map('map').setView([-12.0464, -77.0428], 11);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     maxZoom:19,
     attribution:'&copy; OpenStreetMap'
   }).addTo(mapa);
-  capaVerdes = L.layerGroup().addTo(mapa);
-  capaRojos = L.layerGroup().addTo(mapa);
+  capaFSE = L.layerGroup().addTo(mapa);
+  capaDetEnRuta = L.layerGroup().addTo(mapa);
+  capaDetFueraRuta = L.layerGroup().addTo(mapa);
 }
 
 /* --------- Catálogo Sigma --------- */
@@ -408,7 +416,6 @@ function habilitarBotonProcesar(){
 
 function procesarArchivoPlanner(file){
   const ext = file.name.split('.').pop().toLowerCase();
-  if (DEBUG) console.log('Procesando archivo', file.name, 'ext=', ext);
 
   if (ext === 'csv'){
     Papa.parse(file,{
@@ -420,7 +427,7 @@ function procesarArchivoPlanner(file){
     Papa.parse(file,{
       header:false,
       skipEmptyLines:false,
-      delimiter:'\t', // PREVIA.TXT es tabulado
+      delimiter:'\t',
       complete:(res)=>procesarFilasPlanner(res.data)
     });
   } else if (ext === 'xls' || ext === 'xlsx'){
@@ -439,7 +446,7 @@ function procesarArchivoPlanner(file){
   }
 }
 
-/* --------- Utilidades fecha / inicio datos --------- */
+/* --------- Utilidades --------- */
 
 function obtenerLetraDiaDesdeFecha(fechaStr){
   if (!fechaStr) return '';
@@ -452,7 +459,7 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
   if (isNaN(d) || isNaN(m) || isNaN(y)) return '';
   const dt = new Date(y,m,d);
   if (isNaN(dt.getTime())) return '';
-  const jsDay = dt.getDay(); // 0=Dom,1=Lun,2=Mar,3=Mié,4=Jue,5=Vie,6=Sab
+  const jsDay = dt.getDay();
   switch(jsDay){
     case 1: return 'L';
     case 2: return 'M';
@@ -467,9 +474,9 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
 function encontrarInicioDatos(rows){
   for (let i=0;i<rows.length;i++){
     const row = rows[i];
-    const canal = (row[2] || '').toString().trim();   // Canal (Come)
-    const codigo = (row[6] || '').toString().trim();  // Cliente
-    const fechaEntrega = (row[17] || '').toString().trim(); // Fe.entrega
+    const canal = (row[2] || '').toString().trim();
+    const codigo = (row[6] || '').toString().trim();
+    const fechaEntrega = (row[17] || '').toString().trim();
     if (canal && codigo && fechaEntrega){
       return i;
     }
@@ -477,7 +484,7 @@ function encontrarInicioDatos(rows){
   return 1;
 }
 
-/* --------- Procesar planner + poblar tabla y mapa --------- */
+/* --------- Procesar planner + tabla y mapa --------- */
 
 function procesarFilasPlanner(rows){
   const tbody = document.querySelector('#result-table tbody');
@@ -485,50 +492,71 @@ function procesarFilasPlanner(rows){
 
   ultimosValoresTabla = [];
   markersByCodigo.clear();
-  capaVerdes.clearLayers();
-  capaRojos.clearLayers();
+  capaFSE.clearLayers();
+  capaDetEnRuta.clearLayers();
+  capaDetFueraRuta.clearLayers();
 
-  const agregadosFueraRuta = new Map(); // solo fuera de ruta
-  const clientesEnRuta = [];            // para marcadores verdes
+  const agregadosFueraRuta = new Map(); // solo DET fuera de ruta
+  const clientesDetEnRuta = [];
+  const clientesFSE = [];
   const startIdx = encontrarInicioDatos(rows);
 
-  if (DEBUG) console.log('Inicio datos en fila:', startIdx);
+  const bounds = [];
 
   for (let i=startIdx;i<rows.length;i++){
     const row = rows[i];
     if (!row) continue;
 
     const canal = (row[2] || '').toString().trim();      // Canal (Come)
-    if (!canal || !canal.includes('DET')) continue;
+    if (!canal) continue;
 
-    const rutaVentas    = (row[3] || '').toString().trim(); // Ruta
-    const codigo        = (row[6] || '').toString().trim(); // Cliente
-    const clienteNombre = (row[7] || '').toString().trim(); // Nombre cliente
+    const rutaVentas    = (row[3] || '').toString().trim();
+    const codigo        = (row[6] || '').toString().trim();
+    const clienteNombre = (row[7] || '').toString().trim();
     if (!codigo) continue;
 
-    const fechaEntregaRaw = (row[17] || '').toString();     // Fe.entrega (PREVIA)
+    const fechaEntregaRaw = (row[17] || '').toString();
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
-    if (!letraDiaEntrega) continue;
-
     const filaSigma = sigmaByDeudor.get(codigo);
-    if (!filaSigma) continue;
-
-    let diasDespacho = (filaSigma[48] || '').toString(); // FV Z3
-    diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim();
-    if (!diasDespacho) continue;
-
     const kgStr = (row[18] || '0').toString().replace(',','.');
     const kg = parseFloat(kgStr) || 0;
 
-    const lat = parseFloat((filaSigma[COL_LAT] || '').toString().replace(',','.'));
-    const lon = parseFloat((filaSigma[COL_LON] || '').toString().replace(',','.'));
+    let lat = NaN;
+    let lon = NaN;
+    if (filaSigma){
+      lat = parseFloat((filaSigma[COL_LAT] || '').toString().replace(',','.'));
+      lon = parseFloat((filaSigma[COL_LON] || '').toString().replace(',','.'));
+    }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
+
+    // FSE: entran directos al mapa (azul), no a la lógica de ruta.
+    if (canal.includes('FSE')){
+      clientesFSE.push({canal,codigo,cliente:clienteNombre,lat,lon,tieneGeo});
+      if (tieneGeo){
+        const mFse = L.circleMarker([lat,lon],{
+          radius:5,
+          color:'#1d4ed8',
+          fillColor:'#3b82f6',
+          fillOpacity:0.9
+        }).addTo(capaFSE)
+          .bindPopup(`${codigo} - ${clienteNombre}`);
+        markersByCodigo.set(codigo,mFse);
+        bounds.push([lat,lon]);
+      }
+      continue;
+    }
+
+    // Solo los DET siguen con validación de día.
+    if (!canal.includes('DET') || !filaSigma || !letraDiaEntrega) continue;
+
+    let diasDespacho = (filaSigma[48] || '').toString();
+    diasDespacho = diasDespacho.toUpperCase().replace(/s+/g,'').trim();
+    if (!diasDespacho) continue;
 
     const enRuta = diasDespacho.indexOf(letraDiaEntrega) >= 0;
 
     if (enRuta){
-      // clientes programados (verdes en mapa)
-      clientesEnRuta.push({
+      clientesDetEnRuta.push({
         canal,
         codigo,
         cliente: clienteNombre,
@@ -541,36 +569,45 @@ function procesarFilasPlanner(rows){
         lon,
         tieneGeo
       });
-      continue;
+      if (tieneGeo){
+        const mDetOk = L.circleMarker([lat,lon],{
+          radius:5,
+          color:'#a16207',
+          fillColor:'#facc15',
+          fillOpacity:0.9
+        }).addTo(capaDetEnRuta)
+          .bindPopup(`${codigo} - ${clienteNombre}<br>${fechaEntregaRaw} (${letraDiaEntrega})`);
+        if (!markersByCodigo.has(codigo)){
+          markersByCodigo.set(codigo,mDetOk);
+        }
+        bounds.push([lat,lon]);
+      }
+    } else {
+      let item = agregadosFueraRuta.get(codigo);
+      if (!item){
+        item = {
+          canal,
+          codigo,
+          cliente: clienteNombre,
+          ruta: rutaVentas,
+          fechaEntrega: fechaEntregaRaw,
+          letraEntrega: letraDiaEntrega,
+          diaDespacho: diasDespacho,
+          kg: 0,
+          lat,
+          lon,
+          tieneGeo
+        };
+        agregadosFueraRuta.set(codigo,item);
+      }
+      item.kg += kg;
     }
-
-    // fuera de ruta: tabla + marcadores rojos
-    let item = agregadosFueraRuta.get(codigo);
-    if (!item){
-      item = {
-        canal,
-        codigo,
-        cliente: clienteNombre,
-        ruta: rutaVentas,
-        fechaEntrega: fechaEntregaRaw,
-        letraEntrega: letraDiaEntrega,
-        diaDespacho: diasDespacho,
-        kg: 0,
-        lat,
-        lon,
-        tieneGeo
-      };
-      agregadosFueraRuta.set(codigo,item);
-    }
-    item.kg += kg;
   }
 
-  // Ordenar fuera de ruta por Kg asc
+  // Tabla = solo DET fuera de ruta
   const valoresFueraRuta = Array.from(agregadosFueraRuta.values()).sort((a,b)=>a.kg-b.kg);
   ultimosValoresTabla = valoresFueraRuta;
 
-  // Poblar tabla y crear marcadores rojos
-  const bounds = [];
   valoresFueraRuta.forEach(item=>{
     const fechaConLetra = `${item.fechaEntrega} (${item.letraEntrega})`;
     const tr = document.createElement('tr');
@@ -584,37 +621,18 @@ function procesarFilasPlanner(rows){
       <td>${item.diaDespacho}</td>
       <td>${item.kg.toFixed(3)}</td>
     `;
-    tbody.appendChild(tr);
+    document.querySelector('#result-table tbody').appendChild(tr);
 
     if (item.tieneGeo){
-      const iconRojo = L.circleMarker([item.lat,item.lon],{
+      const mDetBad = L.circleMarker([item.lat,item.lon],{
         radius:6,
         color:'#b91c1c',
         fillColor:'#ef4444',
         fillOpacity:0.9
-      }).addTo(capaRojos)
+      }).addTo(capaDetFueraRuta)
         .bindPopup(`${item.codigo} - ${item.cliente}<br>${fechaConLetra}`);
-
-      markersByCodigo.set(item.codigo, iconRojo);
+      markersByCodigo.set(item.codigo,mDetBad);
       bounds.push([item.lat,item.lon]);
-    }
-  });
-
-  // Marcadores verdes (en ruta)
-  clientesEnRuta.forEach(item=>{
-    if (!item.tieneGeo) return;
-    const iconVerde = L.circleMarker([item.lat,item.lon],{
-      radius:5,
-      color:'#166534',
-      fillColor:'#22c55e',
-      fillOpacity:0.9
-    }).addTo(capaVerdes)
-      .bindPopup(`${item.codigo} - ${item.cliente}<br>${item.fechaEntrega} (${item.letraEntrega})`);
-    bounds.push([item.lat,item.lon]);
-
-    // También guardamos por código por si quieres usar más adelante
-    if (!markersByCodigo.has(item.codigo)){
-      markersByCodigo.set(item.codigo, iconVerde);
     }
   });
 
@@ -622,12 +640,11 @@ function procesarFilasPlanner(rows){
     mapa.fitBounds(bounds,{padding:[20,20]});
   }
 
-  // Vincular filas con marcadores (resaltado)
   enlazarFilasYMarcadores();
 
-  const summary = document.getElementById('results-summary');
   document.getElementById('table-panel').style.display = 'flex';
-  summary.textContent = `Clientes DET fuera de ruta encontrados: ${valoresFueraRuta.length}.`;
+  document.getElementById('results-summary').textContent =
+    `Clientes DET fuera de ruta encontrados: ${valoresFueraRuta.length}.`;
 }
 
 /* --------- Enlace tabla <-> mapa --------- */
@@ -639,7 +656,6 @@ function enlazarFilasYMarcadores(){
     const marker = markersByCodigo.get(codigo);
     if (!marker) return;
 
-    // Hover sobre fila -> resalta marcador
     tr.addEventListener('mouseenter', ()=>{
       tr.classList.add('highlight-row');
       marker.setStyle({radius:9, weight:3});
@@ -650,7 +666,6 @@ function enlazarFilasYMarcadores(){
       marker.setStyle({radius:6, weight:1});
     });
 
-    // Hover sobre marcador -> resalta fila
     marker.on('mouseover', ()=>{
       tr.classList.add('highlight-row');
     });
@@ -658,7 +673,6 @@ function enlazarFilasYMarcadores(){
       tr.classList.remove('highlight-row');
     });
 
-    // Click en fila -> centra mapa y abre popup
     tr.addEventListener('click', ()=>{
       if (marker.getLatLng){
         mapa.setView(marker.getLatLng(), 14);
@@ -668,7 +682,7 @@ function enlazarFilasYMarcadores(){
   });
 }
 
-/* ---------- BOTONES DE EXPORTACIÓN / COPIAR ---------- */
+/* ---------- BOTONES EXPORTACIÓN / COPIAR ---------- */
 
 function configurarEventosTabla(){
   document.getElementById('btnCsv').addEventListener('click', descargarCSV);
@@ -676,7 +690,6 @@ function configurarEventosTabla(){
   document.getElementById('btnCopyImage').addEventListener('click', copiarTablaImagen);
 }
 
-// CSV con separador coma
 function descargarCSV(){
   if (!ultimosValoresTabla.length){
     alert('No hay datos para exportar.');
@@ -711,7 +724,6 @@ function descargarCSV(){
   URL.revokeObjectURL(url);
 }
 
-// Copia tabla en formato tabular compatible con pegar en Excel
 function copiarTablaExcel(){
   const table = document.getElementById('result-table');
   if (!table) return;
@@ -731,7 +743,6 @@ function copiarTablaExcel(){
   });
 }
 
-// Copia la tabla completa como imagen (todas las filas)
 function copiarTablaImagen(){
   const table = document.getElementById('result-table');
   if (!table) return;
