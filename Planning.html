@@ -89,16 +89,11 @@
       font-size:11px;
     }
 
-    .uploader-box{
+    .uploader-inline{
       display:flex;
-      flex-wrap:wrap;
       align-items:center;
       gap:8px;
-      padding:10px;
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      background:#f9fafb;
-      font-size:12px;
+      margin-top:4px;
     }
     .file-label{
       display:inline-flex;
@@ -154,26 +149,26 @@
       color:var(--text-muted);
     }
 
-    /* Layout tabla + mapa lado a lado */
+    /* Layout tabla + mapa */
     .content-split{
       display:flex;
       gap:10px;
       align-items:stretch;
     }
     .content-left{
-      flex:1.4;
+      flex:1.1;
       display:flex;
       flex-direction:column;
       gap:6px;
     }
     .content-right{
-      flex:1;
+      flex:1.4;
       display:flex;
       flex-direction:column;
       gap:6px;
     }
 
-    /* Recuadro tabla + botones */
+    /* Recuadro tabla */
     .table-panel{
       border-radius:10px;
       border:1px solid var(--border-soft);
@@ -275,7 +270,7 @@
 
     #map{
       flex:1;
-      min-height:300px;
+      min-height:320px;
       border-radius:8px;
       border:1px solid var(--border-soft);
     }
@@ -297,7 +292,17 @@
       <section class="panel">
         <header class="panel-header">
           <div class="panel-title">
-            <h1>Filtros Planner</h1>
+            <h1>Filtros Planning</h1>
+            <div class="uploader-inline">
+              <label class="file-label" for="plannerFile">
+                <span class="icon">📂</span>
+                <span id="fileNameLabel">Seleccionar archivo</span>
+              </label>
+              <input type="file" id="plannerFile" accept=".csv,.txt,.xls,.xlsx" />
+              <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">
+                ▶
+              </button>
+            </div>
             <p>Sube el archivo del planner y cruza los clientes con el catálogo Sigma.</p>
           </div>
           <div class="panel-meta">
@@ -305,23 +310,12 @@
           </div>
         </header>
 
-        <div class="uploader-box">
-          <label class="file-label" for="plannerFile">
-            <span class="icon">📂</span>
-            <span id="fileNameLabel">Seleccionar planner</span>
-          </label>
-          <input type="file" id="plannerFile" accept=".csv,.txt,.xls,.xlsx" />
-          <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">
-            ▶
-          </button>
-        </div>
-
-        <!-- Tabla + mapa lado a lado -->
+        <!-- Tabla + mapa -->
         <div class="content-split">
           <div class="content-left">
             <div class="table-panel" id="table-panel" style="display:none;">
               <div class="table-header-row">
-                <span id="results-summary">Clientes DET fuera de ruta encontrados: 0.</span>
+                <span id="results-summary">Clientes DET fuera de ruta: 0 | Fecha: -</span>
                 <div class="table-actions">
                   <button class="btn btn-icon" id="btnCsv" title="Descargar CSV">💾</button>
                   <button class="btn btn-icon" id="btnCopyTable" title="Copiar como tabla Excel">📋</button>
@@ -337,7 +331,6 @@
                       <th>Código</th>
                       <th>Cliente</th>
                       <th>Ruta ventas</th>
-                      <th>Fecha entrega (PREVIA)</th>
                       <th>Día despacho</th>
                       <th>Kg pedido</th>
                     </tr>
@@ -398,7 +391,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   configurarEventos();
 });
 
-/* --------- Mapa Leaflet --------- */
+/* --------- Mapa --------- */
 
 function initMapa(){
   mapa = L.map('map').setView([-12.0464, -77.0428], 11);
@@ -543,7 +536,7 @@ function encontrarInicioDatos(rows){
   return 1;
 }
 
-/* --------- Procesar planner + tabla y mapa --------- */
+/* --------- Procesar planner --------- */
 
 function procesarFilasPlanner(rows){
   const tbody = document.querySelector('#result-table tbody');
@@ -560,6 +553,7 @@ function procesarFilasPlanner(rows){
   const clientesFSE = [];
   const startIdx = encontrarInicioDatos(rows);
   const bounds = [];
+  const fechasEntrega = [];
 
   for (let i=startIdx;i<rows.length;i++){
     const row = rows[i];
@@ -574,6 +568,7 @@ function procesarFilasPlanner(rows){
     if (!codigo) continue;
 
     const fechaEntregaRaw = (row[17] || '').toString();
+    if (fechaEntregaRaw) fechasEntrega.push(fechaEntregaRaw);
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
     const filaSigma = sigmaByDeudor.get(codigo);
     const kgStr = (row[18] || '0').toString().replace(',','.');
@@ -590,13 +585,13 @@ function procesarFilasPlanner(rows){
     if (canal.includes('FSE')){
       clientesFSE.push({canal,codigo,cliente:clienteNombre,lat,lon,tieneGeo});
       if (tieneGeo){
+        const popupHtml = `<div style="font-size:10px;"><strong>${codigo}</strong> - ${clienteNombre}</div>`;
         const mFse = L.circleMarker([lat,lon],{
           radius:5,
           color:'#1d4ed8',
           fillColor:'#3b82f6',
           fillOpacity:0.9
-        }).addTo(capaFSE)
-          .bindPopup(`${codigo} - ${clienteNombre}`);
+        }).addTo(capaFSE).bindPopup(popupHtml);
         markersByCodigo.set(codigo,mFse);
         bounds.push([lat,lon]);
       }
@@ -626,13 +621,15 @@ function procesarFilasPlanner(rows){
         tieneGeo
       });
       if (tieneGeo){
+        const popupHtml =
+          `<div style="font-size:10px;"><strong>${codigo}</strong> - ${clienteNombre}<br>`+
+          `Día despacho: ${diasDespacho}</div>`;
         const mDetOk = L.circleMarker([lat,lon],{
           radius:5,
           color:'#a16207',
           fillColor:'#facc15',
           fillOpacity:0.9
-        }).addTo(capaDetEnRuta)
-          .bindPopup(`${codigo} - ${clienteNombre}<br>${fechaEntregaRaw} (${letraDiaEntrega})`);
+        }).addTo(capaDetEnRuta).bindPopup(popupHtml);
         if (!markersByCodigo.has(codigo)){
           markersByCodigo.set(codigo,mDetOk);
         }
@@ -664,7 +661,6 @@ function procesarFilasPlanner(rows){
   ultimosValoresTabla = valoresFueraRuta;
 
   valoresFueraRuta.forEach(item=>{
-    const fechaConLetra = `${item.fechaEntrega} (${item.letraEntrega})`;
     const tr = document.createElement('tr');
     tr.dataset.codigo = item.codigo;
     tr.innerHTML = `
@@ -672,20 +668,21 @@ function procesarFilasPlanner(rows){
       <td>${item.codigo}</td>
       <td>${item.cliente}</td>
       <td>${item.ruta}</td>
-      <td>${fechaConLetra}</td>
       <td>${item.diaDespacho}</td>
       <td>${item.kg.toFixed(3)}</td>
     `;
     document.querySelector('#result-table tbody').appendChild(tr);
 
     if (item.tieneGeo){
+      const popupHtml =
+        `<div style="font-size:10px;"><strong>${item.codigo}</strong> - ${item.cliente}<br>`+
+        `Día despacho: ${item.diaDespacho}</div>`;
       const mDetBad = L.circleMarker([item.lat,item.lon],{
         radius:6,
         color:'#b91c1c',
         fillColor:'#ef4444',
         fillOpacity:0.9
-      }).addTo(capaDetFueraRuta)
-        .bindPopup(`${item.codigo} - ${item.cliente}<br>${fechaConLetra}`);
+      }).addTo(capaDetFueraRuta).bindPopup(popupHtml);
       markersByCodigo.set(item.codigo,mDetBad);
       bounds.push([item.lat,item.lon]);
     }
@@ -698,8 +695,15 @@ function procesarFilasPlanner(rows){
   enlazarFilasYMarcadores();
 
   document.getElementById('table-panel').style.display = 'flex';
+
+  let fechaTexto = '-';
+  if (fechasEntrega.length){
+    const fMin = fechasEntrega[0];
+    const fMax = fechasEntrega[fechasEntrega.length-1];
+    fechaTexto = (fMin === fMax) ? fMin : `${fMin} - ${fMax}`;
+  }
   document.getElementById('results-summary').textContent =
-    `Clientes DET fuera de ruta encontrados: ${valoresFueraRuta.length}.`;
+    `Clientes DET fuera de ruta: ${valoresFueraRuta.length} | Fecha: ${fechaTexto}`;
 }
 
 /* --------- Enlace tabla <-> mapa --------- */
@@ -734,6 +738,11 @@ function enlazarFilasYMarcadores(){
         marker.openPopup();
       }
     });
+
+    marker.on('click', ()=>{
+      filas.forEach(f=>f.classList.remove('highlight-row'));
+      tr.classList.add('highlight-row');
+    });
   });
 }
 
@@ -750,13 +759,12 @@ function descargarCSV(){
     alert('No hay datos para exportar.');
     return;
   }
-  const headers = ['Canal','Código','Cliente','Ruta ventas','Fecha entrega (PREVIA)','Día despacho','Kg pedido'];
+  const headers = ['Canal','Código','Cliente','Ruta ventas','Día despacho','Kg pedido'];
   const filas = ultimosValoresTabla.map(it=>[
     it.canal,
     it.codigo,
     it.cliente,
     it.ruta,
-    `${it.fechaEntrega} (${it.letraEntrega})`,
     it.diaDespacho,
     it.kg.toFixed(3)
   ]);
@@ -873,8 +881,8 @@ function copiarTablaImagen(){
 }
 
 function copiarMapaImagen(){
-  const mapDiv = document.getElementById('map');
-  const rect = mapDiv.getBoundingClientRect();
+  const panel = document.querySelector('.map-panel');
+  const rect = panel.getBoundingClientRect();
   const scale = window.devicePixelRatio || 1;
 
   const canvas = document.createElement('canvas');
@@ -882,17 +890,17 @@ function copiarMapaImagen(){
   canvas.height = rect.height * scale;
   const ctx = canvas.getContext('2d');
 
-  // Tomar captura rápida del contenido del canvas interno de Leaflet
-  const mapCanvas = mapDiv.querySelector('canvas');
-  if (!mapCanvas){
-    alert('No se encontró el canvas del mapa.');
-    return;
-  }
-
   ctx.scale(scale,scale);
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = '#f9fafb';
   ctx.fillRect(0,0,rect.width,rect.height);
-  ctx.drawImage(mapCanvas,0,0,rect.width,rect.height);
+
+  const mapCanvas = panel.querySelector('#map canvas');
+  if (mapCanvas){
+    const mapRect = mapCanvas.getBoundingClientRect();
+    const offsetX = mapRect.left - rect.left;
+    const offsetY = mapRect.top - rect.top;
+    ctx.drawImage(mapCanvas,offsetX,offsetY,mapRect.width,mapRect.height);
+  }
 
   canvas.toBlob(blob=>{
     if (!blob){
@@ -912,4 +920,3 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
-
