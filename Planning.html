@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>  <!--web:254-->
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <style>
     :root{
@@ -100,13 +100,24 @@
       background:#f9fafb;
       font-size:12px;
     }
-    .uploader-box label{
-      font-weight:600;
-      color:#4b5563;
+    .file-label{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid #d1d5db;
+      background:#ffffff;
+      cursor:pointer;
+      font-size:11px;
     }
-    .uploader-box input[type="file"]{
-      font-size:12px;
+    .file-label span.icon{
+      font-size:13px;
     }
+    #plannerFile{
+      display:none;
+    }
+
     .btn{
       border:none;
       border-radius:999px;
@@ -234,11 +245,34 @@
       flex-direction:column;
       gap:4px;
     }
-    .map-title{
+    .map-title-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
       font-size:10px;
       color:#4b5563;
-      font-weight:600;
     }
+    .map-legend{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .legend-item{
+      display:inline-flex;
+      align-items:center;
+      gap:3px;
+    }
+    .legend-dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      display:inline-block;
+    }
+    .dot-blue{background:#3b82f6;border:1px solid #1d4ed8;}
+    .dot-yellow{background:#facc15;border:1px solid #a16207;}
+    .dot-red{background:#ef4444;border:1px solid #b91c1c;}
+
     #map{
       flex:1;
       min-height:300px;
@@ -263,7 +297,7 @@
       <section class="panel">
         <header class="panel-header">
           <div class="panel-title">
-            <h1>Filtros Planning</h1>
+            <h1>Filtros Planner</h1>
             <p>Sube el archivo del planner y cruza los clientes con el catálogo Sigma.</p>
           </div>
           <div class="panel-meta">
@@ -272,9 +306,14 @@
         </header>
 
         <div class="uploader-box">
-          <label for="plannerFile">Archivo Planner (.csv, .txt, .xls, .xlsx):</label>
+          <label class="file-label" for="plannerFile">
+            <span class="icon">📂</span>
+            <span id="fileNameLabel">Seleccionar planner</span>
+          </label>
           <input type="file" id="plannerFile" accept=".csv,.txt,.xls,.xlsx" />
-          <button class="btn btn-primary" id="btnProcesar" disabled>Procesar</button>
+          <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">
+            ▶
+          </button>
         </div>
 
         <!-- Tabla + mapa lado a lado -->
@@ -286,7 +325,7 @@
                 <div class="table-actions">
                   <button class="btn btn-icon" id="btnCsv" title="Descargar CSV">💾</button>
                   <button class="btn btn-icon" id="btnCopyTable" title="Copiar como tabla Excel">📋</button>
-                  <button class="btn btn-icon" id="btnCopyImage" title="Copiar como imagen">🖼</button>
+                  <button class="btn btn-icon" id="btnCopyImage" title="Copiar tabla como imagen">🖼</button>
                 </div>
               </div>
 
@@ -311,8 +350,19 @@
 
           <div class="content-right">
             <div class="map-panel">
-              <div class="map-title">
-                Mapa clientes (Azul = FSE, Amarillo = DET en ruta, Rojo = DET fuera de ruta)
+              <div class="map-title-row">
+                <div class="map-legend">
+                  <span class="legend-item">
+                    <span class="legend-dot dot-blue"></span><span>FSE</span>
+                  </span>
+                  <span class="legend-item">
+                    <span class="legend-dot dot-yellow"></span><span>DET en ruta</span>
+                  </span>
+                  <span class="legend-item">
+                    <span class="legend-dot dot-red"></span><span>DET fuera de ruta</span>
+                  </span>
+                </div>
+                <button class="btn btn-icon" id="btnCopyMap" title="Copiar mapa como imagen">🖼</button>
               </div>
               <div id="map"></div>
             </div>
@@ -327,12 +377,11 @@
 const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
 const DEBUG = false;
 
-// Índices lat/long confirmados
-const COL_LAT = 28; // columna 29 en Excel
-const COL_LON = 29; // columna 30 en Excel
+const COL_LAT = 28;
+const COL_LON = 29;
 
-let sigmaByDeudor = new Map(); // deudor -> fila catálogo
-let ultimosValoresTabla = [];  // para exportar
+let sigmaByDeudor = new Map();
+let ultimosValoresTabla = [];
 let mapa = null;
 let capaFSE = null;
 let capaDetEnRuta = null;
@@ -375,13 +424,12 @@ function cargarCatalogoSigma(){
     complete:(res)=>{
       sigmaByDeudor.clear();
       res.data.forEach(row=>{
-        const deudor = (row[0] || '').toString().trim(); // código cliente
+        const deudor = (row[0] || '').toString().trim();
         if (deudor){
           sigmaByDeudor.set(deudor,row);
         }
       });
       status.textContent = `Catálogo Sigma: ${sigmaByDeudor.size} clientes cargados.`;
-      if (DEBUG) console.log('Sigma cargado, filas:', res.data.length);
       habilitarBotonProcesar();
     },
     error:(err)=>{
@@ -395,7 +443,16 @@ function cargarCatalogoSigma(){
 
 function configurarEventos(){
   const fileInput   = document.getElementById('plannerFile');
-  fileInput.addEventListener('change', habilitarBotonProcesar);
+  const fileNameLabel = document.getElementById('fileNameLabel');
+
+  fileInput.addEventListener('change', ()=>{
+    if (fileInput.files && fileInput.files[0]){
+      fileNameLabel.textContent = fileInput.files[0].name;
+    } else {
+      fileNameLabel.textContent = 'Seleccionar planner';
+    }
+    habilitarBotonProcesar();
+  });
 
   document.getElementById('btnProcesar').addEventListener('click', ()=>{
     const file = fileInput.files && fileInput.files[0];
@@ -405,6 +462,8 @@ function configurarEventos(){
     }
     procesarArchivoPlanner(file);
   });
+
+  document.getElementById('btnCopyMap').addEventListener('click', copiarMapaImagen);
 }
 
 function habilitarBotonProcesar(){
@@ -496,18 +555,17 @@ function procesarFilasPlanner(rows){
   capaDetEnRuta.clearLayers();
   capaDetFueraRuta.clearLayers();
 
-  const agregadosFueraRuta = new Map(); // solo DET fuera de ruta
+  const agregadosFueraRuta = new Map();
   const clientesDetEnRuta = [];
   const clientesFSE = [];
   const startIdx = encontrarInicioDatos(rows);
-
   const bounds = [];
 
   for (let i=startIdx;i<rows.length;i++){
     const row = rows[i];
     if (!row) continue;
 
-    const canal = (row[2] || '').toString().trim();      // Canal (Come)
+    const canal = (row[2] || '').toString().trim();
     if (!canal) continue;
 
     const rutaVentas    = (row[3] || '').toString().trim();
@@ -529,7 +587,6 @@ function procesarFilasPlanner(rows){
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
-    // FSE: entran directos al mapa (azul), no a la lógica de ruta.
     if (canal.includes('FSE')){
       clientesFSE.push({canal,codigo,cliente:clienteNombre,lat,lon,tieneGeo});
       if (tieneGeo){
@@ -546,7 +603,6 @@ function procesarFilasPlanner(rows){
       continue;
     }
 
-    // Solo los DET siguen con validación de día.
     if (!canal.includes('DET') || !filaSigma || !letraDiaEntrega) continue;
 
     let diasDespacho = (filaSigma[48] || '').toString();
@@ -604,7 +660,6 @@ function procesarFilasPlanner(rows){
     }
   }
 
-  // Tabla = solo DET fuera de ruta
   const valoresFueraRuta = Array.from(agregadosFueraRuta.values()).sort((a,b)=>a.kg-b.kg);
   ultimosValoresTabla = valoresFueraRuta;
 
@@ -708,11 +763,13 @@ function descargarCSV(){
   const todo = [headers].concat(filas);
   const csv = todo.map(r=>r.map(val=>{
     const s = (val==null?'':val.toString());
-    if (s.includes(',') || s.includes('"') || s.includes('\n')){
+    if (s.includes(',') || s.includes('"') || s.includes('
+')){
       return '"' + s.replace(/"/g,'""') + '"';
     }
     return s;
-  }).join(',')).join('\n');
+  }).join(',')).join('
+');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -733,7 +790,8 @@ function copiarTablaExcel(){
   rows.forEach((tr,idx)=>{
     const cells = tr.querySelectorAll(idx===0 ? 'th' : 'td');
     const linea = Array.from(cells).map(td=>td.textContent.trim()).join('\t');
-    texto += linea + '\n';
+    texto += linea + '
+';
   });
 
   navigator.clipboard.writeText(texto).then(()=>{
@@ -810,9 +868,45 @@ function copiarTablaImagen(){
     }
     const item = new ClipboardItem({'image/png': blob});
     navigator.clipboard.write([item]).then(()=>{
-      alert('Imagen copiada. Pega en documentos o chats (Ctrl+V).');
+      alert('Imagen de tabla copiada. Pega con Ctrl+V.');
     }).catch(()=>{
-      alert('No se pudo copiar la imagen al portapapeles (el navegador debe permitir copiar imágenes).');
+      alert('No se pudo copiar la imagen al portapapeles.');
+    });
+  },'image/png');
+}
+
+function copiarMapaImagen(){
+  const mapDiv = document.getElementById('map');
+  const rect = mapDiv.getBoundingClientRect();
+  const scale = window.devicePixelRatio || 1;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = rect.width * scale;
+  canvas.height = rect.height * scale;
+  const ctx = canvas.getContext('2d');
+
+  // Tomar captura rápida del contenido del canvas interno de Leaflet
+  const mapCanvas = mapDiv.querySelector('canvas');
+  if (!mapCanvas){
+    alert('No se encontró el canvas del mapa.');
+    return;
+  }
+
+  ctx.scale(scale,scale);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,rect.width,rect.height);
+  ctx.drawImage(mapCanvas,0,0,rect.width,rect.height);
+
+  canvas.toBlob(blob=>{
+    if (!blob){
+      alert('No se pudo generar la imagen del mapa.');
+      return;
+    }
+    const item = new ClipboardItem({'image/png': blob});
+    navigator.clipboard.write([item]).then(()=>{
+      alert('Imagen del mapa copiada. Pega con Ctrl+V.');
+    }).catch(()=>{
+      alert('No se pudo copiar la imagen del mapa al portapapeles.');
     });
   },'image/png');
 }
