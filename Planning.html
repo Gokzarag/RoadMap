@@ -104,19 +104,28 @@
     .btn{
       border:none;
       border-radius:999px;
-      padding:6px 12px;
-      font-size:12px;
+      padding:6px 10px;
+      font-size:13px;
       cursor:pointer;
       font-weight:600;
       white-space:nowrap;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
     }
     .btn-primary{
       background:var(--sidebar-accent);
       color:#111827;
     }
-    .btn-secondary{
+    .btn-icon{
       background:#e5e7eb;
       color:#111827;
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      padding:0;
+      font-size:14px;
     }
     .btn:disabled{
       opacity:.6;
@@ -190,7 +199,7 @@
       <section class="panel">
         <header class="panel-header">
           <div class="panel-title">
-            <h1>Filtros Planning</h1>
+            <h1>Filtros Planner</h1>
             <p>Sube el archivo del planner y cruza los clientes con el catálogo Sigma.</p>
           </div>
           <div class="panel-meta">
@@ -209,9 +218,10 @@
         <!-- Recuadro de tabla + botones -->
         <div class="table-panel" id="table-panel" style="display:none;">
           <div class="table-actions">
-            <button class="btn btn-secondary" id="btnCsv">Descargar CSV</button>
-            <button class="btn btn-secondary" id="btnCopyTable">Copiar como tabla Excel</button>
-            <button class="btn btn-secondary" id="btnCopyImage">Copiar como imagen</button>
+            <!-- 💾 CSV, 📋 tabla, 🖼 imagen -->
+            <button class="btn btn-icon" id="btnCsv" title="Descargar CSV">💾</button>
+            <button class="btn btn-icon" id="btnCopyTable" title="Copiar como tabla Excel">📋</button>
+            <button class="btn btn-icon" id="btnCopyImage" title="Copiar como imagen">🖼</button>
           </div>
 
           <div class="table-wrapper" id="table-wrapper">
@@ -459,7 +469,7 @@ function configurarEventosTabla(){
   document.getElementById('btnCopyImage').addEventListener('click', copiarTablaImagen);
 }
 
-// Genera CSV descargable desde ultimosValoresTabla
+// CSV con separador coma
 function descargarCSV(){
   if (!ultimosValoresTabla.length){
     alert('No hay datos para exportar.');
@@ -478,11 +488,11 @@ function descargarCSV(){
   const todo = [headers].concat(filas);
   const csv = todo.map(r=>r.map(val=>{
     const s = (val==null?'':val.toString());
-    if (s.includes(';') || s.includes('"') || s.includes('\n')){
+    if (s.includes(',') || s.includes('"') || s.includes('\n')){
       return '"' + s.replace(/"/g,'""') + '"';
     }
     return s;
-  }).join(';')).join('\n'); // separador ; para Excel
+  }).join(',')).join('\n');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -514,12 +524,24 @@ function copiarTablaExcel(){
   });
 }
 
-// Copia la tabla como imagen usando canvas
+// Copia la tabla completa como imagen (todas las filas, sin limitar al scroll)
 function copiarTablaImagen(){
-  const tableWrapper = document.getElementById('table-wrapper');
-  if (!tableWrapper) return;
+  const table = document.getElementById('result-table');
+  if (!table) return;
 
-  const rect = tableWrapper.getBoundingClientRect();
+  // Clonamos la tabla en un contenedor temporal fuera de pantalla
+  const cloneWrapper = document.createElement('div');
+  cloneWrapper.style.position = 'fixed';
+  cloneWrapper.style.left = '-9999px';
+  cloneWrapper.style.top = '0';
+  cloneWrapper.style.background = '#ffffff';
+
+  const cloneTable = table.cloneNode(true);
+  cloneWrapper.appendChild(cloneTable);
+  document.body.appendChild(cloneWrapper);
+
+  // Medimos después de insertarla
+  const rect = cloneTable.getBoundingClientRect();
   const scale = window.devicePixelRatio || 1;
 
   const canvas = document.createElement('canvas');
@@ -531,30 +553,44 @@ function copiarTablaImagen(){
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0,0,rect.width,rect.height);
 
-  // Render sencillo: texto por celdas (no perfecto pero suficiente)
-  const table = document.getElementById('result-table');
-  const rows = table.querySelectorAll('tr');
+  // Dibujar celdas de la tabla en el canvas
+  const rows = cloneTable.querySelectorAll('tr');
   const rowHeight = 18;
+  const headerBg = '#111827';
+  const headerTextColor = '#f9fafb';
+  const bodyEvenBg = '#f3f4f6';
+  const bodyOddBg = '#ffffff';
+
+  // calcular anchos de columnas
   const colWidths = [];
-  const cols = table.querySelectorAll('thead th');
-  cols.forEach((th,i)=>{
+  const headerCells = cloneTable.querySelectorAll('thead th');
+  headerCells.forEach((th,i)=>{
     colWidths[i] = Math.max(80, th.getBoundingClientRect().width);
   });
-
-  ctx.font = '11px Segoe UI, sans-serif';
-  ctx.fillStyle = '#111827';
 
   let y = rowHeight;
   rows.forEach((tr,rowIndex)=>{
     const cells = tr.querySelectorAll(rowIndex===0 ? 'th' : 'td');
+
+    // fondo fila
+    ctx.fillStyle = (rowIndex===0) ? headerBg : (rowIndex % 2 === 0 ? bodyEvenBg : bodyOddBg);
+    ctx.fillRect(0,y-rowHeight,rect.width,rowHeight);
+
+    // texto
+    ctx.font = '11px Segoe UI, sans-serif';
+    ctx.fillStyle = (rowIndex===0) ? headerTextColor : '#111827';
+
     let x = 4;
     cells.forEach((td,colIndex)=>{
       const text = td.textContent.trim();
-      ctx.fillText(text,x,y);
+      ctx.fillText(text,x,y-5);
       x += (colWidths[colIndex] || 80);
     });
     y += rowHeight;
   });
+
+  // eliminamos el clon
+  document.body.removeChild(cloneWrapper);
 
   canvas.toBlob(blob=>{
     if (!blob){
@@ -565,7 +601,7 @@ function copiarTablaImagen(){
     navigator.clipboard.write([item]).then(()=>{
       alert('Imagen copiada. Pega en documentos o chats (Ctrl+V).');
     }).catch(()=>{
-      alert('No se pudo copiar la imagen al portapapeles.');
+      alert('No se pudo copiar la imagen al portapapeles (el navegador debe permitir copiar imágenes).');
     });
   },'image/png');
 }
@@ -574,6 +610,4 @@ function copiarTablaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
-
-
 
