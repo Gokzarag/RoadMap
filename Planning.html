@@ -478,8 +478,7 @@ function descargarCSV(){
   const todo = [headers].concat(filas);
   const csv = todo.map(r=>r.map(val=>{
     const s = (val==null?'':val.toString());
-    if (s.includes(';') || s.includes('"') || s.includes('
-')){
+    if (s.includes(';') || s.includes('"') || s.includes('\n')){
       return '"' + s.replace(/"/g,'""') + '"';
     }
     return s;
@@ -577,3 +576,4 @@ function copiarTablaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
+
