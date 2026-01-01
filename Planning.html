@@ -69,17 +69,18 @@
     .panel-header{
       display:flex;
       justify-content:space-between;
-      align-items:flex-start;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .panel-title{
+      display:flex;
+      align-items:center;
       gap:10px;
       flex-wrap:wrap;
     }
     .panel-title h1{
       font-size:18px;
-      margin-bottom:4px;
-    }
-    .panel-title p{
-      font-size:12px;
-      color:var(--text-muted);
     }
     .panel-meta{
       display:flex;
@@ -92,8 +93,7 @@
     .uploader-inline{
       display:flex;
       align-items:center;
-      gap:8px;
-      margin-top:4px;
+      gap:6px;
     }
     .file-label{
       display:inline-flex;
@@ -296,14 +296,13 @@
             <div class="uploader-inline">
               <label class="file-label" for="plannerFile">
                 <span class="icon">📂</span>
-                <span id="fileNameLabel">Seleccionar archivo</span>
+                <span id="fileNameLabel">Seleccionar planner</span>
               </label>
               <input type="file" id="plannerFile" accept=".csv,.txt,.xls,.xlsx" />
               <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">
                 ▶
               </button>
             </div>
-            <p>Sube el archivo del planner y cruza los clientes con el catálogo Sigma.</p>
           </div>
           <div class="panel-meta">
             <span class="status-text" id="status-text">Catálogo Sigma: cargando…</span>
@@ -342,7 +341,7 @@
           </div>
 
           <div class="content-right">
-            <div class="map-panel">
+            <div class="map-panel" id="mapPanel">
               <div class="map-title-row">
                 <div class="map-legend">
                   <span class="legend-item">
@@ -355,7 +354,9 @@
                     <span class="legend-dot dot-red"></span><span>DET fuera de ruta</span>
                   </span>
                 </div>
-                <button class="btn btn-icon" id="btnCopyMap" title="Copiar mapa como imagen">🖼</button>
+                <div class="table-actions">
+                  <button class="btn btn-icon" id="btnCopyMap" title="Copiar mapa como imagen">🖼</button>
+                </div>
               </div>
               <div id="map"></div>
             </div>
@@ -519,6 +520,7 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
     case 4: return 'J';
     case 5: return 'V';
     case 6: return 'S';
+    case 0: return 'D';
     default: return '';
   }
 }
@@ -567,7 +569,7 @@ function procesarFilasPlanner(rows){
     const clienteNombre = (row[7] || '').toString().trim();
     if (!codigo) continue;
 
-    const fechaEntregaRaw = (row[17] || '').toString();
+    const fechaEntregaRaw = (row[17] || '').toString().trim();
     if (fechaEntregaRaw) fechasEntrega.push(fechaEntregaRaw);
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
     const filaSigma = sigmaByDeudor.get(codigo);
@@ -698,9 +700,9 @@ function procesarFilasPlanner(rows){
 
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const fMin = fechasEntrega[0];
-    const fMax = fechasEntrega[fechasEntrega.length-1];
-    fechaTexto = (fMin === fMax) ? fMin : `${fMin} - ${fMax}`;
+    const f = fechasEntrega[0]; // planner de un solo día
+    const letra = obtenerLetraDiaDesdeFecha(f);
+    fechaTexto = `${f} (${letra})`;
   }
   document.getElementById('results-summary').textContent =
     `Clientes DET fuera de ruta: ${valoresFueraRuta.length} | Fecha: ${fechaTexto}`;
@@ -880,27 +882,33 @@ function copiarTablaImagen(){
   },'image/png');
 }
 
+/* Captura de mapa: todo el recuadro con leyenda (usando canvas interno de Leaflet) */
 function copiarMapaImagen(){
-  const panel = document.querySelector('.map-panel');
-  const rect = panel.getBoundingClientRect();
+  const mapDiv = document.getElementById('map');
+  const mapPanel = document.getElementById('mapPanel');
+  const innerCanvas = mapDiv.querySelector('canvas');
+  if (!innerCanvas){
+    alert('No se encontró el canvas del mapa.');
+    return;
+  }
+
+  const rect = mapPanel.getBoundingClientRect();
   const scale = window.devicePixelRatio || 1;
 
   const canvas = document.createElement('canvas');
   canvas.width = rect.width * scale;
   canvas.height = rect.height * scale;
   const ctx = canvas.getContext('2d');
-
   ctx.scale(scale,scale);
   ctx.fillStyle = '#f9fafb';
   ctx.fillRect(0,0,rect.width,rect.height);
 
-  const mapCanvas = panel.querySelector('#map canvas');
-  if (mapCanvas){
-    const mapRect = mapCanvas.getBoundingClientRect();
-    const offsetX = mapRect.left - rect.left;
-    const offsetY = mapRect.top - rect.top;
-    ctx.drawImage(mapCanvas,offsetX,offsetY,mapRect.width,mapRect.height);
-  }
+  const mapRect = mapDiv.getBoundingClientRect();
+  const offsetX = mapRect.left - rect.left;
+  const offsetY = mapRect.top - rect.top;
+
+  // dibujar el canvas del mapa dentro del panel
+  ctx.drawImage(innerCanvas, offsetX, offsetY, mapRect.width, mapRect.height);
 
   canvas.toBlob(blob=>{
     if (!blob){
