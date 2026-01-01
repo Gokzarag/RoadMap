@@ -337,6 +337,8 @@
                       <th>Canal</th>
                       <th>Código</th>
                       <th>Cliente</th>
+                      <th>Interlocutor</th>
+                      <th>Dirección</th>
                       <th>Ruta ventas</th>
                       <th>Día despacho</th>
                       <th>Kg pedido</th>
@@ -439,7 +441,7 @@ function cargarCatalogoSigma(){
   });
 }
 
-/* Eventos generales */
+/* Eventos */
 function configurarEventos(){
   const fileInput   = document.getElementById('plannerFile');
   const fileNameLabel = document.getElementById('fileNameLabel');
@@ -541,6 +543,7 @@ function encontrarInicioDatos(rows){
   }
   return 1;
 }
+
 /* Procesar planner */
 function procesarFilasPlanner(rows){
   const tbody = document.querySelector('#result-table tbody');
@@ -580,9 +583,16 @@ function procesarFilasPlanner(rows){
 
     let lat = NaN;
     let lon = NaN;
+    let interlocutor = '';
+    let direccion = '';
+
     if (filaSigma){
       lat = parseFloat((filaSigma[COL_LAT] || '').toString().replace(',','.'));
       lon = parseFloat((filaSigma[COL_LON] || '').toString().replace(',','.'));
+      interlocutor = (filaSigma[49] || '').toString().trim();
+      const tramo1 = (filaSigma[14] || '').toString().trim();
+      const tramo2 = (filaSigma[17] || '').toString().trim();
+      direccion = `${tramo1} ${tramo2}`.trim();
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
@@ -625,7 +635,9 @@ function procesarFilasPlanner(rows){
         kg,
         lat,
         lon,
-        tieneGeo
+        tieneGeo,
+        interlocutor,
+        direccion
       });
       if (tieneGeo){
         const popupHtml =
@@ -656,7 +668,9 @@ function procesarFilasPlanner(rows){
           kg: 0,
           lat,
           lon,
-          tieneGeo
+          tieneGeo,
+          interlocutor,
+          direccion
         };
         agregadosFueraRuta.set(codigo,item);
       }
@@ -674,6 +688,8 @@ function procesarFilasPlanner(rows){
       <td>${item.canal}</td>
       <td>${item.codigo}</td>
       <td>${item.cliente}</td>
+      <td>${item.interlocutor || ''}</td>
+      <td>${item.direccion || ''}</td>
       <td>${item.ruta}</td>
       <td>${item.diaDespacho}</td>
       <td>${item.kg.toFixed(3)}</td>
@@ -700,13 +716,12 @@ function procesarFilasPlanner(rows){
   }
 
   enlazarFilasYMarcadores();
-
   document.getElementById('table-panel').style.display = 'flex';
 
-  // resumen: cantidad + fecha del planner con letra de día
+  // Resumen: cantidad + fecha (columna Fe. Entrega) + letra del día
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[0];          // valor de columna Fe. Entrega (row[17])
+    const f = fechasEntrega[5];              // valor de columna Fe. Entrega (row[17])
     const letra = obtenerLetraDiaDesdeFecha(f);
     fechaTexto = `${f} (${letra})`;
   }
@@ -765,11 +780,14 @@ function descargarCSV(){
     alert('No hay datos para exportar.');
     return;
   }
-  const headers = ['Canal','Código','Cliente','Ruta ventas','Día despacho','Kg pedido'];
+  const headers = ['Canal','Código','Cliente','Interlocutor','Dirección',
+                   'Ruta ventas','Día despacho','Kg pedido'];
   const filas = ultimosValoresTabla.map(it=>[
     it.canal,
     it.codigo,
     it.cliente,
+    it.interlocutor || '',
+    it.direccion || '',
     it.ruta,
     it.diaDespacho,
     it.kg.toFixed(3)
