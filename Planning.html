@@ -36,6 +36,7 @@
       color:var(--text-main);
       min-height:100vh;
       margin:0;
+      font-size:12px;
     }
     .layout{
       display:flex;
@@ -44,7 +45,7 @@
     }
     .main{
       flex:1;
-      padding:72px 12px 12px;
+      padding:72px 8px 8px;
       display:flex;
       justify-content:center;
     }
@@ -53,17 +54,17 @@
       max-width:var(--content-max);
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap:8px;
     }
 
     .panel{
       flex:1;
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap:8px;
       background:var(--card-bg);
       border-radius:14px;
-      padding:14px 14px 18px;
+      padding:12px;
       border:1px solid var(--border-soft);
       box-shadow:0 6px 20px rgba(15,23,42,0.08);
       min-height:0;
@@ -72,44 +73,44 @@
       display:flex;
       justify-content:space-between;
       align-items:center;
-      gap:10px;
+      gap:8px;
       flex-wrap:wrap;
     }
     .panel-title{
       display:flex;
       align-items:center;
-      gap:10px;
+      gap:8px;
       flex-wrap:wrap;
     }
     .panel-title h1{
-      font-size:18px;
+      font-size:16px;
     }
     .panel-meta{
       display:flex;
       flex-direction:column;
       align-items:flex-end;
-      gap:4px;
-      font-size:11px;
+      gap:2px;
+      font-size:10px;
     }
 
     .uploader-inline{
       display:flex;
       align-items:center;
-      gap:6px;
+      gap:4px;
     }
     .file-label{
       display:inline-flex;
       align-items:center;
       gap:4px;
-      padding:4px 8px;
+      padding:3px 7px;
       border-radius:999px;
       border:1px solid #d1d5db;
       background:#ffffff;
       cursor:pointer;
-      font-size:11px;
+      font-size:10px;
     }
     .file-label span.icon{
-      font-size:13px;
+      font-size:12px;
     }
     #plannerFile{
       display:none;
@@ -118,8 +119,8 @@
     .btn{
       border:none;
       border-radius:999px;
-      padding:4px 8px;
-      font-size:11px;
+      padding:3px 7px;
+      font-size:10px;
       cursor:pointer;
       font-weight:600;
       white-space:nowrap;
@@ -135,11 +136,11 @@
     .btn-icon{
       background:#e5e7eb;
       color:#111827;
-      width:24px;
-      height:24px;
+      width:22px;
+      height:22px;
       border-radius:999px;
       padding:0;
-      font-size:13px;
+      font-size:12px;
     }
     .btn:disabled{
       opacity:.6;
@@ -147,48 +148,49 @@
     }
 
     .status-text{
-      font-size:11px;
+      font-size:10px;
       color:var(--text-muted);
     }
 
     .content-split{
       display:flex;
-      gap:10px;
+      gap:6px;
       align-items:stretch;
       height:calc(100vh - 140px);
     }
     .content-left{
-      flex:1.1;
+      flex:0.95;   /* tabla un poco más angosta */
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:4px;
       min-height:0;
     }
     .content-right{
-      flex:1.4;
+      flex:1.75;   /* mapa más ancho */
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:4px;
       min-height:0;
     }
 
     .table-panel{
       border-radius:10px;
       border:1px solid var(--border-soft);
-      padding:6px;
+      padding:4px;
       background:#f9fafb;
       display:flex;
       flex-direction:column;
       gap:4px;
       height:100%;
       min-height:0;
+      font-size:9px;
     }
     .table-header-row{
       display:flex;
       justify-content:space-between;
       align-items:center;
       gap:6px;
-      font-size:10px;
+      font-size:9px;
       color:#4b5563;
     }
     .table-actions{
@@ -204,13 +206,13 @@
       overflow:auto;
       flex:1;
       background:#ffffff;
-      font-size:10px;
+      font-size:9px;
       min-height:0;
     }
     table{
       width:100%;
       border-collapse:collapse;
-      font-size:10px;
+      font-size:9px;
     }
     thead{
       position:sticky;
@@ -220,7 +222,7 @@
       z-index:1;
     }
     th,td{
-      padding:3px 5px;
+      padding:2px 4px;
       border-bottom:1px solid #e5e7eb;
       text-align:left;
       white-space:nowrap;
@@ -237,19 +239,20 @@
     .map-panel{
       border-radius:10px;
       border:1px solid var(--border-soft);
-      padding:6px;
+      padding:4px;
       background:#f9fafb;
       height:100%;
       display:flex;
       flex-direction:column;
       gap:4px;
       min-height:0;
+      font-size:9px;
     }
     .map-title-row{
       display:flex;
       justify-content:space-between;
       align-items:center;
-      font-size:10px;
+      font-size:9px;
       color:#4b5563;
     }
     .map-legend{
@@ -264,8 +267,8 @@
       gap:3px;
     }
     .legend-dot{
-      width:10px;
-      height:10px;
+      width:9px;
+      height:9px;
       border-radius:50%;
       display:inline-block;
     }
@@ -305,7 +308,7 @@
             <div class="uploader-inline">
               <label class="file-label" for="plannerFile">
                 <span class="icon">📂</span>
-                <span id="fileNameLabel">Seleccionar planner</span>
+                <span id="fileNameLabel">Seleccionar archivo</span>
               </label>
               <input type="file" id="plannerFile" accept=".csv,.txt,.xls,.xlsx" />
               <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">
@@ -592,7 +595,11 @@ function procesarFilasPlanner(rows){
       interlocutor = (filaSigma[49] || '').toString().trim();
       const tramo1 = (filaSigma[14] || '').toString().trim();
       const tramo2 = (filaSigma[17] || '').toString().trim();
-      direccion = `${tramo1} ${tramo2}`.trim();
+      if (tramo1 && tramo2){
+        direccion = `${tramo1} - ${tramo2}`;
+      } else {
+        direccion = tramo1 || tramo2;
+      }
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
@@ -721,7 +728,7 @@ function procesarFilasPlanner(rows){
   // Resumen: cantidad + fecha (columna Fe. Entrega) + letra del día
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[5];              // valor de columna Fe. Entrega (row[17])
+    const f = fechasEntrega[5];
     const letra = obtenerLetraDiaDesdeFecha(f);
     fechaTexto = `${f} (${letra})`;
   }
@@ -938,4 +945,3 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
-
