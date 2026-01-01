@@ -27,7 +27,7 @@
       --text-main:#111827;
       --text-muted:#6b7280;
       --font:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
-      --content-max:1120px;
+      --content-max:1280px;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{
@@ -45,13 +45,13 @@
     }
     .main{
       flex:1;
-      padding:72px 8px 8px;
+      padding:70px 0 4px;
       display:flex;
       justify-content:center;
     }
     .main-inner{
       width:100%;
-      max-width:var(--content-max);
+      max-width:1280px;
       display:flex;
       flex-direction:column;
       gap:8px;
@@ -156,17 +156,17 @@
       display:flex;
       gap:6px;
       align-items:stretch;
-      height:calc(100vh - 140px);
+      height:calc(100vh - 150px);
     }
     .content-left{
-      flex:0.95;   /* tabla un poco más angosta */
+      flex:0.9;
       display:flex;
       flex-direction:column;
       gap:4px;
       min-height:0;
     }
     .content-right{
-      flex:1.75;   /* mapa más ancho */
+      flex:1.9;
       display:flex;
       flex-direction:column;
       gap:4px;
@@ -308,7 +308,7 @@
             <div class="uploader-inline">
               <label class="file-label" for="plannerFile">
                 <span class="icon">📂</span>
-                <span id="fileNameLabel">Seleccionar archivo</span>
+                <span id="fileNameLabel">Seleccionar documento</span>
               </label>
               <input type="file" id="plannerFile" accept=".csv,.txt,.xls,.xlsx" />
               <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">
