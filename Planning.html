@@ -276,7 +276,7 @@
     #map{
       flex:1;
       border-radius:8px;
-      border:1px solid var(--border-soft);
+      border:1px solid #e5e7eb;
       min-height:0;
     }
 
@@ -305,7 +305,7 @@
             <div class="uploader-inline">
               <label class="file-label" for="plannerFile">
                 <span class="icon">📂</span>
-                <span id="fileNameLabel">Seleccionar archivo</span>
+                <span id="fileNameLabel">Seleccionar planner</span>
               </label>
               <input type="file" id="plannerFile" accept=".csv,.txt,.xls,.xlsx" />
               <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">
@@ -541,7 +541,6 @@ function encontrarInicioDatos(rows){
   }
   return 1;
 }
-
 /* Procesar planner */
 function procesarFilasPlanner(rows){
   const tbody = document.querySelector('#result-table tbody');
@@ -704,11 +703,12 @@ function procesarFilasPlanner(rows){
 
   document.getElementById('table-panel').style.display = 'flex';
 
+  // resumen: cantidad + fecha del planner con letra de día
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[0];             // planner de un solo día
+    const f = fechasEntrega[0];          // valor de columna Fe. Entrega (row[17])
     const letra = obtenerLetraDiaDesdeFecha(f);
-    fechaTexto = `${f} (${letra})`;         // ej: 02.01.2026 (V)
+    fechaTexto = `${f} (${letra})`;
   }
   document.getElementById('results-summary').textContent =
     `Clientes DET fuera de ruta: ${valoresFueraRuta.length} | Fecha: ${fechaTexto}`;
@@ -777,11 +777,13 @@ function descargarCSV(){
   const todo = [headers].concat(filas);
   const csv = todo.map(r=>r.map(val=>{
     const s = (val==null?'':val.toString());
-    if (s.includes(',') || s.includes('"') || s.includes('\n')){
+    if (s.includes(',') || s.includes('"') || s.includes('
+')){
       return '"' + s.replace(/"/g,'""') + '"';
     }
     return s;
-  }).join(',')).join('\n');
+  }).join(',')).join('
+');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -802,7 +804,8 @@ function copiarTablaExcel(){
   rows.forEach((tr,idx)=>{
     const cells = tr.querySelectorAll(idx===0 ? 'th' : 'td');
     const linea = Array.from(cells).map(td=>td.textContent.trim()).join('\t');
-    texto += linea + '\n';
+    texto += linea + '
+';
   });
 
   navigator.clipboard.writeText(texto).then(()=>{
