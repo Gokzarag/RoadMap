@@ -482,8 +482,7 @@ function descargarCSV(){
       return '"' + s.replace(/"/g,'""') + '"';
     }
     return s;
-  }).join(';')).join('
-'); // separador ; para Excel
+  }).join(';')).join('\n'); // separador ; para Excel
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -576,4 +575,5 @@ function copiarTablaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
+
 
