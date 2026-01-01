@@ -1,4 +1,0 @@
-Ce.	Come	Ruta	Interlocut	Placa	Cliente	D.Solic/Ct	GClt	D.Gpo Clie	Material	D.Material	Cl Pedido	Doc.comer.	N? de pedido	Fecha doc.	Hora	Fe.entrega	    Pedido	 Surtido	Valorizaci	ClFac	Factura
-																					
-0752	DET	577	211108	ATY-875	11667295	NAVIKA EIRL			403734	JAMON PIZZA 3.4 - 3.5 KG OK	ZY10	3023857507	5770015285	29.12.2025	12:07:58	30.12.2025	3.45	0	73.95		
-0752	DET	577	211108	ATY-875	11667295	NAVIKA EIRL			404360	EDAM BARRA 3KG AP MILKUNZ	ZY10	3023857507	5770015285	29.12.2025	12:07:58	30.12.2025	3	0	125.75		
