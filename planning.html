@@ -761,7 +761,7 @@ function procesarFilasPlanner(rows){
 
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[0]; // ya en dd.MM.yyyy
+    const f = fechasEntrega[5]; // ya en dd.MM.yyyy
     const letra = obtenerLetraDiaDesdeFecha(f);
     fechaTexto = `${f} (${letra})`;
   }
@@ -820,7 +820,7 @@ function descargarCSV(){
     alert('No hay datos para exportar.');
     return;
   }
-  const headers = ['Canal','Código','Cliente','Interlocutor','Dirección',
+  const headers = ['Canal','Codigo','Cliente','Interlocutor','Direccion',
                    'Ruta ventas','Día despacho','Kg pedido'];
   const filas = ultimosValoresTabla.map(it=>[
     it.canal,
@@ -978,4 +978,5 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
+
 
