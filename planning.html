@@ -497,7 +497,7 @@ function procesarArchivoPlanner(file){
     const reader = new FileReader();
     reader.onload = (e)=>{
       const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data,{type:'array', cellDates:false});
+      const wb = XLSX.read(data,{type:'array', cellDates:true});   // fechas como Date
       const firstSheet = wb.SheetNames[0];
       const ws = wb.Sheets[firstSheet];
       const json = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
@@ -536,10 +536,8 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
 
 /* Convierte serial de Excel a dd.MM.yyyy */
 function excelSerialToDateString(serial){
-  if (serial == null || serial === '') return '';
   const n = Number(serial);
-  if (!Number.isFinite(n)) return serial.toString().trim();
-
+  if (!Number.isFinite(n)) return '';
   const excelEpoch = new Date(Date.UTC(1899,11,30)); // 1899-12-30
   const ms = n * 24 * 60 * 60 * 1000;
   const dt = new Date(excelEpoch.getTime() + ms);
@@ -550,15 +548,33 @@ function excelSerialToDateString(serial){
   return `${dd}.${mm}.${yyyy}`;
 }
 
-/* Normaliza fecha venga como texto o número Excel */
+/* Normaliza fecha: Date, texto o serial Excel */
 function normalizarFechaPlanner(valor){
   if (valor == null) return '';
-  const str = valor.toString().trim();
+  const raw = valor;
+
+  // 1) Si XLSX la dio como Date
+  if (raw instanceof Date){
+    const dd = String(raw.getDate()).padStart(2,'0');
+    const mm = String(raw.getMonth()+1).padStart(2,'0');
+    const yyyy = raw.getFullYear();
+    return `${dd}.${mm}.${yyyy}`;
+  }
+
+  const str = raw.toString().trim();
   if (!str) return '';
-  if (/^d+(.d+)?$/.test(str)){
+
+  // 2) Si ya parece fecha con separadores, solo homogeneiza
+  if (str.includes('.') || str.includes('/') || str.includes('-')){
+    return str.replace(/[/-]/g,'.');
+  }
+
+  // 3) Si es entero grande, tratar como serial Excel
+  if (/^d+$/.test(str)){
     return excelSerialToDateString(str);
   }
-  return str.replace(/[/-]/g,'.');
+
+  return str;
 }
 
 function encontrarInicioDatos(rows){
@@ -761,7 +777,7 @@ function procesarFilasPlanner(rows){
 
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[5]; // ya en dd.MM.yyyy
+    const f = fechasEntrega[5];
     const letra = obtenerLetraDiaDesdeFecha(f);
     fechaTexto = `${f} (${letra})`;
   }
@@ -820,7 +836,7 @@ function descargarCSV(){
     alert('No hay datos para exportar.');
     return;
   }
-  const headers = ['Canal','Codigo','Cliente','Interlocutor','Direccion',
+  const headers = ['Canal','Código','Cliente','Interlocutor','Dirección',
                    'Ruta ventas','Día despacho','Kg pedido'];
   const filas = ultimosValoresTabla.map(it=>[
     it.canal,
@@ -978,5 +994,4 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
-
 
