@@ -852,7 +852,7 @@ function procesarFilasPlanner(rows){
 
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[0];
+    const f = fechasEntrega[5];
     const letra = obtenerLetraDiaDesdeFecha(f);
     fechaTexto = `${f} (${letra})`;
   }
@@ -1127,3 +1127,4 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
+
