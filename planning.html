@@ -9,7 +9,6 @@
   <!-- Librerías -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <!-- html2canvas para screenshot del mapa -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <!-- Leaflet -->
@@ -152,11 +151,33 @@
       color:var(--text-muted);
     }
 
+    /* Pestañas */
+    .tabs{
+      display:flex;
+      gap:4px;
+      margin-bottom:4px;
+    }
+    .tab-button{
+      border:none;
+      border-radius:999px;
+      padding:3px 10px;
+      font-size:11px;
+      cursor:pointer;
+      background:#e5e7eb;
+    }
+    .tab-button.active{
+      background:#111827;
+      color:#f9fafb;
+    }
+    .tab-content{display:none;}
+    .tab-content.active{display:block;}
+
+    /* Layout Fuera de ruta (tabla + mapa) */
     .content-split{
       display:flex;
       gap:6px;
       align-items:stretch;
-      height:calc(100vh - 150px);
+      height:calc(100vh - 170px);
     }
     .content-left{
       flex:0.9;
@@ -321,61 +342,94 @@
           </div>
         </header>
 
-        <div class="content-split">
-          <div class="content-left">
-            <div class="table-panel" id="table-panel" style="display:none;">
-              <div class="table-header-row">
-                <span id="results-summary">Clientes DET fuera de ruta: 0 | Fecha: -</span>
-                <div class="table-actions">
-                  <button class="btn btn-icon" id="btnCsv" title="Descargar CSV">💾</button>
-                  <button class="btn btn-icon" id="btnCopyTable" title="Copiar como tabla Excel">📋</button>
-                  <button class="btn btn-icon" id="btnCopyImage" title="Copiar tabla como imagen">🖼</button>
-                </div>
-              </div>
-
-              <div class="table-wrapper" id="table-wrapper">
-                <table id="result-table">
-                  <thead>
-                    <tr>
-                      <th>Canal</th>
-                      <th>Código</th>
-                      <th>Cliente</th>
-                      <th>Interlocutor</th>
-                      <th>Dirección</th>
-                      <th>Ruta ventas</th>
-                      <th>Día despacho</th>
-                      <th>Kg pedido</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div class="content-right">
-            <div class="map-panel" id="mapPanel">
-              <div class="map-title-row">
-                <div class="map-legend">
-                  <span class="legend-item">
-                    <span class="legend-dot dot-blue"></span><span>FSE</span>
-                  </span>
-                  <span class="legend-item">
-                    <span class="legend-dot dot-yellow"></span><span>DET en ruta</span>
-                  </span>
-                  <span class="legend-item">
-                    <span class="legend-dot dot-red"></span><span>DET fuera de ruta</span>
-                  </span>
-                </div>
-                <div class="table-actions">
-                  <button class="btn btn-icon" id="btnCopyMap" title="Copiar mapa como imagen">🖼</button>
-                </div>
-              </div>
-              <div id="map"></div>
-            </div>
-          </div>
-
+        <!-- Pestañas -->
+        <div class="tabs">
+          <button class="tab-button active" data-tab="tab-fuera">Fuera de ruta</button>
+          <button class="tab-button" data-tab="tab-duplicados">Duplicados</button>
         </div>
+
+        <!-- Tab Fuera de ruta (tabla + mapa) -->
+        <div class="tab-content active" id="tab-fuera">
+          <div class="content-split">
+            <div class="content-left">
+              <div class="table-panel" id="table-panel" style="display:none;">
+                <div class="table-header-row">
+                  <span id="results-summary">Clientes DET fuera de ruta: 0 | Fecha: -</span>
+                  <div class="table-actions">
+                    <button class="btn btn-icon" id="btnCsv" title="Descargar CSV">💾</button>
+                    <button class="btn btn-icon" id="btnCopyTable" title="Copiar como tabla Excel">📋</button>
+                    <button class="btn btn-icon" id="btnCopyImage" title="Copiar tabla como imagen">🖼</button>
+                  </div>
+                </div>
+
+                <div class="table-wrapper" id="table-wrapper">
+                  <table id="result-table">
+                    <thead>
+                      <tr>
+                        <th>Canal</th>
+                        <th>Código</th>
+                        <th>Cliente</th>
+                        <th>Interlocutor</th>
+                        <th>Dirección</th>
+                        <th>Ruta ventas</th>
+                        <th>Día despacho</th>
+                        <th>Kg pedido</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="content-right">
+              <div class="map-panel" id="mapPanel">
+                <div class="map-title-row">
+                  <div class="map-legend">
+                    <span class="legend-item">
+                      <span class="legend-dot dot-blue"></span><span>FSE</span>
+                    </span>
+                    <span class="legend-item">
+                      <span class="legend-dot dot-yellow"></span><span>DET en ruta</span>
+                    </span>
+                    <span class="legend-item">
+                      <span class="legend-dot dot-red"></span><span>DET fuera de ruta</span>
+                    </span>
+                  </div>
+                  <div class="table-actions">
+                    <button class="btn btn-icon" id="btnCopyMap" title="Copiar mapa como imagen">🖼</button>
+                  </div>
+                </div>
+                <div id="map"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Duplicados -->
+        <div class="tab-content" id="tab-duplicados">
+          <div class="table-panel">
+            <div class="table-header-row">
+              <span id="dup-summary">Pedidos duplicados: 0</span>
+            </div>
+            <div class="table-wrapper">
+              <table id="dup-table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Cliente</th>
+                    <th>Ruta</th>
+                    <th>Pedido</th>
+                    <th>Cod Material</th>
+                    <th>Material</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
       </section>
     </div>
   </main>
@@ -399,11 +453,27 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if (typeof loadSidebar === 'function') {
     loadSidebar('planner');
   }
+  initTabs();
   initMapa();
   cargarCatalogoSigma();
   configurarEventosTabla();
   configurarEventos();
 });
+
+/* Tabs */
+function initTabs(){
+  const btns = document.querySelectorAll('.tab-button');
+  const tabs = document.querySelectorAll('.tab-content');
+  btns.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const id = btn.dataset.tab;
+      btns.forEach(b=>b.classList.remove('active'));
+      tabs.forEach(t=>t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(id).classList.add('active');
+    });
+  });
+}
 
 /* Mapa */
 function initMapa(){
@@ -444,7 +514,7 @@ function cargarCatalogoSigma(){
   });
 }
 
-/* Eventos */
+/* Eventos generales */
 function configurarEventos(){
   const fileInput   = document.getElementById('plannerFile');
   const fileNameLabel = document.getElementById('fileNameLabel');
@@ -497,7 +567,7 @@ function procesarArchivoPlanner(file){
     const reader = new FileReader();
     reader.onload = (e)=>{
       const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data,{type:'array', cellDates:false}); // números crudos
+      const wb = XLSX.read(data,{type:'array', cellDates:false});
       const firstSheet = wb.SheetNames[0];
       const ws = wb.Sheets[firstSheet];
       const json = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
@@ -509,7 +579,7 @@ function procesarArchivoPlanner(file){
   }
 }
 
-/* Utilidades de fecha */
+/* Fechas */
 function obtenerLetraDiaDesdeFecha(fechaStr){
   if (!fechaStr) return '';
   const limpia = fechaStr.toString().trim().replace(/[.-]/g,'/');
@@ -534,17 +604,14 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
   }
 }
 
-/* Convierte serial Excel (con o sin fracción) a dd.MM.yyyy */
 function excelSerialToDateString(serial){
   if (serial == null || serial === '') return '';
   const n = Number(serial);
   if (!Number.isFinite(n)) return '';
-
-  const days = Math.floor(n);              // solo la parte entera
-  const excelEpoch = new Date(1899,11,30); // sistema 1900
+  const days = Math.floor(n);
+  const excelEpoch = new Date(1899,11,30);
   const ms = days * 24 * 60 * 60 * 1000;
   const dt = new Date(excelEpoch.getTime() + ms);
-
   if (isNaN(dt.getTime())) return '';
   const dd = String(dt.getDate()).padStart(2,'0');
   const mm = String(dt.getMonth()+1).padStart(2,'0');
@@ -552,7 +619,6 @@ function excelSerialToDateString(serial){
   return `${dd}.${mm}.${yyyy}`;
 }
 
-/* Normaliza cualquier formato posible de Fe.entrega */
 function normalizarFechaPlanner(valor){
   if (valor == null) return '';
   const raw = valor;
@@ -563,18 +629,15 @@ function normalizarFechaPlanner(valor){
     const yyyy = raw.getFullYear();
     return `${dd}.${mm}.${yyyy}`;
   }
-
   const str = raw.toString().trim();
   if (!str) return '';
 
   if (str.includes('.') || str.includes('/') || str.includes('-')){
     return str.replace(/[/-]/g,'.');
   }
-
   if (/^d+(.d+)?$/.test(str)){
     return excelSerialToDateString(str);
   }
-
   return str;
 }
 
@@ -603,11 +666,13 @@ function procesarFilasPlanner(rows){
   capaDetFueraRuta.clearLayers();
 
   const agregadosFueraRuta = new Map();
-  const clientesDetEnRuta = [];
-  const clientesFSE = [];
   const startIdx = encontrarInicioDatos(rows);
   const bounds = [];
   const fechasEntrega = [];
+
+  // Estructuras para duplicados
+  // porCliente: codCliente -> { nombre, ruta, pedidos: Map(pedido -> líneas[]) }
+  const porCliente = new Map();
 
   for (let i=startIdx;i<rows.length;i++){
     const row = rows[i];
@@ -616,9 +681,9 @@ function procesarFilasPlanner(rows){
     const canal = (row[2] || '').toString().trim();
     if (!canal) continue;
 
-    const rutaVentas    = (row[3] || '').toString().trim();
-    const codigo        = (row[6] || '').toString().trim();
-    const clienteNombre = (row[7] || '').toString().trim();
+    const rutaVentas    = (row[3] || '').toString().trim();   // índice 3
+    const codigo        = (row[6] || '').toString().trim();   // cliente (para duplicados)
+    const clienteNombre = (row[7] || '').toString().trim();   // índice 7
     if (!codigo) continue;
 
     const fechaEntregaRaw = normalizarFechaPlanner(row[17]);
@@ -647,9 +712,32 @@ function procesarFilasPlanner(rows){
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
-    /* FSE */
+    /* Construcción estructura duplicados (solo DET) */
+    if (canal.includes('DET')){
+      const pedido     = (row[13] || '').toString().trim(); // índice 13
+      const codMat     = (row[10] || '').toString().trim(); // índice 10
+      const material   = (row[11] || '').toString().trim(); // índice 11
+
+      if (!porCliente.has(codigo)){
+        porCliente.set(codigo,{
+          nombre: clienteNombre,
+          ruta: rutaVentas,
+          pedidos: new Map()
+        });
+      }
+      const infoCli = porCliente.get(codigo);
+      if (!infoCli.pedidos.has(pedido)){
+        infoCli.pedidos.set(pedido, []);
+      }
+      infoCli.pedidos.get(pedido).push({
+        codMat,
+        material,
+        kg
+      });
+    }
+
+    /* FSE en mapa */
     if (canal.includes('FSE')){
-      clientesFSE.push({canal,codigo,cliente:clienteNombre,lat,lon,tieneGeo});
       if (tieneGeo){
         const popupHtml =
           `<div style="font-size:10px;"><strong>${codigo}</strong> - ${clienteNombre}</div>`;
@@ -665,7 +753,7 @@ function procesarFilasPlanner(rows){
       continue;
     }
 
-    /* DET */
+    /* DET en ruta / fuera de ruta (como antes) */
     if (!canal.includes('DET') || !filaSigma || !letraDiaEntrega) continue;
 
     let diasDespacho = (filaSigma[48] || '').toString();
@@ -675,21 +763,6 @@ function procesarFilasPlanner(rows){
     const enRuta = diasDespacho.indexOf(letraDiaEntrega) >= 0;
 
     if (enRuta){
-      clientesDetEnRuta.push({
-        canal,
-        codigo,
-        cliente: clienteNombre,
-        ruta: rutaVentas,
-        fechaEntrega: fechaEntregaRaw,
-        letraEntrega: letraDiaEntrega,
-        diaDespacho: diasDespacho,
-        kg,
-        lat,
-        lon,
-        tieneGeo,
-        interlocutor,
-        direccion
-      });
       if (tieneGeo){
         const popupHtml =
           `<div style="font-size:10px;"><strong>${codigo}</strong> - ${clienteNombre}<br>`+
@@ -729,6 +802,7 @@ function procesarFilasPlanner(rows){
     }
   }
 
+  /* Fuera de ruta: poblar tabla */
   const valoresFueraRuta = Array.from(agregadosFueraRuta.values()).sort((a,b)=>a.kg-b.kg);
   ultimosValoresTabla = valoresFueraRuta;
 
@@ -778,12 +852,70 @@ function procesarFilasPlanner(rows){
 
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[5];
+    const f = fechasEntrega[0];
     const letra = obtenerLetraDiaDesdeFecha(f);
     fechaTexto = `${f} (${letra})`;
   }
   document.getElementById('results-summary').textContent =
     `Clientes DET fuera de ruta: ${valoresFueraRuta.length} | Fecha: ${fechaTexto}`;
+
+  /* Construir tabla Duplicados */
+  construirTablaDuplicados(porCliente);
+}
+
+/* Duplicados: Código, Cliente, Ruta, Pedido, Cod Material, Material */
+function construirTablaDuplicados(porCliente){
+  const tbody = document.querySelector('#dup-table tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  let total = 0;
+
+  porCliente.forEach((infoCli, codCli)=>{
+    const {nombre, ruta, pedidos} = infoCli;
+    const entries = Array.from(pedidos.entries()); // [ [pedido, lineas[]], ...]
+
+    for (let i = 0; i < entries.length; i++){
+      for (let j = i+1; j < entries.length; j++){
+        const [pedidoA, lineasA] = entries[i];
+        const [pedidoB, lineasB] = entries[j];
+
+        if (lineasA.length !== lineasB.length) continue;
+
+        let iguales = true;
+        for (let k = 0; k < lineasA.length; k++){
+          const a = lineasA[k];
+          const b = lineasB[k];
+          if (a.codMat !== b.codMat || a.kg !== b.kg){
+            iguales = false;
+            break;
+          }
+        }
+        if (!iguales) continue;
+
+        total++;
+
+        // Por cada línea común, agregamos filas separadas
+        for (let k = 0; k < lineasA.length; k++){
+          const a = lineasA[k];
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${codCli}</td>
+            <td>${nombre}</td>
+            <td>${ruta}</td>
+            <td>${pedidoA} / ${pedidoB}</td>
+            <td>${a.codMat}</td>
+            <td>${a.material}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      }
+    }
+  });
+
+  const resumen = document.getElementById('dup-summary');
+  if (resumen){
+    resumen.textContent = `Pedidos duplicados: ${total}`;
+  }
 }
 
 /* Enlace tabla <-> mapa */
@@ -825,7 +957,7 @@ function enlazarFilasYMarcadores(){
   });
 }
 
-/* Botones exportación */
+/* Exportaciones tabla Fuera de ruta */
 function configurarEventosTabla(){
   document.getElementById('btnCsv').addEventListener('click', descargarCSV);
   document.getElementById('btnCopyTable').addEventListener('click', copiarTablaExcel);
@@ -837,7 +969,7 @@ function descargarCSV(){
     alert('No hay datos para exportar.');
     return;
   }
-  const headers = ['Canal','Código','Cliente','Interlocutor','Dirección',
+  const headers = ['Canal','Codigo','Cliente','Interlocutor','Direccion',
                    'Ruta ventas','Día despacho','Kg pedido'];
   const filas = ultimosValoresTabla.map(it=>[
     it.canal,
@@ -961,7 +1093,7 @@ function copiarTablaImagen(){
   },'image/png');
 }
 
-/* Captura de mapa con html2canvas (incluye leyenda) */
+/* Captura de mapa */
 function copiarMapaImagen(){
   const mapPanel = document.getElementById('mapPanel');
   if (!mapPanel){
