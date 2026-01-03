@@ -497,8 +497,7 @@ function procesarArchivoPlanner(file){
     const reader = new FileReader();
     reader.onload = (e)=>{
       const data = new Uint8Array(e.target.result);
-      // cellDates:false => lee texto tal cual (02.01.2026) sin convertir a Date
-      const wb = XLSX.read(data,{type:'array', cellDates:false});
+      const wb = XLSX.read(data,{type:'array', cellDates:false}); // números crudos
       const firstSheet = wb.SheetNames[0];
       const ws = wb.Sheets[firstSheet];
       const json = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
@@ -535,13 +534,48 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
   }
 }
 
-/* Normaliza fecha: respeta el orden original del XLS */
+/* Convierte serial Excel (con o sin fracción) a dd.MM.yyyy */
+function excelSerialToDateString(serial){
+  if (serial == null || serial === '') return '';
+  const n = Number(serial);
+  if (!Number.isFinite(n)) return '';
+
+  const days = Math.floor(n);              // solo la parte entera
+  const excelEpoch = new Date(1899,11,30); // sistema 1900
+  const ms = days * 24 * 60 * 60 * 1000;
+  const dt = new Date(excelEpoch.getTime() + ms);
+
+  if (isNaN(dt.getTime())) return '';
+  const dd = String(dt.getDate()).padStart(2,'0');
+  const mm = String(dt.getMonth()+1).padStart(2,'0');
+  const yyyy = dt.getFullYear();
+  return `${dd}.${mm}.${yyyy}`;
+}
+
+/* Normaliza cualquier formato posible de Fe.entrega */
 function normalizarFechaPlanner(valor){
   if (valor == null) return '';
-  const str = valor.toString().trim();
+  const raw = valor;
+
+  if (raw instanceof Date){
+    const dd = String(raw.getDate()).padStart(2,'0');
+    const mm = String(raw.getMonth()+1).padStart(2,'0');
+    const yyyy = raw.getFullYear();
+    return `${dd}.${mm}.${yyyy}`;
+  }
+
+  const str = raw.toString().trim();
   if (!str) return '';
-  // Solo uniformiza separadores, no toca el orden
-  return str.replace(/[/-]/g,'.');   // 02.01.2026 se queda 02.01.2026
+
+  if (str.includes('.') || str.includes('/') || str.includes('-')){
+    return str.replace(/[/-]/g,'.');
+  }
+
+  if (/^d+(.d+)?$/.test(str)){
+    return excelSerialToDateString(str);
+  }
+
+  return str;
 }
 
 function encontrarInicioDatos(rows){
@@ -744,7 +778,7 @@ function procesarFilasPlanner(rows){
 
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[5];           // ej. 02.01.2026 tal cual XLS
+    const f = fechasEntrega[5];
     const letra = obtenerLetraDiaDesdeFecha(f);
     fechaTexto = `${f} (${letra})`;
   }
