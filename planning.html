@@ -853,7 +853,7 @@ function procesarFilasPlanner(rows){
 
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[0];
+    const f = fechasEntrega[5];
     const letra = obtenerLetraDiaDesdeFecha(f);
     fechaTexto = `${f} (${letra})`;
   }
@@ -993,13 +993,11 @@ function descargarCSV(){
   const todo = [headers].concat(filas);
   const csv = todo.map(r=>r.map(val=>{
     const s = (val==null?'':val.toString());
-    if (s.includes(',') || s.includes('"') || s.includes('
-')){
+    if (s.includes(',') || s.includes('"') || s.includes('\n')){
       return '"' + s.replace(/"/g,'""') + '"';
     }
     return s;
-  }).join(',')).join('
-');
+  }).join(',')).join('\n');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1020,8 +1018,7 @@ function copiarTablaExcel(){
   rows.forEach((tr,idx)=>{
     const cells = tr.querySelectorAll(idx===0 ? 'th' : 'td');
     const linea = Array.from(cells).map(td=>td.textContent.trim()).join('\t');
-    texto += linea + '
-';
+    texto += linea + '\n';
   });
 
   navigator.clipboard.writeText(texto).then(()=>{
@@ -1139,3 +1136,4 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
+
