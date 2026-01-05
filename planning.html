@@ -348,7 +348,7 @@
           <button class="tab-button" data-tab="tab-duplicados">Duplicados</button>
         </div>
 
-        <!-- Tab Fuera de ruta (tabla + mapa) -->
+        <!-- Tab Fuera de ruta -->
         <div class="tab-content active" id="tab-fuera">
           <div class="content-split">
             <div class="content-left">
@@ -419,9 +419,10 @@
                     <th>Código</th>
                     <th>Cliente</th>
                     <th>Ruta</th>
-                    <th>Pedido</th>
+                    <th>Pedido(s)</th>
                     <th>Cod Material</th>
                     <th>Material</th>
+                    <th>Kg</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -670,8 +671,8 @@ function procesarFilasPlanner(rows){
   const bounds = [];
   const fechasEntrega = [];
 
-  // Estructuras para duplicados
-  // porCliente: codCliente -> { nombre, ruta, pedidos: Map(pedido -> líneas[]) }
+  // Estructura para duplicados:
+  // codCliente -> { nombre, ruta, pedidos: Map(pedido -> lineas[]) }
   const porCliente = new Map();
 
   for (let i=startIdx;i<rows.length;i++){
@@ -682,14 +683,14 @@ function procesarFilasPlanner(rows){
     if (!canal) continue;
 
     const rutaVentas    = (row[3] || '').toString().trim();   // índice 3
-    const codigo        = (row[6] || '').toString().trim();   // cliente (para duplicados)
+    const codCliente    = (row[6] || '').toString().trim();   // índice 6
     const clienteNombre = (row[7] || '').toString().trim();   // índice 7
-    if (!codigo) continue;
+    if (!codCliente) continue;
 
     const fechaEntregaRaw = normalizarFechaPlanner(row[17]);
     if (fechaEntregaRaw) fechasEntrega.push(fechaEntregaRaw);
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
-    const filaSigma = sigmaByDeudor.get(codigo);
+    const filaSigma = sigmaByDeudor.get(codCliente);
     const kgStr = (row[18] || '0').toString().replace(',','.');
     const kg = parseFloat(kgStr) || 0;
 
@@ -712,20 +713,20 @@ function procesarFilasPlanner(rows){
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
-    /* Construcción estructura duplicados (solo DET) */
+    /* Construcción duplicados (solo DET) */
     if (canal.includes('DET')){
-      const pedido     = (row[13] || '').toString().trim(); // índice 13
-      const codMat     = (row[10] || '').toString().trim(); // índice 10
-      const material   = (row[11] || '').toString().trim(); // índice 11
+      const pedido   = (row[13] || '').toString().trim(); // índice 13
+      const codMat   = (row[10] || '').toString().trim(); // índice 10
+      const material = (row[11] || '').toString().trim(); // índice 11
 
-      if (!porCliente.has(codigo)){
-        porCliente.set(codigo,{
+      if (!porCliente.has(codCliente)){
+        porCliente.set(codCliente,{
           nombre: clienteNombre,
           ruta: rutaVentas,
           pedidos: new Map()
         });
       }
-      const infoCli = porCliente.get(codigo);
+      const infoCli = porCliente.get(codCliente);
       if (!infoCli.pedidos.has(pedido)){
         infoCli.pedidos.set(pedido, []);
       }
@@ -736,18 +737,18 @@ function procesarFilasPlanner(rows){
       });
     }
 
-    /* FSE en mapa */
+    /* FSE */
     if (canal.includes('FSE')){
       if (tieneGeo){
         const popupHtml =
-          `<div style="font-size:10px;"><strong>${codigo}</strong> - ${clienteNombre}</div>`;
+          `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}</div>`;
         const mFse = L.circleMarker([lat,lon],{
           radius:5,
           color:'#1d4ed8',
           fillColor:'#3b82f6',
           fillOpacity:0.9
         }).addTo(capaFSE).bindPopup(popupHtml);
-        markersByCodigo.set(codigo,mFse);
+        markersByCodigo.set(codCliente,mFse);
         bounds.push([lat,lon]);
       }
       continue;
@@ -765,7 +766,7 @@ function procesarFilasPlanner(rows){
     if (enRuta){
       if (tieneGeo){
         const popupHtml =
-          `<div style="font-size:10px;"><strong>${codigo}</strong> - ${clienteNombre}<br>`+
+          `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}<br>`+
           `Día despacho: ${diasDespacho}</div>`;
         const mDetOk = L.circleMarker([lat,lon],{
           radius:5,
@@ -773,17 +774,17 @@ function procesarFilasPlanner(rows){
           fillColor:'#facc15',
           fillOpacity:0.9
         }).addTo(capaDetEnRuta).bindPopup(popupHtml);
-        if (!markersByCodigo.has(codigo)){
-          markersByCodigo.set(codigo,mDetOk);
+        if (!markersByCodigo.has(codCliente)){
+          markersByCodigo.set(codCliente,mDetOk);
         }
         bounds.push([lat,lon]);
       }
     } else {
-      let item = agregadosFueraRuta.get(codigo);
+      let item = agregadosFueraRuta.get(codCliente);
       if (!item){
         item = {
           canal,
-          codigo,
+          codigo: codCliente,
           cliente: clienteNombre,
           ruta: rutaVentas,
           fechaEntrega: fechaEntregaRaw,
@@ -796,7 +797,7 @@ function procesarFilasPlanner(rows){
           interlocutor,
           direccion
         };
-        agregadosFueraRuta.set(codigo,item);
+        agregadosFueraRuta.set(codCliente,item);
       }
       item.kg += kg;
     }
@@ -852,7 +853,7 @@ function procesarFilasPlanner(rows){
 
   let fechaTexto = '-';
   if (fechasEntrega.length){
-    const f = fechasEntrega[5];
+    const f = fechasEntrega[0];
     const letra = obtenerLetraDiaDesdeFecha(f);
     fechaTexto = `${f} (${letra})`;
   }
@@ -863,58 +864,66 @@ function procesarFilasPlanner(rows){
   construirTablaDuplicados(porCliente);
 }
 
-/* Duplicados: Código, Cliente, Ruta, Pedido, Cod Material, Material */
+/* Duplicados: Código, Cliente, Ruta, Pedido(s), Cod Material, Material, Kg */
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  let total = 0;
+  let gruposDuplicados = 0;
 
   porCliente.forEach((infoCli, codCli)=>{
     const {nombre, ruta, pedidos} = infoCli;
     const entries = Array.from(pedidos.entries()); // [ [pedido, lineas[]], ...]
 
-    for (let i = 0; i < entries.length; i++){
-      for (let j = i+1; j < entries.length; j++){
-        const [pedidoA, lineasA] = entries[i];
-        const [pedidoB, lineasB] = entries[j];
+    // Normalizar cada pedido a una “firma” para comparar
+    const firmaMap = new Map(); // firma -> { pedidos:[], lineas:[] }
 
-        if (lineasA.length !== lineasB.length) continue;
+    entries.forEach(([pedido, lineas])=>{
+      // Ordenamos por codMat para que el orden en el archivo no afecte
+      const ordenadas = [...lineas].sort((a,b)=>{
+        if (a.codMat < b.codMat) return -1;
+        if (a.codMat > b.codMat) return 1;
+        if (a.kg < b.kg) return -1;
+        if (a.kg > b.kg) return 1;
+        return 0;
+      });
 
-        let iguales = true;
-        for (let k = 0; k < lineasA.length; k++){
-          const a = lineasA[k];
-          const b = lineasB[k];
-          if (a.codMat !== b.codMat || a.kg !== b.kg){
-            iguales = false;
-            break;
-          }
-        }
-        if (!iguales) continue;
+      const firma = ordenadas
+        .map(l => `${l.codMat}::${l.material}::${l.kg.toFixed(3)}`)
+        .join('|');
 
-        total++;
-
-        // Por cada línea común, agregamos filas separadas
-        for (let k = 0; k < lineasA.length; k++){
-          const a = lineasA[k];
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${codCli}</td>
-            <td>${nombre}</td>
-            <td>${ruta}</td>
-            <td>${pedidoA} / ${pedidoB}</td>
-            <td>${a.codMat}</td>
-            <td>${a.material}</td>
-          `;
-          tbody.appendChild(tr);
-        }
+      if (!firmaMap.has(firma)){
+        firmaMap.set(firma,{pedidos:[], lineas:ordenadas});
       }
-    }
+      firmaMap.get(firma).pedidos.push(pedido);
+    });
+
+    // Para cada firma con más de 1 pedido, es grupo de duplicados
+    firmaMap.forEach((grupo)=>{
+      if (grupo.pedidos.length < 2) return;
+      gruposDuplicados++;
+
+      const pedidosTexto = grupo.pedidos.join(', ');
+
+      grupo.lineas.forEach(l=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${codCli}</td>
+          <td>${nombre}</td>
+          <td>${ruta}</td>
+          <td>${pedidosTexto}</td>
+          <td>${l.codMat}</td>
+          <td>${l.material}</td>
+          <td>${l.kg.toFixed(3)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
   });
 
   const resumen = document.getElementById('dup-summary');
   if (resumen){
-    resumen.textContent = `Pedidos duplicados: ${total}`;
+    resumen.textContent = `Pedidos duplicados (grupos): ${gruposDuplicados}`;
   }
 }
 
@@ -969,7 +978,7 @@ function descargarCSV(){
     alert('No hay datos para exportar.');
     return;
   }
-  const headers = ['Canal','Codigo','Cliente','Interlocutor','Direccion',
+  const headers = ['Canal','Código','Cliente','Interlocutor','Dirección',
                    'Ruta ventas','Día despacho','Kg pedido'];
   const filas = ultimosValoresTabla.map(it=>[
     it.canal,
@@ -984,11 +993,13 @@ function descargarCSV(){
   const todo = [headers].concat(filas);
   const csv = todo.map(r=>r.map(val=>{
     const s = (val==null?'':val.toString());
-    if (s.includes(',') || s.includes('"') || s.includes('\n')){
+    if (s.includes(',') || s.includes('"') || s.includes('
+')){
       return '"' + s.replace(/"/g,'""') + '"';
     }
     return s;
-  }).join(',')).join('\n');
+  }).join(',')).join('
+');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1009,7 +1020,8 @@ function copiarTablaExcel(){
   rows.forEach((tr,idx)=>{
     const cells = tr.querySelectorAll(idx===0 ? 'th' : 'td');
     const linea = Array.from(cells).map(td=>td.textContent.trim()).join('\t');
-    texto += linea + '\n';
+    texto += linea + '
+';
   });
 
   navigator.clipboard.writeText(texto).then(()=>{
@@ -1127,4 +1139,3 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
-
