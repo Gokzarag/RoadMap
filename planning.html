@@ -6,12 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack.png" />
 
-  <!-- Librerías -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -26,7 +24,6 @@
       --text-main:#111827;
       --text-muted:#6b7280;
       --font:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
-      --content-max:1280px;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{
@@ -37,281 +34,108 @@
       margin:0;
       font-size:12px;
     }
-    .layout{
-      display:flex;
-      flex-direction:column;
-      min-height:100vh;
-    }
-    .main{
-      flex:1;
-      padding:70px 0 4px;
-      display:flex;
-      justify-content:center;
-    }
-    .main-inner{
-      width:100%;
-      max-width:1280px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
+    .layout{display:flex;flex-direction:column;min-height:100vh;}
+    .main{flex:1;padding:70px 0 4px;display:flex;justify-content:center;}
+    .main-inner{width:100%;max-width:1280px;display:flex;flex-direction:column;gap:8px;}
 
     .panel{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      background:var(--card-bg);
-      border-radius:14px;
-      padding:12px;
-      border:1px solid var(--border-soft);
-      box-shadow:0 6px 20px rgba(15,23,42,0.08);
+      flex:1;display:flex;flex-direction:column;gap:8px;
+      background:var(--card-bg);border-radius:14px;padding:12px;
+      border:1px solid var(--border-soft);box-shadow:0 6px 20px rgba(15,23,42,0.08);
       min-height:0;
     }
     .panel-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
+      display:flex;justify-content:space-between;align-items:center;
+      gap:8px;flex-wrap:wrap;
     }
-    .panel-title{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .panel-title h1{
-      font-size:16px;
-    }
-    .panel-meta{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-end;
-      gap:2px;
-      font-size:10px;
-    }
+    .panel-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .panel-title h1{font-size:16px;}
+    .panel-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:10px;}
 
-    .uploader-inline{
-      display:flex;
-      align-items:center;
-      gap:4px;
-    }
+    .uploader-inline{display:flex;align-items:center;gap:4px;}
     .file-label{
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      padding:3px 7px;
-      border-radius:999px;
-      border:1px solid #d1d5db;
-      background:#ffffff;
-      cursor:pointer;
-      font-size:10px;
+      display:inline-flex;align-items:center;gap:4px;padding:3px 7px;
+      border-radius:999px;border:1px solid #d1d5db;background:#ffffff;
+      cursor:pointer;font-size:10px;
     }
-    .file-label span.icon{
-      font-size:12px;
-    }
-    #plannerFile{
-      display:none;
-    }
+    .file-label span.icon{font-size:12px;}
+    #plannerFile{display:none;}
 
     .btn{
-      border:none;
-      border-radius:999px;
-      padding:3px 7px;
-      font-size:10px;
-      cursor:pointer;
-      font-weight:600;
-      white-space:nowrap;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:4px;
+      border:none;border-radius:999px;padding:3px 7px;font-size:10px;
+      cursor:pointer;font-weight:600;white-space:nowrap;
+      display:inline-flex;align-items:center;justify-content:center;gap:4px;
     }
-    .btn-primary{
-      background:var(--sidebar-accent);
-      color:#111827;
-    }
+    .btn-primary{background:var(--sidebar-accent);color:#111827;}
     .btn-icon{
-      background:#e5e7eb;
-      color:#111827;
-      width:22px;
-      height:22px;
-      border-radius:999px;
-      padding:0;
-      font-size:12px;
+      background:#e5e7eb;color:#111827;width:22px;height:22px;
+      border-radius:999px;padding:0;font-size:12px;
     }
-    .btn:disabled{
-      opacity:.6;
-      cursor:not-allowed;
-    }
+    .btn:disabled{opacity:.6;cursor:not-allowed;}
+    .status-text{font-size:10px;color:var(--text-muted);}
 
-    .status-text{
-      font-size:10px;
-      color:var(--text-muted);
-    }
-
-    /* Pestañas */
-    .tabs{
-      display:flex;
-      gap:4px;
-      margin-bottom:4px;
-    }
+    .tabs{display:flex;gap:4px;margin-bottom:4px;}
     .tab-button{
-      border:none;
-      border-radius:999px;
-      padding:3px 10px;
-      font-size:11px;
-      cursor:pointer;
-      background:#e5e7eb;
+      border:none;border-radius:999px;padding:3px 10px;font-size:11px;
+      cursor:pointer;background:#e5e7eb;
     }
-    .tab-button.active{
-      background:#111827;
-      color:#f9fafb;
-    }
+    .tab-button.active{background:#111827;color:#f9fafb;}
     .tab-content{display:none;}
     .tab-content.active{display:block;}
 
-    /* Layout Fuera de ruta (tabla + mapa) */
     .content-split{
-      display:flex;
-      gap:6px;
-      align-items:stretch;
+      display:flex;gap:6px;align-items:stretch;
       height:calc(100vh - 170px);
     }
-    .content-left{
-      flex:0.9;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-height:0;
+    .content-left,.content-right{
+      display:flex;flex-direction:column;gap:4px;min-height:0;
     }
-    .content-right{
-      flex:1.9;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-height:0;
-    }
+    .content-left{flex:0.9;}
+    .content-right{flex:1.9;}
 
     .table-panel{
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      padding:4px;
-      background:#f9fafb;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      height:100%;
-      min-height:0;
-      font-size:9px;
+      border-radius:10px;border:1px solid var(--border-soft);
+      padding:4px;background:#f9fafb;display:flex;flex-direction:column;
+      gap:4px;height:100%;min-height:0;font-size:9px;
     }
     .table-header-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:6px;
-      font-size:9px;
-      color:#4b5563;
+      display:flex;justify-content:space-between;align-items:center;
+      gap:6px;font-size:9px;color:#4b5563;
     }
-    .table-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:4px;
-      justify-content:flex-end;
-    }
+    .table-actions{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;}
 
     .table-wrapper{
-      border-radius:8px;
-      border:1px solid var(--border-soft);
-      overflow:auto;
-      flex:1;
-      background:#ffffff;
-      font-size:9px;
-      min-height:0;
+      border-radius:8px;border:1px solid var(--border-soft);
+      overflow:auto;flex:1;background:#ffffff;font-size:9px;min-height:0;
     }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:9px;
-    }
-    thead{
-      position:sticky;
-      top:0;
-      background:#111827;
-      color:#f9fafb;
-      z-index:1;
-    }
-    th,td{
-      padding:2px 4px;
-      border-bottom:1px solid #e5e7eb;
-      text-align:left;
-      white-space:nowrap;
-    }
-    tbody tr:nth-child(even){
-      background:#f3f4f6;
-    }
+    table{width:100%;border-collapse:collapse;font-size:9px;}
+    thead{position:sticky;top:0;background:#111827;color:#f9fafb;z-index:1;}
+    th,td{padding:2px 4px;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap;}
+    tbody tr:nth-child(even){background:#f3f4f6;}
     tbody tr.highlight-row{
-      outline:2px solid #f9735b;
-      outline-offset:-2px;
-      background:#fef3c7;
+      outline:2px solid #f9735b;outline-offset:-2px;background:#fef3c7;
     }
 
     .map-panel{
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      padding:4px;
-      background:#f9fafb;
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-height:0;
-      font-size:9px;
+      border-radius:10px;border:1px solid var(--border-soft);
+      padding:4px;background:#f9fafb;height:100%;display:flex;
+      flex-direction:column;gap:4px;min-height:0;font-size:9px;
     }
     .map-title-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      font-size:9px;
-      color:#4b5563;
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:9px;color:#4b5563;
     }
-    .map-legend{
-      display:flex;
-      gap:6px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    .legend-item{
-      display:inline-flex;
-      align-items:center;
-      gap:3px;
-    }
-    .legend-dot{
-      width:9px;
-      height:9px;
-      border-radius:50%;
-      display:inline-block;
-    }
+    .map-legend{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+    .legend-item{display:inline-flex;align-items:center;gap:3px;}
+    .legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
     .dot-blue{background:#3b82f6;border:1px solid #1d4ed8;}
     .dot-yellow{background:#facc15;border:1px solid #a16207;}
     .dot-red{background:#ef4444;border:1px solid #b91c1c;}
-
-    #map{
-      flex:1;
-      border-radius:8px;
-      border:1px solid #e5e7eb;
-      min-height:0;
-    }
+    #map{flex:1;border-radius:8px;border:1px solid #e5e7eb;min-height:0;}
 
     @media (max-width:900px){
-      .content-split{
-        flex-direction:column;
-        height:auto;
-      }
-      .table-wrapper,#map{
-        min-height:260px;
-      }
+      .content-split{flex-direction:column;height:auto;}
+      .table-wrapper,#map{min-height:260px;}
     }
   </style>
 </head>
@@ -342,13 +166,12 @@
           </div>
         </header>
 
-        <!-- Pestañas -->
         <div class="tabs">
           <button class="tab-button active" data-tab="tab-fuera">Fuera de ruta</button>
           <button class="tab-button" data-tab="tab-duplicados">Duplicados</button>
         </div>
 
-        <!-- Tab Fuera de ruta -->
+        <!-- Fuera de ruta -->
         <div class="tab-content active" id="tab-fuera">
           <div class="content-split">
             <div class="content-left">
@@ -406,7 +229,7 @@
           </div>
         </div>
 
-        <!-- Tab Duplicados -->
+        <!-- Duplicados -->
         <div class="tab-content" id="tab-duplicados">
           <div class="table-panel">
             <div class="table-header-row">
@@ -438,7 +261,6 @@
 
 <script>
 const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
-const DEBUG = false;
 const COL_LAT = 28;
 const COL_LON = 29;
 
@@ -508,8 +330,7 @@ function cargarCatalogoSigma(){
       status.textContent = `Catálogo Sigma: ${sigmaByDeudor.size} clientes cargados.`;
       habilitarBotonProcesar();
     },
-    error:(err)=>{
-      console.error('Error catálogo Sigma',err);
+    error:()=>{
       status.textContent = 'Error cargando catálogo Sigma.';
     }
   });
@@ -521,11 +342,9 @@ function configurarEventos(){
   const fileNameLabel = document.getElementById('fileNameLabel');
 
   fileInput.addEventListener('change', ()=>{
-    if (fileInput.files && fileInput.files[0]){
-      fileNameLabel.textContent = fileInput.files[0].name;
-    } else {
-      fileNameLabel.textContent = 'Seleccionar planner';
-    }
+    fileNameLabel.textContent = fileInput.files && fileInput.files[0]
+      ? fileInput.files[0].name
+      : 'Seleccionar planner';
     habilitarBotonProcesar();
   });
 
@@ -544,33 +363,22 @@ function configurarEventos(){
 function habilitarBotonProcesar(){
   const fileInput = document.getElementById('plannerFile');
   const btn = document.getElementById('btnProcesar');
-  const ok = sigmaByDeudor.size > 0 && fileInput.files.length > 0;
-  btn.disabled = !ok;
+  btn.disabled = !(sigmaByDeudor.size > 0 && fileInput.files.length > 0);
 }
 
 function procesarArchivoPlanner(file){
   const ext = file.name.split('.').pop().toLowerCase();
 
   if (ext === 'csv'){
-    Papa.parse(file,{
-      header:false,
-      skipEmptyLines:false,
-      complete:(res)=>procesarFilasPlanner(res.data)
-    });
+    Papa.parse(file,{header:false,skipEmptyLines:false,complete:r=>procesarFilasPlanner(r.data)});
   } else if (ext === 'txt'){
-    Papa.parse(file,{
-      header:false,
-      skipEmptyLines:false,
-      delimiter:'\t',
-      complete:(res)=>procesarFilasPlanner(res.data)
-    });
+    Papa.parse(file,{header:false,skipEmptyLines:false,delimiter:'\t',complete:r=>procesarFilasPlanner(r.data)});
   } else if (ext === 'xls' || ext === 'xlsx'){
     const reader = new FileReader();
-    reader.onload = (e)=>{
+    reader.onload = e=>{
       const data = new Uint8Array(e.target.result);
       const wb = XLSX.read(data,{type:'array', cellDates:false});
-      const firstSheet = wb.SheetNames[0];
-      const ws = wb.Sheets[firstSheet];
+      const ws = wb.Sheets[wb.SheetNames[0]];
       const json = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
       procesarFilasPlanner(json);
     };
@@ -589,20 +397,10 @@ function obtenerLetraDiaDesdeFecha(fechaStr){
   const d = parseInt(partes[0],10);
   const m = parseInt(partes[1],10) - 1;
   const y = parseInt(partes[2],10);
-  if (isNaN(d) || isNaN(m) || isNaN(y)) return '';
   const dt = new Date(y,m,d);
   if (isNaN(dt.getTime())) return '';
   const jsDay = dt.getDay();
-  switch(jsDay){
-    case 1: return 'L';
-    case 2: return 'M';
-    case 3: return 'X';
-    case 4: return 'J';
-    case 5: return 'V';
-    case 6: return 'S';
-    case 0: return 'D';
-    default: return '';
-  }
+  return ['D','L','M','X','J','V','S'][jsDay];
 }
 
 function excelSerialToDateString(serial){
@@ -622,17 +420,14 @@ function excelSerialToDateString(serial){
 
 function normalizarFechaPlanner(valor){
   if (valor == null) return '';
-  const raw = valor;
-
-  if (raw instanceof Date){
-    const dd = String(raw.getDate()).padStart(2,'0');
-    const mm = String(raw.getMonth()+1).padStart(2,'0');
-    const yyyy = raw.getFullYear();
+  if (valor instanceof Date){
+    const dd = String(valor.getDate()).padStart(2,'0');
+    const mm = String(valor.getMonth()+1).padStart(2,'0');
+    const yyyy = valor.getFullYear();
     return `${dd}.${mm}.${yyyy}`;
   }
-  const str = raw.toString().trim();
+  const str = valor.toString().trim();
   if (!str) return '';
-
   if (str.includes('.') || str.includes('/') || str.includes('-')){
     return str.replace(/[/-]/g,'.');
   }
@@ -671,7 +466,6 @@ function procesarFilasPlanner(rows){
   const bounds = [];
   const fechasEntrega = [];
 
-  // Estructura para duplicados:
   // codCliente -> { nombre, ruta, pedidos: Map(pedido -> lineas[]) }
   const porCliente = new Map();
 
@@ -690,30 +484,23 @@ function procesarFilasPlanner(rows){
     const fechaEntregaRaw = normalizarFechaPlanner(row[17]);
     if (fechaEntregaRaw) fechasEntrega.push(fechaEntregaRaw);
     const letraDiaEntrega = obtenerLetraDiaDesdeFecha(fechaEntregaRaw);
+
     const filaSigma = sigmaByDeudor.get(codCliente);
     const kgStr = (row[18] || '0').toString().replace(',','.');
     const kg = parseFloat(kgStr) || 0;
 
-    let lat = NaN;
-    let lon = NaN;
-    let interlocutor = '';
-    let direccion = '';
-
+    let lat = NaN, lon = NaN, interlocutor = '', direccion = '';
     if (filaSigma){
       lat = parseFloat((filaSigma[COL_LAT] || '').toString().replace(',','.'));
       lon = parseFloat((filaSigma[COL_LON] || '').toString().replace(',','.'));
       interlocutor = (filaSigma[49] || '').toString().trim();
       const tramo1 = (filaSigma[14] || '').toString().trim();
       const tramo2 = (filaSigma[17] || '').toString().trim();
-      if (tramo1 && tramo2){
-        direccion = `${tramo1} - ${tramo2}`;
-      } else {
-        direccion = tramo1 || tramo2;
-      }
+      direccion = tramo1 && tramo2 ? `${tramo1} - ${tramo2}` : (tramo1 || tramo2);
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
-    /* Construcción duplicados (solo DET) */
+    /* Estructura duplicados (solo DET) */
     if (canal.includes('DET')){
       const pedido   = (row[13] || '').toString().trim(); // índice 13
       const codMat   = (row[10] || '').toString().trim(); // índice 10
@@ -730,23 +517,15 @@ function procesarFilasPlanner(rows){
       if (!infoCli.pedidos.has(pedido)){
         infoCli.pedidos.set(pedido, []);
       }
-      infoCli.pedidos.get(pedido).push({
-        codMat,
-        material,
-        kg
-      });
+      infoCli.pedidos.get(pedido).push({codMat, material, kg});
     }
 
     /* FSE */
     if (canal.includes('FSE')){
       if (tieneGeo){
-        const popupHtml =
-          `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}</div>`;
+        const popupHtml = `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}</div>`;
         const mFse = L.circleMarker([lat,lon],{
-          radius:5,
-          color:'#1d4ed8',
-          fillColor:'#3b82f6',
-          fillOpacity:0.9
+          radius:5,color:'#1d4ed8',fillColor:'#3b82f6',fillOpacity:0.9
         }).addTo(capaFSE).bindPopup(popupHtml);
         markersByCodigo.set(codCliente,mFse);
         bounds.push([lat,lon]);
@@ -754,7 +533,7 @@ function procesarFilasPlanner(rows){
       continue;
     }
 
-    /* DET en ruta / fuera de ruta (como antes) */
+    /* DET en ruta / fuera de ruta */
     if (!canal.includes('DET') || !filaSigma || !letraDiaEntrega) continue;
 
     let diasDespacho = (filaSigma[48] || '').toString();
@@ -766,13 +545,9 @@ function procesarFilasPlanner(rows){
     if (enRuta){
       if (tieneGeo){
         const popupHtml =
-          `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}<br>`+
-          `Día despacho: ${diasDespacho}</div>`;
+          `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}<br>Día despacho: ${diasDespacho}</div>`;
         const mDetOk = L.circleMarker([lat,lon],{
-          radius:5,
-          color:'#a16207',
-          fillColor:'#facc15',
-          fillOpacity:0.9
+          radius:5,color:'#a16207',fillColor:'#facc15',fillOpacity:0.9
         }).addTo(capaDetEnRuta).bindPopup(popupHtml);
         if (!markersByCodigo.has(codCliente)){
           markersByCodigo.set(codCliente,mDetOk);
@@ -803,7 +578,7 @@ function procesarFilasPlanner(rows){
     }
   }
 
-  /* Fuera de ruta: poblar tabla */
+  /* Tabla Fuera de ruta */
   const valoresFueraRuta = Array.from(agregadosFueraRuta.values()).sort((a,b)=>a.kg-b.kg);
   ultimosValoresTabla = valoresFueraRuta;
 
@@ -824,13 +599,9 @@ function procesarFilasPlanner(rows){
 
     if (item.tieneGeo){
       const popupHtml =
-        `<div style="font-size:10px;"><strong>${item.codigo}</strong> - ${item.cliente}<br>`+
-        `Día despacho: ${item.diaDespacho}</div>`;
+        `<div style="font-size:10px;"><strong>${item.codigo}</strong> - ${item.cliente}<br>Día despacho: ${item.diaDespacho}</div>`;
       const mDetBad = L.circleMarker([item.lat,item.lon],{
-        radius:6,
-        color:'#b91c1c',
-        fillColor:'#ef4444',
-        fillOpacity:0.9
+        radius:6,color:'#b91c1c',fillColor:'#ef4444',fillOpacity:0.9
       }).addTo(capaDetFueraRuta).bindPopup(popupHtml);
       markersByCodigo.set(item.codigo,mDetBad);
       bounds.push([item.lat,item.lon]);
@@ -838,14 +609,8 @@ function procesarFilasPlanner(rows){
   });
 
   if (bounds.length){
-    mapa.fitBounds(bounds,{
-      paddingTopLeft:[10,10],
-      paddingBottomRight:[10,10]
-    });
-    const maxZoom = 12;
-    if (mapa.getZoom() > maxZoom){
-      mapa.setZoom(maxZoom);
-    }
+    mapa.fitBounds(bounds,{paddingTopLeft:[10,10],paddingBottomRight:[10,10]});
+    if (mapa.getZoom() > 12) mapa.setZoom(12);
   }
 
   enlazarFilasYMarcadores();
@@ -860,11 +625,11 @@ function procesarFilasPlanner(rows){
   document.getElementById('results-summary').textContent =
     `Clientes DET fuera de ruta: ${valoresFueraRuta.length} | Fecha: ${fechaTexto}`;
 
-  /* Construir tabla Duplicados */
+  /* Tabla Duplicados */
   construirTablaDuplicados(porCliente);
 }
 
-/* Duplicados: Código, Cliente, Ruta, Pedido(s), Cod Material, Material, Kg */
+/* Duplicados: usa firma (codMat, material, kg) sin importar orden de filas */
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
   if (!tbody) return;
@@ -873,13 +638,9 @@ function construirTablaDuplicados(porCliente){
 
   porCliente.forEach((infoCli, codCli)=>{
     const {nombre, ruta, pedidos} = infoCli;
-    const entries = Array.from(pedidos.entries()); // [ [pedido, lineas[]], ...]
-
-    // Normalizar cada pedido a una “firma” para comparar
     const firmaMap = new Map(); // firma -> { pedidos:[], lineas:[] }
 
-    entries.forEach(([pedido, lineas])=>{
-      // Ordenamos por codMat para que el orden en el archivo no afecte
+    pedidos.forEach((lineas, pedido)=>{
       const ordenadas = [...lineas].sort((a,b)=>{
         if (a.codMat < b.codMat) return -1;
         if (a.codMat > b.codMat) return 1;
@@ -887,22 +648,18 @@ function construirTablaDuplicados(porCliente){
         if (a.kg > b.kg) return 1;
         return 0;
       });
-
       const firma = ordenadas
         .map(l => `${l.codMat}::${l.material}::${l.kg.toFixed(3)}`)
         .join('|');
-
       if (!firmaMap.has(firma)){
         firmaMap.set(firma,{pedidos:[], lineas:ordenadas});
       }
       firmaMap.get(firma).pedidos.push(pedido);
     });
 
-    // Para cada firma con más de 1 pedido, es grupo de duplicados
-    firmaMap.forEach((grupo)=>{
-      if (grupo.pedidos.length < 2) return;
+    firmaMap.forEach(grupo=>{
+      if (grupo.pedidos.length < 2) return; // solo si hay duplicado
       gruposDuplicados++;
-
       const pedidosTexto = grupo.pedidos.join(', ');
 
       grupo.lineas.forEach(l=>{
@@ -921,10 +678,8 @@ function construirTablaDuplicados(porCliente){
     });
   });
 
-  const resumen = document.getElementById('dup-summary');
-  if (resumen){
-    resumen.textContent = `Pedidos duplicados (grupos): ${gruposDuplicados}`;
-  }
+  document.getElementById('dup-summary').textContent =
+    `Pedidos duplicados (grupos): ${gruposDuplicados}`;
 }
 
 /* Enlace tabla <-> mapa */
@@ -945,20 +700,12 @@ function enlazarFilasYMarcadores(){
       marker.setStyle({radius:6, weight:1});
     });
 
-    marker.on('mouseover', ()=>{
-      tr.classList.add('highlight-row');
-    });
-    marker.on('mouseout', ()=>{
-      tr.classList.remove('highlight-row');
-    });
+    marker.on('mouseover', ()=>tr.classList.add('highlight-row'));
+    marker.on('mouseout', ()=>tr.classList.remove('highlight-row'));
 
     tr.addEventListener('click', ()=>{
-      if (marker.getLatLng){
-        mapa.setView(marker.getLatLng(), 14);
-        marker.openPopup();
-      }
+      if (marker.getLatLng){ mapa.setView(marker.getLatLng(), 14); marker.openPopup(); }
     });
-
     marker.on('click', ()=>{
       filas.forEach(f=>f.classList.remove('highlight-row'));
       tr.classList.add('highlight-row');
@@ -966,7 +713,7 @@ function enlazarFilasYMarcadores(){
   });
 }
 
-/* Exportaciones tabla Fuera de ruta */
+/* Exportaciones Fuera de ruta */
 function configurarEventosTabla(){
   document.getElementById('btnCsv').addEventListener('click', descargarCSV);
   document.getElementById('btnCopyTable').addEventListener('click', copiarTablaExcel);
@@ -981,50 +728,35 @@ function descargarCSV(){
   const headers = ['Canal','Código','Cliente','Interlocutor','Dirección',
                    'Ruta ventas','Día despacho','Kg pedido'];
   const filas = ultimosValoresTabla.map(it=>[
-    it.canal,
-    it.codigo,
-    it.cliente,
-    it.interlocutor || '',
-    it.direccion || '',
-    it.ruta,
-    it.diaDespacho,
-    it.kg.toFixed(3)
+    it.canal,it.codigo,it.cliente,it.interlocutor || '',
+    it.direccion || '',it.ruta,it.diaDespacho,it.kg.toFixed(3)
   ]);
   const todo = [headers].concat(filas);
   const csv = todo.map(r=>r.map(val=>{
     const s = (val==null?'':val.toString());
-    if (s.includes(',') || s.includes('"') || s.includes('\n')){
-      return '"' + s.replace(/"/g,'""') + '"';
-    }
-    return s;
+    return (s.includes(',') || s.includes('"') || s.includes('\n'))
+      ? '"' + s.replace(/"/g,'""') + '"'
+      : s;
   }).join(',')).join('\n');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'clientes_fuera_ruta.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  a.href = url;a.download = 'clientes_fuera_ruta.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
 function copiarTablaExcel(){
   const table = document.getElementById('result-table');
   if (!table) return;
-
   let texto = '';
   const rows = table.querySelectorAll('tr');
   rows.forEach((tr,idx)=>{
     const cells = tr.querySelectorAll(idx===0 ? 'th' : 'td');
-    const linea = Array.from(cells).map(td=>td.textContent.trim()).join('\t');
-    texto += linea + '\n';
+    texto += Array.from(cells).map(td=>td.textContent.trim()).join('\t') + '\n';
   });
-
   navigator.clipboard.writeText(texto).then(()=>{
     alert('Tabla copiada. Pega en Excel con Ctrl+V.');
-  }).catch(()=>{
-    alert('No se pudo copiar al portapapeles.');
   });
 }
 
@@ -1044,7 +776,6 @@ function copiarTablaImagen(){
 
   const rect = cloneTable.getBoundingClientRect();
   const scale = window.devicePixelRatio || 1;
-
   const canvas = document.createElement('canvas');
   canvas.width = rect.width * scale;
   canvas.height = rect.height * scale;
@@ -1079,8 +810,7 @@ function copiarTablaImagen(){
 
     let x = 4;
     cells.forEach((td,colIndex)=>{
-      const text = td.textContent.trim();
-      ctx.fillText(text,x,y-5);
+      ctx.fillText(td.textContent.trim(),x,y-5);
       x += (colWidths[colIndex] || 80);
     });
     y += rowHeight;
@@ -1096,8 +826,6 @@ function copiarTablaImagen(){
     const item = new ClipboardItem({'image/png': blob});
     navigator.clipboard.write([item]).then(()=>{
       alert('Imagen de tabla copiada. Pega con Ctrl+V.');
-    }).catch(()=>{
-      alert('No se pudo copiar la imagen al portapapeles.');
     });
   },'image/png');
 }
@@ -1109,11 +837,8 @@ function copiarMapaImagen(){
     alert('No se encontró el panel del mapa.');
     return;
   }
-
   html2canvas(mapPanel,{
-    useCORS:true,
-    logging:false,
-    scale:window.devicePixelRatio || 1
+    useCORS:true,logging:false,scale:window.devicePixelRatio || 1
   }).then(canvas=>{
     canvas.toBlob(blob=>{
       if (!blob){
@@ -1123,12 +848,8 @@ function copiarMapaImagen(){
       const item = new ClipboardItem({'image/png': blob});
       navigator.clipboard.write([item]).then(()=>{
         alert('Imagen del mapa copiada. Pega con Ctrl+V.');
-      }).catch(()=>{
-        alert('No se pudo copiar la imagen del mapa al portapapeles.');
       });
     },'image/png');
-  }).catch(()=>{
-    alert('No se pudo capturar el mapa.');
   });
 }
 </script>
@@ -1136,4 +857,3 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
-
