@@ -628,10 +628,6 @@ function procesarFilasPlanner(rows){
     `Clientes DET fuera de ruta: ${valoresFueraRuta.length} | Fecha: ${fechaTexto}`;
 
   /* Tabla Duplicados */
-  construirTablaDuplicados(porCliente);
-}
-
-/* Duplicados con formato “agrupado” */
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
   if (!tbody) return;
@@ -640,9 +636,12 @@ function construirTablaDuplicados(porCliente){
 
   porCliente.forEach((infoCli, codCli)=>{
     const {nombre, ruta, pedidos} = infoCli;
-    const firmaMap = new Map(); // firma -> { pedidos:[], lineas:[] }
+
+    // firma -> { pedidos:[], lineas[] }
+    const firmaMap = new Map();
 
     pedidos.forEach((lineas, pedido)=>{
+      // ordenamos para que el orden en el planner no afecte
       const ordenadas = [...lineas].sort((a,b)=>{
         if (a.codMat < b.codMat) return -1;
         if (a.codMat > b.codMat) return 1;
@@ -650,27 +649,41 @@ function construirTablaDuplicados(porCliente){
         if (a.kg > b.kg) return 1;
         return 0;
       });
+
+      // firma única por combinación codMat + material + kg
       const firma = ordenadas
         .map(l => `${l.codMat}::${l.material}::${l.kg.toFixed(3)}`)
         .join('|');
+
       if (!firmaMap.has(firma)){
         firmaMap.set(firma,{pedidos:[], lineas:ordenadas});
       }
       firmaMap.get(firma).pedidos.push(pedido);
     });
 
+    // pintar solo firmas que tienen más de un pedido (duplicados)
     firmaMap.forEach(grupo=>{
-      if (grupo.pedidos.length < 2) return;   // solo duplicados
-      gruposDuplicados++;
-      const pedidosTexto = grupo.pedidos.join(', ');
+      if (grupo.pedidos.length < 2) return;
 
-      grupo.lineas.forEach((l, index)=>{
+      gruposDuplicados++;
+
+      const pedidosTexto = grupo.pedidos.join(', ');
+      const lineas = grupo.lineas;
+
+      lineas.forEach((l, idx)=>{
         const tr = document.createElement('tr');
+
+        // solo la primera fila del bloque lleva cod/cliente/ruta/pedido(s)
+        const cod   = idx === 0 ? codCli   : '';
+        const nom   = idx === 0 ? nombre   : '';
+        const rutaT = idx === 0 ? ruta     : '';
+        const ped   = idx === 0 ? pedidosTexto : '';
+
         tr.innerHTML = `
-          <td>${index === 0 ? codCli : ''}</td>
-          <td>${index === 0 ? nombre : ''}</td>
-          <td>${index === 0 ? ruta : ''}</td>
-          <td>${index === 0 ? pedidosTexto : ''}</td>
+          <td>${cod}</td>
+          <td>${nom}</td>
+          <td>${rutaT}</td>
+          <td>${ped}</td>
           <td>${l.codMat}</td>
           <td>${l.material}</td>
           <td>${l.kg.toFixed(3)}</td>
@@ -859,3 +872,4 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
+
