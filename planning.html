@@ -6,10 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack.png" />
 
+  <!-- Librerías -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -74,6 +76,7 @@
     .btn:disabled{opacity:.6;cursor:not-allowed;}
     .status-text{font-size:10px;color:var(--text-muted);}
 
+    /* Tabs */
     .tabs{display:flex;gap:4px;margin-bottom:4px;}
     .tab-button{
       border:none;border-radius:999px;padding:3px 10px;font-size:11px;
@@ -83,6 +86,7 @@
     .tab-content{display:none;}
     .tab-content.active{display:block;}
 
+    /* Layout Fuera de ruta */
     .content-split{
       display:flex;gap:6px;align-items:stretch;
       height:calc(100vh - 170px);
@@ -476,9 +480,9 @@ function procesarFilasPlanner(rows){
     const canal = (row[2] || '').toString().trim();
     if (!canal) continue;
 
-    const rutaVentas    = (row[3] || '').toString().trim();   // índice 3
-    const codCliente    = (row[6] || '').toString().trim();   // índice 6
-    const clienteNombre = (row[7] || '').toString().trim();   // índice 7
+    const rutaVentas    = (row[3] || '').toString().trim();   // 3
+    const codCliente    = (row[6] || '').toString().trim();   // 6
+    const clienteNombre = (row[7] || '').toString().trim();   // 7
     if (!codCliente) continue;
 
     const fechaEntregaRaw = normalizarFechaPlanner(row[17]);
@@ -500,27 +504,25 @@ function procesarFilasPlanner(rows){
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
-    /* Estructura duplicados (solo DET) */
-    if (canal.includes('DET')){
-      const pedido   = (row[13] || '').toString().trim(); // índice 13
-      const codMat   = (row[10] || '').toString().trim(); // índice 10
-      const material = (row[11] || '').toString().trim(); // índice 11
+    /* Duplicados: TODAS las filas, sin importar canal */
+    const pedido   = (row[13] || '').toString().trim(); // 13
+    const codMat   = (row[10] || '').toString().trim(); // 10
+    const material = (row[11] || '').toString().trim(); // 11
 
-      if (!porCliente.has(codCliente)){
-        porCliente.set(codCliente,{
-          nombre: clienteNombre,
-          ruta: rutaVentas,
-          pedidos: new Map()
-        });
-      }
-      const infoCli = porCliente.get(codCliente);
-      if (!infoCli.pedidos.has(pedido)){
-        infoCli.pedidos.set(pedido, []);
-      }
-      infoCli.pedidos.get(pedido).push({codMat, material, kg});
+    if (!porCliente.has(codCliente)){
+      porCliente.set(codCliente,{
+        nombre: clienteNombre,
+        ruta: rutaVentas,
+        pedidos: new Map()
+      });
     }
+    const infoCli = porCliente.get(codCliente);
+    if (!infoCli.pedidos.has(pedido)){
+      infoCli.pedidos.set(pedido, []);
+    }
+    infoCli.pedidos.get(pedido).push({codMat, material, kg});
 
-    /* FSE */
+    /* FSE para mapa */
     if (canal.includes('FSE')){
       if (tieneGeo){
         const popupHtml = `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}</div>`;
@@ -629,7 +631,7 @@ function procesarFilasPlanner(rows){
   construirTablaDuplicados(porCliente);
 }
 
-/* Duplicados: usa firma (codMat, material, kg) sin importar orden de filas */
+/* Duplicados: cliente + ruta, pedidos con mismo set de (codMat, material, kg) */
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
   if (!tbody) return;
@@ -658,7 +660,7 @@ function construirTablaDuplicados(porCliente){
     });
 
     firmaMap.forEach(grupo=>{
-      if (grupo.pedidos.length < 2) return; // solo si hay duplicado
+      if (grupo.pedidos.length < 2) return;
       gruposDuplicados++;
       const pedidosTexto = grupo.pedidos.join(', ');
 
