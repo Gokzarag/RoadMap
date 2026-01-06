@@ -262,7 +262,6 @@
     </div>
   </main>
 </div>
-
 <script>
 const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
 const COL_LAT = 28;
@@ -480,9 +479,9 @@ function procesarFilasPlanner(rows){
     const canal = (row[2] || '').toString().trim();
     if (!canal) continue;
 
-    const rutaVentas    = (row[3] || '').toString().trim();   // 3
-    const codCliente    = (row[6] || '').toString().trim();   // 6
-    const clienteNombre = (row[7] || '').toString().trim();   // 7
+    const rutaVentas    = (row[3] || '').toString().trim();
+    const codCliente    = (row[6] || '').toString().trim();
+    const clienteNombre = (row[7] || '').toString().trim();
     if (!codCliente) continue;
 
     const fechaEntregaRaw = normalizarFechaPlanner(row[17]);
@@ -505,9 +504,9 @@ function procesarFilasPlanner(rows){
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
     /* Duplicados: TODAS las filas, sin importar canal */
-    const pedido   = (row[13] || '').toString().trim(); // 13
-    const codMat   = (row[10] || '').toString().trim(); // 10
-    const material = (row[11] || '').toString().trim(); // 11
+    const pedido   = (row[13] || '').toString().trim();
+    const codMat   = (row[10] || '').toString().trim();
+    const material = (row[11] || '').toString().trim();
 
     if (!porCliente.has(codCliente)){
       porCliente.set(codCliente,{
@@ -525,7 +524,8 @@ function procesarFilasPlanner(rows){
     /* FSE para mapa */
     if (canal.includes('FSE')){
       if (tieneGeo){
-        const popupHtml = `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}</div>`;
+        const popupHtml =
+          `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}</div>`;
         const mFse = L.circleMarker([lat,lon],{
           radius:5,color:'#1d4ed8',fillColor:'#3b82f6',fillOpacity:0.9
         }).addTo(capaFSE).bindPopup(popupHtml);
@@ -631,7 +631,7 @@ function procesarFilasPlanner(rows){
   construirTablaDuplicados(porCliente);
 }
 
-/* Duplicados: cliente + ruta, pedidos con mismo set de (codMat, material, kg) */
+/* Duplicados con formato “agrupado” */
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
   if (!tbody) return;
@@ -660,17 +660,17 @@ function construirTablaDuplicados(porCliente){
     });
 
     firmaMap.forEach(grupo=>{
-      if (grupo.pedidos.length < 2) return;
+      if (grupo.pedidos.length < 2) return;   // solo duplicados
       gruposDuplicados++;
       const pedidosTexto = grupo.pedidos.join(', ');
 
-      grupo.lineas.forEach(l=>{
+      grupo.lineas.forEach((l, index)=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${codCli}</td>
-          <td>${nombre}</td>
-          <td>${ruta}</td>
-          <td>${pedidosTexto}</td>
+          <td>${index === 0 ? codCli : ''}</td>
+          <td>${index === 0 ? nombre : ''}</td>
+          <td>${index === 0 ? ruta : ''}</td>
+          <td>${index === 0 ? pedidosTexto : ''}</td>
           <td>${l.codMat}</td>
           <td>${l.material}</td>
           <td>${l.kg.toFixed(3)}</td>
