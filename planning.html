@@ -645,7 +645,7 @@ function construirTablaDuplicados(porCliente){
     const firmaMap = new Map();
 
     pedidos.forEach((lineas, pedido)=>{
-      // ordenamos para que el orden en el planner no afecte
+      // Ordenar para que el orden en el planner no afecte
       const ordenadas = [...lineas].sort((a,b)=>{
         if (a.codMat < b.codMat) return -1;
         if (a.codMat > b.codMat) return 1;
@@ -654,7 +654,7 @@ function construirTablaDuplicados(porCliente){
         return 0;
       });
 
-      // firma única por combinación codMat + material + kg
+      // Firma única por combinación codMat + material + kg
       const firma = ordenadas
         .map(l => `${l.codMat}::${l.material}::${l.kg.toFixed(3)}`)
         .join('|');
@@ -665,29 +665,29 @@ function construirTablaDuplicados(porCliente){
       firmaMap.get(firma).pedidos.push(pedido);
     });
 
-    // pintar solo firmas que tienen más de un pedido (duplicados)
+    // Pintar solo firmas que tienen más de un pedido (duplicados)
     firmaMap.forEach(grupo=>{
       if (grupo.pedidos.length < 2) return;
 
       gruposDuplicados++;
-
       const pedidosTexto = grupo.pedidos.join(', ');
       const lineas = grupo.lineas;
 
+      // Recorremos todas las líneas de material del grupo
       lineas.forEach((l, idx)=>{
         const tr = document.createElement('tr');
 
-        // solo la primera fila del bloque lleva cod/cliente/ruta/pedido(s)
-        const cod   = idx === 0 ? codCli   : '';
-        const nom   = idx === 0 ? nombre   : '';
-        const rutaT = idx === 0 ? ruta     : '';
-        const ped   = idx === 0 ? pedidosTexto : '';
+        // Solo la primera fila del bloque lleva código/cliente/ruta/pedido(s)
+        const codCol   = idx === 0 ? codCli        : '';
+        const cliCol   = idx === 0 ? nombre        : '';
+        const rutaCol  = idx === 0 ? ruta          : '';
+        const pedCol   = idx === 0 ? pedidosTexto  : '';
 
         tr.innerHTML = `
-          <td>${cod}</td>
-          <td>${nom}</td>
-          <td>${rutaT}</td>
-          <td>${ped}</td>
+          <td>${codCol}</td>
+          <td>${cliCol}</td>
+          <td>${rutaCol}</td>
+          <td>${pedCol}</td>
           <td>${l.codMat}</td>
           <td>${l.material}</td>
           <td>${l.kg.toFixed(3)}</td>
@@ -700,7 +700,6 @@ function construirTablaDuplicados(porCliente){
   document.getElementById('dup-summary').textContent =
     `Pedidos duplicados (grupos): ${gruposDuplicados}`;
 }
-
 /* Enlace tabla <-> mapa */
 function enlazarFilasYMarcadores(){
   const filas = document.querySelectorAll('#result-table tbody tr');
@@ -876,5 +875,6 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
+
 
 
