@@ -628,6 +628,10 @@ function procesarFilasPlanner(rows){
     `Clientes DET fuera de ruta: ${valoresFueraRuta.length} | Fecha: ${fechaTexto}`;
 
   /* Tabla Duplicados */
+    construirTablaDuplicados(porCliente);
+}
+
+  /* Duplicados con formato “agrupado” */
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
   if (!tbody) return;
@@ -872,4 +876,5 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
+
 
