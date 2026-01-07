@@ -773,12 +773,10 @@ function descargarCSV(){
   const todo = [headers].concat(filas);
   const csv = todo.map(r=>r.map(val=>{
     const s = (val==null?'':val.toString());
-    return (s.includes(',') || s.includes('"') || s.includes('
-'))
+    return (s.includes(',') || s.includes('"') || s.includes('\n'))
       ? '"' + s.replace(/"/g,'""') + '"'
       : s;
-  }).join(',')).join('
-');
+  }).join(',')).join('\n');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -948,3 +946,4 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
+
