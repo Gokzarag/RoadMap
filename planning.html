@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -138,6 +139,40 @@
     @media (max-width:900px){
       .content-split{flex-direction:column;height:auto;}
       .table-wrapper,#map{min-height:260px;}
+    }
+
+    /* ======= ESTILO ESPECÍFICO: TABLA DUPLICADOS (como la imagen) ======= */
+    /* Encabezado negro, texto blanco */
+    #dup-table thead{
+      background:#000000 !important;
+      color:#ffffff !important;
+    }
+    /* Bordes exteriores e internos negros */
+    #dup-table{
+      border:2px solid #000;
+    }
+    #dup-table th, #dup-table td{
+      border:1px solid #000 !important;
+      padding:2px 6px;
+      background:#fff; /* cuerpo blanco */
+      color:#000;
+    }
+    /* Celda de Pedido(s): lista apilada con separadores finos */
+    .pedido-list{
+      display:flex;
+      flex-direction:column;
+      gap:0;
+    }
+    .pedido-item{
+      padding:2px 0;
+      border-bottom:1px solid #000;
+    }
+    .pedido-item:last-child{
+      border-bottom:none;
+    }
+    /* Evitar zebra en duplicados para parecerse a tu ejemplo */
+    #dup-table tbody tr:nth-child(even){
+      background:#fff;
     }
   </style>
 </head>
@@ -639,7 +674,7 @@ function procesarFilasPlanner(rows){
   construirTablaDuplicados(porCliente);
 }
 
-/* Duplicados: formato tipo Excel + Canal */
+/* Duplicados: render con ROWSPAN (Canal / Código / Cliente / Ruta) y bloque de Pedido(s) */
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
   if (!tbody) return;
@@ -675,35 +710,74 @@ function construirTablaDuplicados(porCliente){
       if (grupo.pedidos.length < 2) return;
 
       gruposDuplicados++;
-      const pedidosTexto = grupo.pedidos.join(', ');
+      const pedidosArr = grupo.pedidos; // arreglo de pedidos
       const lineas = grupo.lineas;
+      const rowsCount = lineas.length;
 
       lineas.forEach((l, idx)=>{
-        const canalCol = idx === 0 ? canal        : '';
-        const codCol   = idx === 0 ? codCli       : '';
-        const cliCol   = idx === 0 ? nombre       : '';
-        const rutaCol  = idx === 0 ? ruta         : '';
-        const pedCol   = idx === 0 ? pedidosTexto : '';
-
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${canalCol}</td>
-          <td>${codCol}</td>
-          <td>${cliCol}</td>
-          <td>${rutaCol}</td>
-          <td>${pedCol}</td>
-          <td>${l.codMat}</td>
-          <td>${l.material}</td>
-          <td>${l.kg.toFixed(3)}</td>
-        `;
+
+        // Canal (rowspan)
+        if (idx === 0){
+          const tdCanal = document.createElement('td');
+          tdCanal.textContent = canal;
+          tdCanal.rowSpan = rowsCount;
+          tr.appendChild(tdCanal);
+
+          const tdCodigo = document.createElement('td');
+          tdCodigo.textContent = codCli;
+          tdCodigo.rowSpan = rowsCount;
+          tr.appendChild(tdCodigo);
+
+          const tdCliente = document.createElement('td');
+          tdCliente.textContent = nombre;
+          tdCliente.rowSpan = rowsCount;
+          tr.appendChild(tdCliente);
+
+          const tdRuta = document.createElement('td');
+          tdRuta.textContent = ruta;
+          tdRuta.rowSpan = rowsCount;
+          tr.appendChild(tdRuta);
+
+          // Pedido(s) como bloque apilado
+          const tdPedidos = document.createElement('td');
+          tdPedidos.rowSpan = rowsCount;
+          const divList = document.createElement('div');
+          divList.className = 'pedido-list';
+          pedidosArr.forEach(p=>{
+            const div = document.createElement('div');
+            div.className = 'pedido-item';
+            div.textContent = p;
+            divList.appendChild(div);
+          });
+          tdPedidos.appendChild(divList);
+          tr.appendChild(tdPedidos);
+        }
+
+        // Cod Material
+        const tdCodMat = document.createElement('td');
+        tdCodMat.textContent = l.codMat;
+        tr.appendChild(tdCodMat);
+
+        // Material
+        const tdMaterial = document.createElement('td');
+        tdMaterial.textContent = l.material;
+        tr.appendChild(tdMaterial);
+
+        // Kg
+        const tdKg = document.createElement('td');
+        tdKg.textContent = l.kg.toFixed(3);
+        tr.appendChild(tdKg);
+
         tbody.appendChild(tr);
 
+        // Mantener datos para exportaciones (igual que antes)
         window.ultimosDuplicados.push({
-          canal: canalCol,
-          codigo: codCol,
-          cliente: cliCol,
-          ruta: rutaCol,
-          pedidos: pedCol,
+          canal: idx === 0 ? canal : '',
+          codigo: idx === 0 ? codCli : '',
+          cliente: idx === 0 ? nombre : '',
+          ruta: idx === 0 ? ruta : '',
+          pedidos: idx === 0 ? pedidosArr.join(', ') : '',
           codMat: l.codMat,
           material: l.material,
           kg: l.kg.toFixed(3)
@@ -945,5 +1019,4 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
-
 
