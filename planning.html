@@ -13,13 +13,10 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <!-- Leaflet -->
-  <link rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin=""/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-          crossorigin=""></script>
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 
   <style>
     :root{
@@ -174,6 +171,7 @@
     }
     /* Sin zebra para parecerse al reporte Excel */
     #dup-table tbody tr:nth-child(even){ background:#fff; }
+
     /* Alinear números de Kg a la derecha */
     td.kg-cell{ text-align:right; }
 
@@ -186,31 +184,6 @@
     #dup-table col.cma { width:95px; }
     #dup-table col.mat { width:auto; }
     #dup-table col.kg  { width:70px; }
-
-    /* ===== Estilo forzado SOLO para la captura (aplicado al clon) ===== */
-    .dup-capture-mode{
-      border:2px solid #000 !important;
-      border-radius:10px !important;
-      overflow:hidden !important;
-      background:#ffffff !important;
-      filter:none !important;
-    }
-    .dup-capture-mode #dup-table thead th{
-      background:#000 !important;
-      color:#fff !important;
-      border:1px solid #000 !important;
-    }
-    .dup-capture-mode #dup-table tbody td{
-      background:#fff !important;
-      color:#000 !important;
-      border:1px solid #000 !important;
-    }
-    .dup-capture-mode #dup-table tbody tr:nth-child(even){
-      background:#fff !important;
-    }
-    .dup-capture-mode td.kg-cell{
-      text-align:right !important;
-    }
   </style>
 </head>
 
@@ -230,9 +203,7 @@
                 <span id="fileNameLabel">Seleccionar planner</span>
               </label>
               <input type="file" id="plannerFile" accept=".csv,.txt,.xls,.xlsx" />
-              <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">
-                ▶
-              </button>
+              <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">▶</button>
             </div>
           </div>
           <div class="panel-meta">
@@ -595,7 +566,7 @@ function procesarFilasPlanner(rows){
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
-    /* Duplicados: todas las filas */
+    /* Duplicados */
     const pedido   = (row[13] || '').toString().trim();
     const codMat   = (row[10] || '').toString().trim();
     const material = (row[11] || '').toString().trim();
@@ -617,8 +588,7 @@ function procesarFilasPlanner(rows){
     /* FSE */
     if (canal.includes('FSE')){
       if (tieneGeo){
-        const popupHtml =
-          `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}</div>`;
+        const popupHtml = `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}</div>`;
         const mFse = L.circleMarker([lat,lon],{
           radius:5,color:'#1d4ed8',fillColor:'#3b82f6',fillOpacity:0.9
         }).addTo(capaFSE).bindPopup(popupHtml);
@@ -724,10 +694,10 @@ function procesarFilasPlanner(rows){
   construirTablaDuplicados(porCliente);
 }
 
-/* === Duplicados con filas = (#pedidos × #materiales) ===
+/* === Duplicados con 4 filas (2 pedidos × 2 materiales) ===
    - Canal/Código/Cliente/Ruta: una sola vez por grupo (rowSpan = totalFilas).
    - Pedido(s): una vez por cada pedido, rowSpan = #materiales del pedido.
-   - Cod Material/Material/Kg: por cada línea del pedido.
+   - Cod Material/Material/Kg: por cada línea del pedido (se repiten por pedido).
 */
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
@@ -766,10 +736,10 @@ function construirTablaDuplicados(porCliente){
       if (grupo.pedidos.length < 2) return;
 
       gruposDuplicados++;
-      const pedidosArr     = grupo.pedidos;     // p.ej. [3023766972, 3023966247]
-      const lineasBase     = grupo.lineas;      // p.ej. 2 materiales
-      const filasPorPedido = lineasBase.length; // 2
-      const filasTotales   = pedidosArr.length * filasPorPedido; // 4
+      const pedidosArr = grupo.pedidos;      // p.ej. [3023766972, 3023966247]
+      const lineasBase = grupo.lineas;       // p.ej. 2 materiales
+      const filasPorPedido = lineasBase.length;
+      const filasTotales   = pedidosArr.length * filasPorPedido;
 
       // Iterar por pedido y repetir sus materiales
       let filaGlobal = 0;
@@ -795,7 +765,16 @@ function construirTablaDuplicados(porCliente){
             tr.appendChild(tdCliente);
 
             const tdRuta = document.createElement('td');
-            tdRuta.textContent =pan = filasPorPedido;
+            tdRuta.textContent = ruta;
+            tdRuta.rowSpan = filasTotales;
+            tr.appendChild(tdRuta);
+          }
+
+          // Pedido(s): una celda por pedido, que abarca sus materiales
+          if (lIdx === 0){
+            const tdPedido = document.createElement('td');
+            tdPedido.textContent = pedido;
+            tdPedido.rowSpan = filasPorPedido;
             tr.appendChild(tdPedido);
           }
 
@@ -815,7 +794,7 @@ function construirTablaDuplicados(porCliente){
 
           tbody.appendChild(tr);
 
-          // Mantener datos para exportaciones (compatibilidad)
+          // Exportaciones (una sola fila con encabezados; pero mantenemos por compatibilidad)
           window.ultimosDuplicados.push({
             canal: filaGlobal === 0 ? canal : '',
             codigo: filaGlobal === 0 ? codCli : '',
@@ -837,7 +816,7 @@ function construirTablaDuplicados(porCliente){
     `Pedidos duplicados (grupos): ${gruposDuplicados}`;
 }
 
-/* Enlace tabla <-> mapa (no cambia) */
+/* Enlace tabla <-> mapa (igual) */
 function enlazarFilasYMarcadores(){
   const filas = document.querySelectorAll('#result-table tbody tr');
   filas.forEach(tr=>{
@@ -964,71 +943,11 @@ function copiarDuplicadosExcel(){
   });
 }
 
-/* ===== Copiar imagen "óptima" de la tabla de Duplicados ===== */
 function copiarDuplicadosImagen(){
-  const frame = document.querySelector('.dup-frame');
-  const table = document.getElementById('dup-table');
-  if (!frame || !table){
-    alert('No se encontró la tabla de duplicados.');
-    return;
-  }
-
-  // Clonar el marco completo para preservar el look Excel
-  const cloneWrapper = document.createElement('div');
-  cloneWrapper.style.position = 'fixed';
-  cloneWrapper.style.left = '-99999px';
-  cloneWrapper.style.top = '0';
-  cloneWrapper.style.zIndex = '-1';
-  cloneWrapper.style.background = '#ffffff';
-
-  const frameClone = frame.cloneNode(true);
-  frameClone.classList.add('dup-capture-mode');
-
-  cloneWrapper.appendChild(frameClone);
-  document.body.appendChild(cloneWrapper);
-
-  // Capturar el clon con alta resolución
-  const scale = Math.max(2, window.devicePixelRatio || 1);
-  html2canvas(frameClone, {
-    backgroundColor: '#ffffff',
-    scale,
-    useCORS: true,
-    logging: false,
-    scrollX: 0,
-    scrollY: 0,
-    removeContainer: true
-  }).then(canvas => {
-    document.body.removeChild(cloneWrapper);
-
-    canvas.toBlob(async (blob) => {
-      if (!blob){
-        alert('No se pudo generar la imagen.');
-        return;
-      }
-      const pngItem = new ClipboardItem({ 'image/png': blob });
-      try {
-        await navigator.clipboard.write([pngItem]);
-        alert('Imagen de duplicados copiada. Pega con Ctrl+V.');
-      } catch (err) {
-        // Fallback: descarga del PNG
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'duplicados.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        alert('No se pudo copiar al portapapeles. Se descargó la imagen como archivo PNG.');
-      }
-    }, 'image/png');
-  }).catch(err => {
-    document.body.removeChild(cloneWrapper);
-    alert('Error generando la imagen: ' + (err && err.message ? err.message : err));
-  });
+  copiarTablaGenericaComoImagen('dup-table','Imagen de duplicados copiada. Pega con Ctrl+V.');
 }
 
-/* Util para copiar tabla como imagen (fuera de ruta) */
+/* Util para copiar tabla como imagen */
 function copiarTablaGenericaComoImagen(tableId, mensajeOk){
   const table = document.getElementById(tableId);
   if (!table) return;
@@ -1039,40 +958,64 @@ function copiarTablaGenericaComoImagen(tableId, mensajeOk){
   cloneWrapper.style.top = '0';
   cloneWrapper.style.background = '#ffffff';
 
-  const targetClone = table.parentElement.cloneNode(true); // clona el contenedor de tabla
-  cloneWrapper.appendChild(targetClone);
+  const cloneTable = table.cloneNode(true);
+  cloneWrapper.appendChild(cloneTable);
   document.body.appendChild(cloneWrapper);
 
-  const scale = Math.max(2, window.devicePixelRatio || 1);
-  html2canvas(targetClone, {
-    backgroundColor:'#ffffff',
-    scale,
-    useCORS:true,
-    logging:false,
-    removeContainer:true
-  }).then(canvas=>{
-    document.body.removeChild(cloneWrapper);
-    canvas.toBlob(blob=>{
-      if (!blob){
-        alert('No se pudo generar la imagen.');
-        return;
-      }
-      const item = new ClipboardItem({'image/png': blob});
-      navigator.clipboard.write([item]).then(()=>{
-        alert(mensajeOk);
-      }).catch(()=>{
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'tabla.png';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        alert('No se pudo copiar al portapapeles. Se descargó la imagen como archivo PNG.');
-      });
-    },'image/png');
-  }).catch(()=>{
-    document.body.removeChild(cloneWrapper);
-    alert('Error generando la imagen.');
+  const rect = cloneTable.getBoundingClientRect();
+  const scale = window.devicePixelRatio || 1;
+  const canvas = document.createElement('canvas');
+  canvas.width = rect.width * scale;
+  canvas.height = rect.height * scale;
+  const ctx = canvas.getContext('2d');
+
+  ctx.scale(scale,scale);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,rect.width,rect.height);
+
+  const rows = cloneTable.querySelectorAll('tr');
+  const rowHeight = 18;
+  const headerBg = '#111827';
+  const headerTextColor = '#f9fafb';
+  const bodyEvenBg = '#f3f4f6';
+  const bodyOddBg = '#ffffff';
+
+  const colWidths = [];
+  const headerCells = cloneTable.querySelectorAll('thead th');
+  headerCells.forEach((th,i)=>{
+    colWidths[i] = Math.max(80, th.getBoundingClientRect().width);
   });
+
+  let y = rowHeight;
+  rows.forEach((tr,rowIndex)=>{
+    const cells = tr.querySelectorAll(rowIndex===0 ? 'th' : 'td');
+
+    ctx.fillStyle = (rowIndex===0) ? headerBg : (rowIndex % 2 === 0 ? bodyEvenBg : bodyOddBg);
+    ctx.fillRect(0,y-rowHeight,rect.width,rowHeight);
+
+    ctx.font = '11px Segoe UI, sans-serif';
+    ctx.fillStyle = (rowIndex===0) ? headerTextColor : '#111827';
+
+    let x = 4;
+    cells.forEach((td,colIndex)=>{
+      ctx.fillText(td.textContent.trim(),x,y-5);
+      x += (colWidths[colIndex] || 80);
+    });
+    y += rowHeight;
+  });
+
+  document.body.removeChild(cloneWrapper);
+
+  canvas.toBlob(blob=>{
+    if (!blob){
+      alert('No se pudo generar la imagen.');
+      return;
+    }
+    const item = new ClipboardItem({'image/png': blob});
+    navigator.clipboard.write([item]).then(()=>{
+      alert(mensajeOk);
+    });
+  },'image/png');
 }
 
 /* Captura de mapa */
@@ -1083,8 +1026,7 @@ function copiarMapaImagen(){
     return;
   }
   html2canvas(mapPanel,{
-    useCORS:true,logging:false,scale:Math.max(2, window.devicePixelRatio || 1),
-    backgroundColor:'#ffffff'
+    useCORS:true,logging:false,scale:window.devicePixelRatio || 1
   }).then(canvas=>{
     canvas.toBlob(blob=>{
       if (!blob){
@@ -1094,22 +1036,15 @@ function copiarMapaImagen(){
       const item = new ClipboardItem({'image/png': blob});
       navigator.clipboard.write([item]).then(()=>{
         alert('Imagen del mapa copiada. Pega con Ctrl+V.');
-      }).catch(()=>{
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'mapa.png';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        alert('No se pudo copiar al portapapeles. Se descargó la imagen como archivo PNG.');
       });
     },'image/png');
   });
 }
 </script>
 
-<!-- Tu layout (si aplica) -->
-layout.js</script>
+<script src="layout.js"></script>
 </body>
 </html>
+``
 
 
