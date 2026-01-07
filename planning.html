@@ -233,7 +233,7 @@
           </div>
         </div>
 
-        <!-- Duplicados -->
+        <!-- Duplicados (con Canal) -->
         <div class="tab-content" id="tab-duplicados">
           <div class="table-panel">
             <div class="table-header-row">
@@ -243,6 +243,7 @@
               <table id="dup-table">
                 <thead>
                   <tr>
+                    <th>Canal</th>
                     <th>Código</th>
                     <th>Cliente</th>
                     <th>Ruta</th>
@@ -262,6 +263,7 @@
     </div>
   </main>
 </div>
+
 <script>
 const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
 const COL_LAT = 28;
@@ -469,7 +471,7 @@ function procesarFilasPlanner(rows){
   const bounds = [];
   const fechasEntrega = [];
 
-  // codCliente -> { nombre, ruta, pedidos: Map(pedido -> lineas[]) }
+  // codCliente -> { canal, nombre, ruta, pedidos: Map(pedido -> lineas[]) }
   const porCliente = new Map();
 
   for (let i=startIdx;i<rows.length;i++){
@@ -503,13 +505,14 @@ function procesarFilasPlanner(rows){
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
-    /* Duplicados: TODAS las filas, sin importar canal */
+    /* Duplicados: TODAS las filas */
     const pedido   = (row[13] || '').toString().trim();
     const codMat   = (row[10] || '').toString().trim();
     const material = (row[11] || '').toString().trim();
 
     if (!porCliente.has(codCliente)){
       porCliente.set(codCliente,{
+        canal,
         nombre: clienteNombre,
         ruta: rutaVentas,
         pedidos: new Map()
@@ -628,10 +631,10 @@ function procesarFilasPlanner(rows){
     `Clientes DET fuera de ruta: ${valoresFueraRuta.length} | Fecha: ${fechaTexto}`;
 
   /* Tabla Duplicados */
-    construirTablaDuplicados(porCliente);
+  construirTablaDuplicados(porCliente);
 }
 
-  /* Duplicados con formato “agrupado” */
+/* Duplicados: Canal + fila por material */
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
   if (!tbody) return;
@@ -639,13 +642,11 @@ function construirTablaDuplicados(porCliente){
   let gruposDuplicados = 0;
 
   porCliente.forEach((infoCli, codCli)=>{
-    const {nombre, ruta, pedidos} = infoCli;
+    const {canal, nombre, ruta, pedidos} = infoCli;
 
-    // firma -> { pedidos:[], lineas[] }
     const firmaMap = new Map();
 
     pedidos.forEach((lineas, pedido)=>{
-      // Ordenar para que el orden en el planner no afecte
       const ordenadas = [...lineas].sort((a,b)=>{
         if (a.codMat < b.codMat) return -1;
         if (a.codMat > b.codMat) return 1;
@@ -654,7 +655,6 @@ function construirTablaDuplicados(porCliente){
         return 0;
       });
 
-      // Firma única por combinación codMat + material + kg
       const firma = ordenadas
         .map(l => `${l.codMat}::${l.material}::${l.kg.toFixed(3)}`)
         .join('|');
@@ -665,7 +665,6 @@ function construirTablaDuplicados(porCliente){
       firmaMap.get(firma).pedidos.push(pedido);
     });
 
-    // Pintar solo firmas que tienen más de un pedido (duplicados)
     firmaMap.forEach(grupo=>{
       if (grupo.pedidos.length < 2) return;
 
@@ -673,17 +672,17 @@ function construirTablaDuplicados(porCliente){
       const pedidosTexto = grupo.pedidos.join(', ');
       const lineas = grupo.lineas;
 
-      // Recorremos todas las líneas de material del grupo
       lineas.forEach((l, idx)=>{
         const tr = document.createElement('tr');
 
-        // Solo la primera fila del bloque lleva código/cliente/ruta/pedido(s)
-        const codCol   = idx === 0 ? codCli        : '';
-        const cliCol   = idx === 0 ? nombre        : '';
-        const rutaCol  = idx === 0 ? ruta          : '';
-        const pedCol   = idx === 0 ? pedidosTexto  : '';
+        const canalCol = idx === 0 ? canal       : '';
+        const codCol   = idx === 0 ? codCli      : '';
+        const cliCol   = idx === 0 ? nombre      : '';
+        const rutaCol  = idx === 0 ? ruta        : '';
+        const pedCol   = idx === 0 ? pedidosTexto: '';
 
         tr.innerHTML = `
+          <td>${canalCol}</td>
           <td>${codCol}</td>
           <td>${cliCol}</td>
           <td>${rutaCol}</td>
@@ -700,6 +699,7 @@ function construirTablaDuplicados(porCliente){
   document.getElementById('dup-summary').textContent =
     `Pedidos duplicados (grupos): ${gruposDuplicados}`;
 }
+
 /* Enlace tabla <-> mapa */
 function enlazarFilasYMarcadores(){
   const filas = document.querySelectorAll('#result-table tbody tr');
@@ -875,6 +875,5 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
-
 
 
