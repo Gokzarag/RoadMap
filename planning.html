@@ -14,9 +14,9 @@
 
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 
   <style>
     :root{
@@ -141,39 +141,49 @@
       .table-wrapper,#map{min-height:260px;}
     }
 
-    /* ======= ESTILO ESPECÍFICO: TABLA DUPLICADOS (como la imagen) ======= */
-    /* Encabezado negro, texto blanco */
-    #dup-table thead{
-      background:#000000 !important;
-      color:#ffffff !important;
-    }
-    /* Bordes exteriores e internos negros */
-    #dup-table{
+    /* ======= ESTILO ESPECÍFICO: TABLA DUPLICADOS (igual a tu imagen) ======= */
+    /* Marco exterior negro con esquinas redondeadas */
+    .dup-frame{
       border:2px solid #000;
-    }
-    #dup-table th, #dup-table td{
-      border:1px solid #000 !important;
-      padding:2px 6px;
-      background:#fff; /* cuerpo blanco */
-      color:#000;
-    }
-    /* Celda de Pedido(s): lista apilada con separadores finos */
-    .pedido-list{
-      display:flex;
-      flex-direction:column;
-      gap:0;
-    }
-    .pedido-item{
-      padding:2px 0;
-      border-bottom:1px solid #000;
-    }
-    .pedido-item:last-child{
-      border-bottom:none;
-    }
-    /* Evitar zebra en duplicados para parecerse a tu ejemplo */
-    #dup-table tbody tr:nth-child(even){
+      border-radius:10px;
+      overflow:hidden;
       background:#fff;
     }
+    /* Tabla interna (bordes negros y encabezado negro) */
+    #dup-table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:auto;
+      font-size:9px;
+    }
+    #dup-table thead th{
+      background:#000;
+      color:#fff;
+      border:1px solid #000;
+      padding:4px 6px;
+      font-weight:600;
+    }
+    #dup-table tbody td{
+      border:1px solid #000;
+      color:#000;
+      background:#fff;
+      padding:3px 6px;
+    }
+    /* Sin zebra para parecerse al reporte Excel */
+    #dup-table tbody tr:nth-child(even){ background:#fff; }
+
+    /* Alinear números de Kg a la derecha */
+    td.kg-cell{ text-align:right; }
+
+    /* Sugerencia de anchos (ajústalos si quieres finetuning) */
+    #dup-table col.can { width:70px; }
+    #dup-table col.cod { width:90px; }
+    #dup-table col.cli { width:260px; }
+    #dup-table col.rut { width:60px; }
+    #dup-table col.ped { width:140px; }
+    #dup-table col.cma { width:95px; }
+    #dup-table col.mat { width:auto; }
+    #dup-table col.kg  { width:70px; }
   </style>
 </head>
 
@@ -193,9 +203,7 @@
                 <span id="fileNameLabel">Seleccionar planner</span>
               </label>
               <input type="file" id="plannerFile" accept=".csv,.txt,.xls,.xlsx" />
-              <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">
-                ▶
-              </button>
+              <button class="btn btn-primary" id="btnProcesar" disabled title="Procesar archivo">▶</button>
             </div>
           </div>
           <div class="panel-meta">
@@ -278,21 +286,34 @@
               </div>
             </div>
             <div class="table-wrapper">
-              <table id="dup-table">
-                <thead>
-                  <tr>
-                    <th>Canal</th>
-                    <th>Código</th>
-                    <th>Cliente</th>
-                    <th>Ruta</th>
-                    <th>Pedido(s)</th>
-                    <th>Cod Material</th>
-                    <th>Material</th>
-                    <th>Kg</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
+              <!-- Marco exterior negro redondeado -->
+              <div class="dup-frame">
+                <table id="dup-table">
+                  <colgroup>
+                    <col class="can" />
+                    <col class="cod" />
+                    <col class="cli" />
+                    <col class="rut" />
+                    <col class="ped" />
+                    <col class="cma" />
+                    <col class="mat" />
+                    <col class="kg" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>Canal</th>
+                      <th>Código</th>
+                      <th>Cliente</th>
+                      <th>Ruta</th>
+                      <th>Pedido(s)</th>
+                      <th>Cod Material</th>
+                      <th>Material</th>
+                      <th>Kg</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -545,7 +566,7 @@ function procesarFilasPlanner(rows){
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
-    /* Duplicados: todas las filas */
+    /* Duplicados */
     const pedido   = (row[13] || '').toString().trim();
     const codMat   = (row[10] || '').toString().trim();
     const material = (row[11] || '').toString().trim();
@@ -567,8 +588,7 @@ function procesarFilasPlanner(rows){
     /* FSE */
     if (canal.includes('FSE')){
       if (tieneGeo){
-        const popupHtml =
-          `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}</div>`;
+        const popupHtml = `<div style="font-size:10px;"><strong>${codCliente}</strong> - ${clienteNombre}</div>`;
         const mFse = L.circleMarker([lat,lon],{
           radius:5,color:'#1d4ed8',fillColor:'#3b82f6',fillOpacity:0.9
         }).addTo(capaFSE).bindPopup(popupHtml);
@@ -674,7 +694,11 @@ function procesarFilasPlanner(rows){
   construirTablaDuplicados(porCliente);
 }
 
-/* Duplicados: render con ROWSPAN (Canal / Código / Cliente / Ruta) y bloque de Pedido(s) */
+/* === Duplicados con 4 filas (2 pedidos × 2 materiales) ===
+   - Canal/Código/Cliente/Ruta: una sola vez por grupo (rowSpan = totalFilas).
+   - Pedido(s): una vez por cada pedido, rowSpan = #materiales del pedido.
+   - Cod Material/Material/Kg: por cada línea del pedido (se repiten por pedido).
+*/
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
   if (!tbody) return;
@@ -687,6 +711,7 @@ function construirTablaDuplicados(porCliente){
 
     const firmaMap = new Map();
 
+    // Agrupar por "firma" (mismo set de líneas = duplicado)
     pedidos.forEach((lineas, pedido)=>{
       const ordenadas = [...lineas].sort((a,b)=>{
         if (a.codMat < b.codMat) return -1;
@@ -706,81 +731,82 @@ function construirTablaDuplicados(porCliente){
       firmaMap.get(firma).pedidos.push(pedido);
     });
 
+    // Pintar grupos duplicados
     firmaMap.forEach(grupo=>{
       if (grupo.pedidos.length < 2) return;
 
       gruposDuplicados++;
-      const pedidosArr = grupo.pedidos; // arreglo de pedidos
-      const lineas = grupo.lineas;
-      const rowsCount = lineas.length;
+      const pedidosArr = grupo.pedidos;      // p.ej. [3023766972, 3023966247]
+      const lineasBase = grupo.lineas;       // p.ej. 2 materiales
+      const filasPorPedido = lineasBase.length;
+      const filasTotales   = pedidosArr.length * filasPorPedido;
 
-      lineas.forEach((l, idx)=>{
-        const tr = document.createElement('tr');
+      // Iterar por pedido y repetir sus materiales
+      let filaGlobal = 0;
+      pedidosArr.forEach((pedido, pIdx)=>{
+        lineasBase.forEach((l, lIdx)=>{
+          const tr = document.createElement('tr');
 
-        // Canal (rowspan)
-        if (idx === 0){
-          const tdCanal = document.createElement('td');
-          tdCanal.textContent = canal;
-          tdCanal.rowSpan = rowsCount;
-          tr.appendChild(tdCanal);
+          // Canal/Código/Cliente/Ruta: una sola vez (rowSpan total)
+          if (filaGlobal === 0){
+            const tdCanal = document.createElement('td');
+            tdCanal.textContent = canal;
+            tdCanal.rowSpan = filasTotales;
+            tr.appendChild(tdCanal);
 
-          const tdCodigo = document.createElement('td');
-          tdCodigo.textContent = codCli;
-          tdCodigo.rowSpan = rowsCount;
-          tr.appendChild(tdCodigo);
+            const tdCodigo = document.createElement('td');
+            tdCodigo.textContent = codCli;
+            tdCodigo.rowSpan = filasTotales;
+            tr.appendChild(tdCodigo);
 
-          const tdCliente = document.createElement('td');
-          tdCliente.textContent = nombre;
-          tdCliente.rowSpan = rowsCount;
-          tr.appendChild(tdCliente);
+            const tdCliente = document.createElement('td');
+            tdCliente.textContent = nombre;
+            tdCliente.rowSpan = filasTotales;
+            tr.appendChild(tdCliente);
 
-          const tdRuta = document.createElement('td');
-          tdRuta.textContent = ruta;
-          tdRuta.rowSpan = rowsCount;
-          tr.appendChild(tdRuta);
+            const tdRuta = document.createElement('td');
+            tdRuta.textContent = ruta;
+            tdRuta.rowSpan = filasTotales;
+            tr.appendChild(tdRuta);
+          }
 
-          // Pedido(s) como bloque apilado
-          const tdPedidos = document.createElement('td');
-          tdPedidos.rowSpan = rowsCount;
-          const divList = document.createElement('div');
-          divList.className = 'pedido-list';
-          pedidosArr.forEach(p=>{
-            const div = document.createElement('div');
-            div.className = 'pedido-item';
-            div.textContent = p;
-            divList.appendChild(div);
+          // Pedido(s): una celda por pedido, que abarca sus materiales
+          if (lIdx === 0){
+            const tdPedido = document.createElement('td');
+            tdPedido.textContent = pedido;
+            tdPedido.rowSpan = filasPorPedido;
+            tr.appendChild(tdPedido);
+          }
+
+          // Detalle (materiales) - se repiten por pedido
+          const tdCodMat = document.createElement('td');
+          tdCodMat.textContent = l.codMat;
+          tr.appendChild(tdCodMat);
+
+          const tdMaterial = document.createElement('td');
+          tdMaterial.textContent = l.material;
+          tr.appendChild(tdMaterial);
+
+          const tdKg = document.createElement('td');
+          tdKg.textContent = l.kg.toFixed(3);
+          tdKg.className = 'kg-cell';
+          tr.appendChild(tdKg);
+
+          tbody.appendChild(tr);
+
+          // Exportaciones (una sola fila con encabezados; pero mantenemos por compatibilidad)
+          window.ultimosDuplicados.push({
+            canal: filaGlobal === 0 ? canal : '',
+            codigo: filaGlobal === 0 ? codCli : '',
+            cliente: filaGlobal === 0 ? nombre : '',
+            ruta: filaGlobal === 0 ? ruta : '',
+            pedidos: filaGlobal === 0 ? pedidosArr.join(', ') : '',
+            codMat: l.codMat,
+            material: l.material,
+            kg: l.kg.toFixed(3)
           });
-          tdPedidos.appendChild(divList);
-          tr.appendChild(tdPedidos);
-        }
 
-        // Cod Material
-        const tdCodMat = document.createElement('td');
-        tdCodMat.textContent = l.codMat;
-        tr.appendChild(tdCodMat);
-
-        // Material
-        const tdMaterial = document.createElement('td');
-        tdMaterial.textContent = l.material;
-        tr.appendChild(tdMaterial);
-
-        // Kg
-        const tdKg = document.createElement('td');
-        tdKg.textContent = l.kg.toFixed(3);
-        tr.appendChild(tdKg);
-
-        tbody.appendChild(tr);
-
-        // Mantener datos para exportaciones (igual que antes)
-        window.ultimosDuplicados.push({
-          canal: idx === 0 ? canal : '',
-          codigo: idx === 0 ? codCli : '',
-          cliente: idx === 0 ? nombre : '',
-          ruta: idx === 0 ? ruta : '',
-          pedidos: idx === 0 ? pedidosArr.join(', ') : '',
-          codMat: l.codMat,
-          material: l.material,
-          kg: l.kg.toFixed(3)
+          filaGlobal++;
         });
       });
     });
@@ -790,7 +816,7 @@ function construirTablaDuplicados(porCliente){
     `Pedidos duplicados (grupos): ${gruposDuplicados}`;
 }
 
-/* Enlace tabla <-> mapa */
+/* Enlace tabla <-> mapa (igual) */
 function enlazarFilasYMarcadores(){
   const filas = document.querySelectorAll('#result-table tbody tr');
   filas.forEach(tr=>{
@@ -1019,4 +1045,5 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
+``
 
