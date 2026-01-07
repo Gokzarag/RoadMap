@@ -76,7 +76,6 @@
     .btn:disabled{opacity:.6;cursor:not-allowed;}
     .status-text{font-size:10px;color:var(--text-muted);}
 
-    /* Tabs */
     .tabs{display:flex;gap:4px;margin-bottom:4px;}
     .tab-button{
       border:none;border-radius:999px;padding:3px 10px;font-size:11px;
@@ -86,7 +85,6 @@
     .tab-content{display:none;}
     .tab-content.active{display:block;}
 
-    /* Layout Fuera de ruta */
     .content-split{
       display:flex;gap:6px;align-items:stretch;
       height:calc(100vh - 170px);
@@ -233,11 +231,16 @@
           </div>
         </div>
 
-        <!-- Duplicados (con Canal) -->
+        <!-- Duplicados -->
         <div class="tab-content" id="tab-duplicados">
           <div class="table-panel">
             <div class="table-header-row">
               <span id="dup-summary">Pedidos duplicados: 0</span>
+              <div class="table-actions">
+                <button class="btn btn-icon" id="btnDupCsv" title="Descargar CSV">💾</button>
+                <button class="btn btn-icon" id="btnDupCopyTable" title="Copiar como tabla Excel">📋</button>
+                <button class="btn btn-icon" id="btnDupCopyImage" title="Copiar tabla como imagen">🖼</button>
+              </div>
             </div>
             <div class="table-wrapper">
               <table id="dup-table">
@@ -276,6 +279,7 @@ let capaFSE = null;
 let capaDetEnRuta = null;
 let capaDetFueraRuta = null;
 let markersByCodigo = new Map();
+window.ultimosDuplicados = [];
 
 document.addEventListener('DOMContentLoaded', ()=>{
   if (typeof loadSidebar === 'function') {
@@ -461,6 +465,7 @@ function procesarFilasPlanner(rows){
   tbody.innerHTML = '';
 
   ultimosValoresTabla = [];
+  window.ultimosDuplicados = [];
   markersByCodigo.clear();
   capaFSE.clearLayers();
   capaDetEnRuta.clearLayers();
@@ -505,7 +510,7 @@ function procesarFilasPlanner(rows){
     }
     const tieneGeo = !isNaN(lat) && !isNaN(lon);
 
-    /* Duplicados: TODAS las filas */
+    /* Duplicados: todas las filas */
     const pedido   = (row[13] || '').toString().trim();
     const codMat   = (row[10] || '').toString().trim();
     const material = (row[11] || '').toString().trim();
@@ -524,7 +529,7 @@ function procesarFilasPlanner(rows){
     }
     infoCli.pedidos.get(pedido).push({codMat, material, kg});
 
-    /* FSE para mapa */
+    /* FSE */
     if (canal.includes('FSE')){
       if (tieneGeo){
         const popupHtml =
@@ -634,11 +639,12 @@ function procesarFilasPlanner(rows){
   construirTablaDuplicados(porCliente);
 }
 
-/* Duplicados: Canal + fila por material */
+/* Duplicados: formato tipo Excel + Canal */
 function construirTablaDuplicados(porCliente){
   const tbody = document.querySelector('#dup-table tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
+  window.ultimosDuplicados = [];
   let gruposDuplicados = 0;
 
   porCliente.forEach((infoCli, codCli)=>{
@@ -673,14 +679,13 @@ function construirTablaDuplicados(porCliente){
       const lineas = grupo.lineas;
 
       lineas.forEach((l, idx)=>{
+        const canalCol = idx === 0 ? canal        : '';
+        const codCol   = idx === 0 ? codCli       : '';
+        const cliCol   = idx === 0 ? nombre       : '';
+        const rutaCol  = idx === 0 ? ruta         : '';
+        const pedCol   = idx === 0 ? pedidosTexto : '';
+
         const tr = document.createElement('tr');
-
-        const canalCol = idx === 0 ? canal       : '';
-        const codCol   = idx === 0 ? codCli      : '';
-        const cliCol   = idx === 0 ? nombre      : '';
-        const rutaCol  = idx === 0 ? ruta        : '';
-        const pedCol   = idx === 0 ? pedidosTexto: '';
-
         tr.innerHTML = `
           <td>${canalCol}</td>
           <td>${codCol}</td>
@@ -692,6 +697,17 @@ function construirTablaDuplicados(porCliente){
           <td>${l.kg.toFixed(3)}</td>
         `;
         tbody.appendChild(tr);
+
+        window.ultimosDuplicados.push({
+          canal: canalCol,
+          codigo: codCol,
+          cliente: cliCol,
+          ruta: rutaCol,
+          pedidos: pedCol,
+          codMat: l.codMat,
+          material: l.material,
+          kg: l.kg.toFixed(3)
+        });
       });
     });
   });
@@ -731,13 +747,18 @@ function enlazarFilasYMarcadores(){
   });
 }
 
-/* Exportaciones Fuera de ruta */
+/* Exportaciones Fuera de ruta + Duplicados */
 function configurarEventosTabla(){
   document.getElementById('btnCsv').addEventListener('click', descargarCSV);
   document.getElementById('btnCopyTable').addEventListener('click', copiarTablaExcel);
   document.getElementById('btnCopyImage').addEventListener('click', copiarTablaImagen);
+
+  document.getElementById('btnDupCsv').addEventListener('click', descargarDuplicadosCSV);
+  document.getElementById('btnDupCopyTable').addEventListener('click', copiarDuplicadosExcel);
+  document.getElementById('btnDupCopyImage').addEventListener('click', copiarDuplicadosImagen);
 }
 
+/* Fuera de ruta */
 function descargarCSV(){
   if (!ultimosValoresTabla.length){
     alert('No hay datos para exportar.');
@@ -752,10 +773,12 @@ function descargarCSV(){
   const todo = [headers].concat(filas);
   const csv = todo.map(r=>r.map(val=>{
     const s = (val==null?'':val.toString());
-    return (s.includes(',') || s.includes('"') || s.includes('\n'))
+    return (s.includes(',') || s.includes('"') || s.includes('
+'))
       ? '"' + s.replace(/"/g,'""') + '"'
       : s;
-  }).join(',')).join('\n');
+  }).join(',')).join('
+');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -771,7 +794,8 @@ function copiarTablaExcel(){
   const rows = table.querySelectorAll('tr');
   rows.forEach((tr,idx)=>{
     const cells = tr.querySelectorAll(idx===0 ? 'th' : 'td');
-    texto += Array.from(cells).map(td=>td.textContent.trim()).join('\t') + '\n';
+    texto += Array.from(cells).map(td=>td.textContent.trim()).join('\t') + '
+';
   });
   navigator.clipboard.writeText(texto).then(()=>{
     alert('Tabla copiada. Pega en Excel con Ctrl+V.');
@@ -779,7 +803,56 @@ function copiarTablaExcel(){
 }
 
 function copiarTablaImagen(){
-  const table = document.getElementById('result-table');
+  copiarTablaGenericaComoImagen('result-table','Imagen de tabla copiada. Pega con Ctrl+V.');
+}
+
+/* Duplicados export */
+function descargarDuplicadosCSV(){
+  const datos = window.ultimosDuplicados || [];
+  if (!datos.length){
+    alert('No hay datos de duplicados para exportar.');
+    return;
+  }
+  const headers = ['Canal','Código','Cliente','Ruta','Pedido(s)','Cod Material','Material','Kg'];
+  const filas = datos.map(d=>[
+    d.canal,d.codigo,d.cliente,d.ruta,d.pedidos,d.codMat,d.material,d.kg
+  ]);
+  const todo = [headers].concat(filas);
+  const csv = todo.map(r=>r.map(val=>{
+    const s = (val==null?'':val.toString());
+    return (s.includes(',') || s.includes('"') || s.includes('\n'))
+      ? '"' + s.replace(/"/g,'""') + '"'
+      : s;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;a.download = 'pedidos_duplicados.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copiarDuplicadosExcel(){
+  const table = document.getElementById('dup-table');
+  if (!table) return;
+  let texto = '';
+  const rows = table.querySelectorAll('tr');
+  rows.forEach((tr,idx)=>{
+    const cells = tr.querySelectorAll(idx===0 ? 'th' : 'td');
+    texto += Array.from(cells).map(td=>td.textContent.trim()).join('\t') + '\n';
+  });
+  navigator.clipboard.writeText(texto).then(()=>{
+    alert('Tabla de duplicados copiada. Pega en Excel con Ctrl+V.');
+  });
+}
+
+function copiarDuplicadosImagen(){
+  copiarTablaGenericaComoImagen('dup-table','Imagen de duplicados copiada. Pega con Ctrl+V.');
+}
+
+/* Util para copiar tabla como imagen */
+function copiarTablaGenericaComoImagen(tableId, mensajeOk){
+  const table = document.getElementById(tableId);
   if (!table) return;
 
   const cloneWrapper = document.createElement('div');
@@ -843,7 +916,7 @@ function copiarTablaImagen(){
     }
     const item = new ClipboardItem({'image/png': blob});
     navigator.clipboard.write([item]).then(()=>{
-      alert('Imagen de tabla copiada. Pega con Ctrl+V.');
+      alert(mensajeOk);
     });
   },'image/png');
 }
@@ -875,5 +948,3 @@ function copiarMapaImagen(){
 <script src="layout.js"></script>
 </body>
 </html>
-
-
