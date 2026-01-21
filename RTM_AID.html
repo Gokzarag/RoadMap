@@ -146,7 +146,7 @@
       display:flex;
       flex-direction:column;
       gap:2px;
-      min-width:130px;
+      min-width:140px;
     }
     .subgrupo-box .mini-item label{
       font-size:10px;
@@ -165,6 +165,7 @@
     .multi-select{
       position:relative;
       font-size:10px;
+      width:100%;
     }
     .multi-select-button{
       width:100%;
@@ -201,7 +202,7 @@
       margin-top:2px;
       z-index:500;
       display:none;
-      max-height:160px;
+      max-height:180px;
       overflow:auto;
     }
     .multi-select.open .multi-select-panel{
@@ -220,6 +221,14 @@
     }
     .multi-select-option input{
       cursor:pointer;
+    }
+    .multi-select-divider{
+      border-top:1px solid #e5e7eb;
+      margin:2px 0 4px;
+    }
+    .multi-select-all{
+      font-weight:600;
+      color:#4b5563;
     }
 
     .toggle-capas{
@@ -478,6 +487,25 @@ function crearMultiSelect(id, estadoInicial){
   const panel = document.createElement('div');
   panel.className = 'multi-select-panel';
 
+  // Opción TODOS
+  const rowTodos = document.createElement('label');
+  rowTodos.className = 'multi-select-option multi-select-all';
+  const cbTodos = document.createElement('input');
+  cbTodos.type = 'checkbox';
+  cbTodos.value = 'ALL';
+  cbTodos.checked = true;
+  const lblTodos = document.createElement('span');
+  lblTodos.textContent = 'Todos';
+  rowTodos.appendChild(cbTodos);
+  rowTodos.appendChild(lblTodos);
+  panel.appendChild(rowTodos);
+
+  const divider = document.createElement('div');
+  divider.className = 'multi-select-divider';
+  panel.appendChild(divider);
+
+  // Opciones individuales
+  const checkboxes = [];
   OPCIONES_CANAL.forEach(op=>{
     const row = document.createElement('label');
     row.className = 'multi-select-option';
@@ -490,12 +518,32 @@ function crearMultiSelect(id, estadoInicial){
     row.appendChild(cb);
     row.appendChild(lbl);
     panel.appendChild(row);
+    checkboxes.push(cb);
 
     cb.addEventListener('change', ()=>{
       actualizarEstadoCanales(targetKey, op.value, cb.checked);
+      syncTodosCheckbox(targetKey, cbTodos, checkboxes);
       actualizarTextoMulti(cont, targetKey);
       aplicarFiltrosRTM();
     });
+  });
+
+  cbTodos.addEventListener('change', ()=>{
+    const marcar = cbTodos.checked;
+    checkboxes.forEach(cb=>{
+      cb.checked = marcar;
+      actualizarEstadoCanales(targetKey, cb.value, marcar, true);
+    });
+    if (marcar){
+      // todos seleccionados
+      if (targetKey === 'canalesPuntos') canalesPuntos = OPCIONES_CANAL.map(o=>o.value);
+      else canalesChoro = OPCIONES_CANAL.map(o=>o.value);
+    } else {
+      if (targetKey === 'canalesPuntos') canalesPuntos = [];
+      else canalesChoro = [];
+    }
+    actualizarTextoMulti(cont, targetKey);
+    aplicarFiltrosRTM();
   });
 
   btn.addEventListener('click', ()=>{
@@ -511,10 +559,11 @@ function crearMultiSelect(id, estadoInicial){
   cont.appendChild(btn);
   cont.appendChild(panel);
 
+  syncTodosCheckbox(targetKey, cbTodos, checkboxes);
   actualizarTextoMulti(cont, targetKey);
 }
 
-function actualizarEstadoCanales(targetKey, value, checked){
+function actualizarEstadoCanales(targetKey, value, checked, silent){
   let arr = (targetKey === 'canalesPuntos') ? canalesPuntos : canalesChoro;
   if (checked){
     if (!arr.includes(value)) arr.push(value);
@@ -523,6 +572,23 @@ function actualizarEstadoCanales(targetKey, value, checked){
   }
   if (targetKey === 'canalesPuntos') canalesPuntos = arr;
   else canalesChoro = arr;
+  if (!silent){
+    // nada extra
+  }
+}
+
+function syncTodosCheckbox(targetKey, cbTodos, checkboxes){
+  const arr = (targetKey === 'canalesPuntos') ? canalesPuntos : canalesChoro;
+  if (arr.length === OPCIONES_CANAL.length){
+    cbTodos.checked = true;
+    cbTodos.indeterminate = false;
+  } else if (arr.length === 0){
+    cbTodos.checked = false;
+    cbTodos.indeterminate = false;
+  } else {
+    cbTodos.checked = false;
+    cbTodos.indeterminate = true;
+  }
 }
 
 function actualizarTextoMulti(cont, targetKey){
