@@ -259,8 +259,8 @@
 
 <script>
 const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
-const DISTRITOS_GEOJSON_URL = 'URL_DE_TUS_POLIGONOS_DE_DISTRITOS.geojson'; // reemplaza por tu GeoJSON
-const DISTRITO_INDEX = 17; // distrito en índice 17
+const DISTRITOS_GEOJSON_URL = 'https://raw.githubusercontent.com/joseluisq/peru-geojson-datasets/master/geojson/lima_callao_distritos_simple.geojson'; // [web:47]
+const DISTRITO_INDEX = 17;
 
 let sigmaDataRTM = [];
 let rtmMap = null;
@@ -364,8 +364,10 @@ function aplicarFiltrosRTM(){
   if (!rtmMap) return;
 
   const datosFiltrados = filtrarDatos();
-  actualizarPuntos(datosFiltrados);
-  if (vistaActual === 'coropletica'){
+
+  if (vistaActual === 'puntos'){
+    actualizarPuntos(datosFiltrados);
+  } else {
     actualizarCoropletico(datosFiltrados);
   }
 
@@ -383,11 +385,15 @@ function aplicarFiltrosRTM(){
   }
 }
 
-// Vista de puntos
+// --------- PUNTOS ----------
 function actualizarPuntos(datos){
   if (rtmMarkersLayer){
     rtmMap.removeLayer(rtmMarkersLayer);
   }
+  if (rtmChoroplethLayer){
+    rtmMap.removeLayer(rtmChoroplethLayer);
+  }
+
   rtmMarkersLayer = L.layerGroup().addTo(rtmMap);
 
   datos.forEach(row=>{
@@ -464,7 +470,7 @@ function actualizarPuntos(datos){
   });
 }
 
-// Coroplético
+// --------- COROPLÉTICO ----------
 function cargarDistritosGeoJSON(callback){
   if (distritosGeoJSON){
     callback();
@@ -477,61 +483,66 @@ function cargarDistritosGeoJSON(callback){
       callback();
     })
     .catch(err=>{
-      console.error('Error cargando distritos GeoJSON', err);
+      console.error('Error GeoJSON distritos', err);
+      alert('No se pudo cargar el GeoJSON de distritos (revisa conexión).');
     });
 }
 
 function actualizarCoropletico(datos){
-  if (!distritosGeoJSON) return;
+  cargarDistritosGeoJSON(()=>{
 
-  if (rtmChoroplethLayer){
-    rtmMap.removeLayer(rtmChoroplethLayer);
-  }
+    if (rtmChoroplethLayer){
+      rtmMap.removeLayer(rtmChoroplethLayer);
+    }
+    if (rtmMarkersLayer){
+      rtmMap.removeLayer(rtmMarkersLayer);
+    }
 
-  const conteoDistritos = {};
-  datos.forEach(row=>{
-    const dist = (row[DISTRITO_INDEX] || '').toString().trim().toUpperCase();
-    if (!dist) return;
-    conteoDistritos[dist] = (conteoDistritos[dist] || 0) + 1;
+    const conteoDistritos = {};
+    datos.forEach(row=>{
+      const dist = (row[DISTRITO_INDEX] || '').toString().trim().toUpperCase();
+      if (!dist) return;
+      conteoDistritos[dist] = (conteoDistritos[dist] || 0) + 1;
+    });
+
+    const valores = Object.values(conteoDistritos);
+    const maxVal = valores.length ? Math.max(...valores) : 0;
+
+    function getColorByCount(c){
+      if (c === 0) return 'rgba(148,163,184,0.15)';
+      const t = c / maxVal;
+      const r = Math.round(250 - t * 90);
+      const g = Math.round(113 - t * 40);
+      const b = Math.round(133 - t * 20);
+      return `rgba(${r},${g},${b},0.75)`;
+    }
+
+    function style(feature){
+      const nombreDist = (feature.properties.distrito || '').toString().trim().toUpperCase();
+      const count = conteoDistritos[nombreDist] || 0;
+      return {
+        fillColor: getColorByCount(count),
+        weight: 1,
+        opacity: 1,
+        color: '#4b5563',
+        fillOpacity: 0.7
+      };
+    }
+
+    function onEachFeature(feature, layer){
+      const nombreDist = (feature.properties.distrito || '').toString().trim();
+      const count = conteoDistritos[nombreDist.toUpperCase()] || 0;
+      layer.bindPopup(`<strong>${nombreDist}</strong><br>Clientes: ${count}`);
+    }
+
+    rtmChoroplethLayer = L.geoJSON(distritosGeoJSON, {
+      style: style,
+      onEachFeature: onEachFeature
+    }).addTo(rtmMap);
   });
-
-  const valores = Object.values(conteoDistritos);
-  const maxVal = valores.length ? Math.max(...valores) : 0;
-
-  function getColorByCount(c){
-    if (c === 0) return 'rgba(148,163,184,0.2)';
-    const t = c / maxVal;
-    const r = Math.round(251 - t * 100);
-    const g = Math.round(113 - t * 50);
-    const b = Math.round(133 - t * 40);
-    return `rgba(${r},${g},${b},0.7)`;
-  }
-
-  function style(feature){
-    const nombreDist = (feature.properties.NOMBRE || feature.properties.NOMBDIST || '').toString().trim().toUpperCase();
-    const count = conteoDistritos[nombreDist] || 0;
-    return {
-      fillColor: getColorByCount(count),
-      weight: 1,
-      opacity: 1,
-      color: '#4b5563',
-      fillOpacity: 0.7
-    };
-  }
-
-  function onEachFeature(feature, layer){
-    const nombreDist = (feature.properties.NOMBRE || feature.properties.NOMBDIST || '').toString().trim();
-    const count = conteoDistritos[nombreDist.toUpperCase()] || 0;
-    layer.bindPopup(`<strong>${nombreDist}</strong><br>Clientes: ${count}`);
-  }
-
-  rtmChoroplethLayer = L.geoJSON(distritosGeoJSON, {
-    style: style,
-    onEachFeature: onEachFeature
-  }).addTo(rtmMap);
 }
 
-// Toggle vistas
+// --------- TOGGLE VISTAS ----------
 function setVista(vista){
   vistaActual = vista;
 
@@ -541,13 +552,12 @@ function setVista(vista){
   btnPuntos.classList.toggle('active', vista === 'puntos');
   btnCoro.classList.toggle('active', vista === 'coropletica');
 
+  const datosFiltrados = filtrarDatos();
+
   if (vista === 'puntos'){
-    if (rtmChoroplethLayer) rtmMap.removeLayer(rtmChoroplethLayer);
-    aplicarFiltrosRTM();
+    actualizarPuntos(datosFiltrados);
   } else {
-    cargarDistritosGeoJSON(()=>{
-      actualizarCoropletico(filtrarDatos());
-    });
+    actualizarCoropletico(datosFiltrados);
   }
 }
 </script>
