@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>RoadMap - RTM AID</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" />
+  <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack.png" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -36,7 +36,7 @@
     }
     .main{
       flex:1;
-      padding:72px 12px 12px;
+      padding:72px 8px 8px;
       display:flex;
       justify-content:center;
     }
@@ -74,10 +74,10 @@
       flex:1;
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:6px;
       background:var(--card-bg);
       border-radius:14px;
-      padding:10px 14px 16px;
+      padding:8px 10px 10px;
       border:1px solid var(--border-soft);
       box-shadow:0 6px 20px rgba(15,23,42,0.08);
       min-height:0;
@@ -85,77 +85,80 @@
 
     .panel-header{
       display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
+      align-items:center;
+      gap:8px;
       flex-wrap:wrap;
+      font-size:12px;
     }
 
     .filtros-rtm{
       display:flex;
-      flex-direction:column;
-      gap:8px;
-      margin-top:0;
-      padding:8px 8px 10px;
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      background:#f9fafb;
-      font-size:12px;
-      width:100%;
-    }
-    .fila-oficina{
-      display:flex;
       flex-wrap:wrap;
       gap:8px;
+      width:100%;
       align-items:center;
     }
-    .fila-bloques{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
+
     .filtro-item{
       display:flex;
       flex-direction:column;
-      gap:3px;
-      min-width:160px;
+      gap:2px;
+      min-width:150px;
     }
     .filtro-item label{
-      font-size:11px;
+      font-size:10px;
       font-weight:600;
       color:var(--text-muted);
     }
     .filtro-item select{
-      padding:5px 7px;
+      padding:4px 6px;
       border-radius:7px;
       border:1px solid #d1d5db;
-      font-size:12px;
+      font-size:11px;
       background:white;
     }
 
-    .bloque-filtros{
-      flex:1;
-      border-radius:8px;
-      border:1px dashed #d1d5db;
-      padding:6px 8px 8px;
-      background:#ffffff;
-      min-width:220px;
-    }
-    .bloque-titulo{
-      font-size:11px;
-      font-weight:700;
-      color:#4b5563;
-      margin-bottom:4px;
-    }
-    .bloque-contenido{
+    .bloque-mini{
       display:flex;
+      align-items:center;
+      gap:4px;
+      border-radius:999px;
+      border:1px dashed #d1d5db;
+      padding:4px 8px;
+      background:#f9fafb;
+      font-size:10px;
+      white-space:nowrap;
+    }
+    .bloque-mini span{
+      font-weight:600;
+      color:#4b5563;
+    }
+    .bloque-mini select{
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid #d1d5db;
+      font-size:10px;
+      background:white;
+    }
+
+    .toggle-capas{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
       gap:8px;
-      flex-wrap:wrap;
+      font-size:10px;
+      color:#4b5563;
+      white-space:nowrap;
+    }
+    .toggle-capas label{
+      display:flex;
+      align-items:center;
+      gap:3px;
+      cursor:pointer;
     }
 
     .map-wrapper{
       flex:1;
-      margin-top:4px;
       border-radius:10px;
       overflow:hidden;
       border:1px solid var(--border-soft);
@@ -168,7 +171,7 @@
     #rtm-map{
       flex:1;
       width:100%;
-      height:75vh;
+      height:78vh;
     }
 
     .leaflet-popup.rm-dark-popup .leaflet-popup-content-wrapper{
@@ -195,11 +198,11 @@
     }
 
     @media(max-width:900px){
-      .main{padding:66px 8px 10px;}
-      #rtm-map{height:70vh;}
+      .main{padding:66px 6px 6px;}
+      #rtm-map{height:75vh;}
     }
-    @media(max-width:480px){
-      .rm-header-inner{padding:0 10px;}
+    @media(max-width:640px){
+      .toggle-capas{width:100%;justify-content:flex-start;margin-left:0;margin-top:4px;}
     }
   </style>
 </head>
@@ -212,78 +215,69 @@
     <div class="main-inner">
       <section class="panel">
         <header class="panel-header">
-          <div style="flex:1;">
-            <div class="filtros-rtm">
-              <!-- Fila 1: Oficina única -->
-              <div class="fila-oficina">
-                <div class="filtro-item">
-                  <label for="filtro-oficina">Oficina (ambos)</label>
-                  <select id="filtro-oficina">
-                    <option value="">Todas</option>
-                  </select>
-                </div>
-              </div>
+          <div class="filtros-rtm">
+            <!-- Oficina única -->
+            <div class="filtro-item" style="max-width:180px;">
+              <label for="filtro-oficina">Oficina</label>
+              <select id="filtro-oficina">
+                <option value="">Todas</option>
+              </select>
+            </div>
 
-              <!-- Fila 2: Bloques Puntos / Coroplético -->
-              <div class="fila-bloques">
-                <div class="bloque-filtros">
-                  <div class="bloque-titulo">Puntos (clientes)</div>
-                  <div class="bloque-contenido">
-                    <div class="filtro-item">
-                      <label for="filtro-dia-puntos">Día de atención</label>
-                      <select id="filtro-dia-puntos">
-                        <option value="">Todos</option>
-                        <option value="L">Lunes</option>
-                        <option value="M">Martes</option>
-                        <option value="X">Miércoles</option>
-                        <option value="J">Jueves</option>
-                        <option value="V">Viernes</option>
-                        <option value="S">Sábado</option>
-                        <option value="D">Domingo</option>
-                      </select>
-                    </div>
-                    <div class="filtro-item">
-                      <label for="filtro-canal-puntos">Canal</label>
-                      <select id="filtro-canal-puntos">
-                        <option value="">Todos</option>
-                        <option value="DET">DET</option>
-                        <option value="FSE">FSE</option>
-                        <option value="MES">MES</option>
-                        <option value="MOD">MOD</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
+            <!-- Bloque Puntos -->
+            <div class="bloque-mini">
+              <span>Puntos</span>
+              <select id="filtro-dia-puntos" title="Día puntos">
+                <option value="">Día</option>
+                <option value="L">Lun</option>
+                <option value="M">Mar</option>
+                <option value="X">Mié</option>
+                <option value="J">Jue</option>
+                <option value="V">Vie</option>
+                <option value="S">Sáb</option>
+                <option value="D">Dom</option>
+              </select>
+              <select id="filtro-canal-puntos" title="Canal puntos">
+                <option value="">Canal</option>
+                <option value="DET">DET</option>
+                <option value="FSE">FSE</option>
+                <option value="MES">MES</option>
+                <option value="MOD">MOD</option>
+              </select>
+            </div>
 
-                <div class="bloque-filtros">
-                  <div class="bloque-titulo">Coropléctico (por distrito)</div>
-                  <div class="bloque-contenido">
-                    <div class="filtro-item">
-                      <label for="filtro-dia-choro">Día de atención</label>
-                      <select id="filtro-dia-choro">
-                        <option value="">Todos</option>
-                        <option value="L">Lunes</option>
-                        <option value="M">Martes</option>
-                        <option value="X">Miércoles</option>
-                        <option value="J">Jueves</option>
-                        <option value="V">Viernes</option>
-                        <option value="S">Sábado</option>
-                        <option value="D">Domingo</option>
-                      </select>
-                    </div>
-                    <div class="filtro-item">
-                      <label for="filtro-canal-choro">Canal</label>
-                      <select id="filtro-canal-choro">
-                        <option value="">Todos</option>
-                        <option value="DET">DET</option>
-                        <option value="FSE">FSE</option>
-                        <option value="MES">MES</option>
-                        <option value="MOD">MOD</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <!-- Bloque Coroplético -->
+            <div class="bloque-mini">
+              <span>Coropléctico</span>
+              <select id="filtro-dia-choro" title="Día coroplético">
+                <option value="">Día</option>
+                <option value="L">Lun</option>
+                <option value="M">Mar</option>
+                <option value="X">Mié</option>
+                <option value="J">Jue</option>
+                <option value="V">Vie</option>
+                <option value="S">Sáb</option>
+                <option value="D">Dom</option>
+              </select>
+              <select id="filtro-canal-choro" title="Canal coroplético">
+                <option value="">Canal</option>
+                <option value="DET">DET</option>
+                <option value="FSE">FSE</option>
+                <option value="MES">MES</option>
+                <option value="MOD">MOD</option>
+              </select>
+            </div>
+
+            <!-- Toggles capas -->
+            <div class="toggle-capas">
+              <label>
+                <input type="checkbox" id="chk-puntos" checked />
+                Puntos
+              </label>
+              <label>
+                <input type="checkbox" id="chk-choro" checked />
+                Coropléctico
+              </label>
             </div>
           </div>
         </header>
@@ -306,6 +300,9 @@ let rtmMap = null;
 let rtmMarkersLayer = null;
 let rtmChoroplethLayer = null;
 let distritosGeoJSON = null;
+
+// panes para orden de dibujo [web:64][web:67]
+let paneChoro, panePuntos;
 
 // Colores canal
 const canalColors = {
@@ -368,16 +365,23 @@ function prepararFiltrosOficina(){
 }
 
 // --------- FILTROS ---------
-function obtenerFiltrosPuntos(){
+function filtrosComunes(){
   return {
-    oficina: document.getElementById('filtro-oficina').value,
+    oficina: document.getElementById('filtro-oficina').value
+  };
+}
+function obtenerFiltrosPuntos(){
+  const com = filtrosComunes();
+  return {
+    oficina: com.oficina,
     dia: document.getElementById('filtro-dia-puntos').value,
     canal: document.getElementById('filtro-canal-puntos').value
   };
 }
 function obtenerFiltrosChoro(){
+  const com = filtrosComunes();
   return {
-    oficina: document.getElementById('filtro-oficina').value,
+    oficina: com.oficina,
     dia: document.getElementById('filtro-dia-choro').value,
     canal: document.getElementById('filtro-canal-choro').value
   };
@@ -437,18 +441,43 @@ function aplicarFiltrosRTM(){
   const datosPuntos = filtrarDatosPuntos();
   const datosChoro = filtrarDatosChoro();
 
-  actualizarPuntos(datosPuntos);
-  actualizarCoropletico(datosChoro);
+  // capas según checkboxes
+  const mostrarPuntos = document.getElementById('chk-puntos').checked;
+  const mostrarChoro = document.getElementById('chk-choro').checked;
 
-  // Ajustar vista a los puntos (si hay)
+  if (mostrarChoro){
+    actualizarCoropletico(datosChoro);
+  } else if (rtmChoroplethLayer){
+    rtmMap.removeLayer(rtmChoroplethLayer);
+    rtmChoroplethLayer = null;
+  }
+
+  if (mostrarPuntos){
+    actualizarPuntos(datosPuntos);
+  } else if (rtmMarkersLayer){
+    rtmMap.removeLayer(rtmMarkersLayer);
+    rtmMarkersLayer = null;
+  }
+
+  // Ajustar vista a puntos si están visibles; si no, usar coroplético
   const puntos = [];
-  datosPuntos.forEach(row=>{
-    const lat = parseFloat(row[28]);
-    const lng = parseFloat(row[29]);
-    if (!isNaN(lat) && !isNaN(lng)){
-      puntos.push([lat,lng]);
-    }
-  });
+  if (mostrarPuntos){
+    datosPuntos.forEach(row=>{
+      const lat = parseFloat(row[28]);
+      const lng = parseFloat(row[29]);
+      if (!isNaN(lat) && !isNaN(lng)){
+        puntos.push([lat,lng]);
+      }
+    });
+  } else if (mostrarChoro){
+    datosChoro.forEach(row=>{
+      const lat = parseFloat(row[28]);
+      const lng = parseFloat(row[29]);
+      if (!isNaN(lat) && !isNaN(lng)){
+        puntos.push([lat,lng]);
+      }
+    });
+  }
   if (puntos.length > 0){
     const bounds = L.latLngBounds(puntos);
     rtmMap.fitBounds(bounds,{padding:[30,30]});
@@ -460,7 +489,7 @@ function actualizarPuntos(datos){
   if (rtmMarkersLayer){
     rtmMap.removeLayer(rtmMarkersLayer);
   }
-  rtmMarkersLayer = L.layerGroup().addTo(rtmMap);
+  rtmMarkersLayer = L.layerGroup([], {pane:'panePuntos'}).addTo(rtmMap);
 
   datos.forEach(row=>{
     const lat = parseFloat(row[28]);
@@ -518,10 +547,11 @@ function actualizarPuntos(datos){
 
     const color = getColorByCanal(canal);
     const marker = L.circleMarker([lat,lng],{
+      pane:'panePuntos',
       radius:6,
       color:color,
       fillColor:color,
-      fillOpacity:0.85,
+      fillOpacity:0.9,
       weight:1
     });
 
@@ -571,18 +601,19 @@ function actualizarCoropletico(datos){
     const maxVal = valores.length ? Math.max(...valores) : 0;
 
     function getColorByCount(c){
-      if (c === 0) return 'rgba(148,163,184,0.15)';
+      if (c === 0) return 'rgba(148,163,184,0.10)';
       const t = c / maxVal;
       const r = Math.round(250 - t * 90);
       const g = Math.round(113 - t * 40);
       const b = Math.round(133 - t * 20);
-      return `rgba(${r},${g},${b},0.75)`;
+      return `rgba(${r},${g},${b},0.7)`;
     }
 
     function style(feature){
       const nombreDist = (feature.properties.distrito || '').toString().trim().toUpperCase();
       const count = conteoDistritos[nombreDist] || 0;
       return {
+        pane:'paneChoro',
         fillColor: getColorByCount(count),
         weight: 1,
         opacity: 1,
@@ -599,7 +630,8 @@ function actualizarCoropletico(datos){
 
     rtmChoroplethLayer = L.geoJSON(distritosGeoJSON, {
       style: style,
-      onEachFeature: onEachFeature
+      onEachFeature: onEachFeature,
+      pane:'paneChoro'
     }).addTo(rtmMap);
   });
 }
@@ -614,6 +646,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   rtmMap = L.map('rtm-map', {
     closePopupOnClick:true
   }).setView([-12.1, -77.0], 12);
+
+  // panes: coroplético debajo, puntos encima [web:64][web:67]
+  paneChoro = rtmMap.createPane('paneChoro');
+  paneChoro.style.zIndex = 400; // debajo de markers
+  panePuntos = rtmMap.createPane('panePuntos');
+  panePuntos.style.zIndex = 600; // encima del coroplético
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom:19,
     attribution:'&copy; OpenStreetMap'
@@ -627,6 +666,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('filtro-canal-puntos').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('filtro-dia-choro').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('filtro-canal-choro').addEventListener('change', aplicarFiltrosRTM);
+  document.getElementById('chk-puntos').addEventListener('change', aplicarFiltrosRTM);
+  document.getElementById('chk-choro').addEventListener('change', aplicarFiltrosRTM);
 });
 </script>
 
