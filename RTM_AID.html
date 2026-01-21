@@ -93,7 +93,7 @@
 
     .filtros-rtm{
       display:flex;
-      flex-wrap:wrap;
+      flex-direction:column;
       gap:8px;
       margin-top:0;
       padding:8px 8px 10px;
@@ -103,12 +103,22 @@
       font-size:12px;
       width:100%;
     }
+    .fila-oficina{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+    .fila-bloques{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
     .filtro-item{
       display:flex;
       flex-direction:column;
       gap:3px;
       min-width:160px;
-      flex:1;
     }
     .filtro-item label{
       font-size:11px;
@@ -123,28 +133,24 @@
       background:white;
     }
 
-    .toggle-vista{
+    .bloque-filtros{
+      flex:1;
+      border-radius:8px;
+      border:1px dashed #d1d5db;
+      padding:6px 8px 8px;
+      background:#ffffff;
+      min-width:220px;
+    }
+    .bloque-titulo{
+      font-size:11px;
+      font-weight:700;
+      color:#4b5563;
+      margin-bottom:4px;
+    }
+    .bloque-contenido{
       display:flex;
-      align-items:center;
-      gap:6px;
-      font-size:11px;
-      font-weight:600;
-      color:var(--text-muted);
-      margin-left:auto;
-      white-space:nowrap;
-    }
-    .toggle-vista button{
-      border-radius:999px;
-      border:1px solid #d1d5db;
-      padding:4px 10px;
-      font-size:11px;
-      background:#e5e7eb;
-      cursor:pointer;
-    }
-    .toggle-vista button.active{
-      background:#f9735b;
-      color:#111827;
-      border-color:#f9735b;
+      gap:8px;
+      flex-wrap:wrap;
     }
 
     .map-wrapper{
@@ -208,42 +214,75 @@
         <header class="panel-header">
           <div style="flex:1;">
             <div class="filtros-rtm">
-              <div class="filtro-item">
-                <label for="filtro-oficina">Oficina</label>
-                <select id="filtro-oficina">
-                  <option value="">Todas</option>
-                </select>
+              <!-- Fila 1: Oficina única -->
+              <div class="fila-oficina">
+                <div class="filtro-item">
+                  <label for="filtro-oficina">Oficina (ambos)</label>
+                  <select id="filtro-oficina">
+                    <option value="">Todas</option>
+                  </select>
+                </div>
               </div>
 
-              <div class="filtro-item">
-                <label for="filtro-dia">Día de atención</label>
-                <select id="filtro-dia">
-                  <option value="">Todos</option>
-                  <option value="L">Lunes</option>
-                  <option value="M">Martes</option>
-                  <option value="X">Miércoles</option>
-                  <option value="J">Jueves</option>
-                  <option value="V">Viernes</option>
-                  <option value="S">Sábado</option>
-                  <option value="D">Domingo</option>
-                </select>
-              </div>
+              <!-- Fila 2: Bloques Puntos / Coroplético -->
+              <div class="fila-bloques">
+                <div class="bloque-filtros">
+                  <div class="bloque-titulo">Puntos (clientes)</div>
+                  <div class="bloque-contenido">
+                    <div class="filtro-item">
+                      <label for="filtro-dia-puntos">Día de atención</label>
+                      <select id="filtro-dia-puntos">
+                        <option value="">Todos</option>
+                        <option value="L">Lunes</option>
+                        <option value="M">Martes</option>
+                        <option value="X">Miércoles</option>
+                        <option value="J">Jueves</option>
+                        <option value="V">Viernes</option>
+                        <option value="S">Sábado</option>
+                        <option value="D">Domingo</option>
+                      </select>
+                    </div>
+                    <div class="filtro-item">
+                      <label for="filtro-canal-puntos">Canal</label>
+                      <select id="filtro-canal-puntos">
+                        <option value="">Todos</option>
+                        <option value="DET">DET</option>
+                        <option value="FSE">FSE</option>
+                        <option value="MES">MES</option>
+                        <option value="MOD">MOD</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
 
-              <div class="filtro-item">
-                <label for="filtro-canal">Canal</label>
-                <select id="filtro-canal">
-                  <option value="">Todos</option>
-                  <option value="DET">DET</option>
-                  <option value="FSE">FSE</option>
-                  <option value="MES">MES</option>
-                  <option value="MOD">MOD</option>
-                </select>
-              </div>
-
-              <div class="toggle-vista">
-                <span>Vista</span>
-                <button id="btn-vista-puntos" class="active">Puntos</button>
-                <button id="btn-vista-coropletica">Coropléctica</button>
+                <div class="bloque-filtros">
+                  <div class="bloque-titulo">Coropléctico (por distrito)</div>
+                  <div class="bloque-contenido">
+                    <div class="filtro-item">
+                      <label for="filtro-dia-choro">Día de atención</label>
+                      <select id="filtro-dia-choro">
+                        <option value="">Todos</option>
+                        <option value="L">Lunes</option>
+                        <option value="M">Martes</option>
+                        <option value="X">Miércoles</option>
+                        <option value="J">Jueves</option>
+                        <option value="V">Viernes</option>
+                        <option value="S">Sábado</option>
+                        <option value="D">Domingo</option>
+                      </select>
+                    </div>
+                    <div class="filtro-item">
+                      <label for="filtro-canal-choro">Canal</label>
+                      <select id="filtro-canal-choro">
+                        <option value="">Todos</option>
+                        <option value="DET">DET</option>
+                        <option value="FSE">FSE</option>
+                        <option value="MES">MES</option>
+                        <option value="MOD">MOD</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -267,7 +306,6 @@ let rtmMap = null;
 let rtmMarkersLayer = null;
 let rtmChoroplethLayer = null;
 let distritosGeoJSON = null;
-let vistaActual = 'puntos';
 
 // Colores canal
 const canalColors = {
@@ -329,16 +367,49 @@ function prepararFiltrosOficina(){
   });
 }
 
-function obtenerFiltros(){
+// --------- FILTROS ---------
+function obtenerFiltrosPuntos(){
   return {
     oficina: document.getElementById('filtro-oficina').value,
-    dia: document.getElementById('filtro-dia').value,
-    canal: document.getElementById('filtro-canal').value
+    dia: document.getElementById('filtro-dia-puntos').value,
+    canal: document.getElementById('filtro-canal-puntos').value
+  };
+}
+function obtenerFiltrosChoro(){
+  return {
+    oficina: document.getElementById('filtro-oficina').value,
+    dia: document.getElementById('filtro-dia-choro').value,
+    canal: document.getElementById('filtro-canal-choro').value
   };
 }
 
-function filtrarDatos(){
-  const { oficina, dia, canal } = obtenerFiltros();
+// Datos para puntos
+function filtrarDatosPuntos(){
+  const { oficina, dia, canal } = obtenerFiltrosPuntos();
+  const filtrados = [];
+
+  sigmaDataRTM.forEach(row=>{
+    const lat = parseFloat(row[28]);
+    const lng = parseFloat(row[29]);
+    if (isNaN(lat) || isNaN(lng)) return;
+
+    const oficinaRow = (row[46] || '').toString().trim();
+    const diasRow = (row[48] || '').toString().toUpperCase().trim();
+    const canalRow = (row[21] || '').toString().trim();
+
+    if (oficina && oficinaRow !== oficina) return;
+    if (dia && !diasRow.includes(dia)) return;
+    if (canal && canalRow !== canal) return;
+
+    filtrados.push(row);
+  });
+
+  return filtrados;
+}
+
+// Datos para coroplético
+function filtrarDatosChoro(){
+  const { oficina, dia, canal } = obtenerFiltrosChoro();
   const filtrados = [];
 
   sigmaDataRTM.forEach(row=>{
@@ -363,16 +434,15 @@ function filtrarDatos(){
 function aplicarFiltrosRTM(){
   if (!rtmMap) return;
 
-  const datosFiltrados = filtrarDatos();
+  const datosPuntos = filtrarDatosPuntos();
+  const datosChoro = filtrarDatosChoro();
 
-  if (vistaActual === 'puntos'){
-    actualizarPuntos(datosFiltrados);
-  } else {
-    actualizarCoropletico(datosFiltrados);
-  }
+  actualizarPuntos(datosPuntos);
+  actualizarCoropletico(datosChoro);
 
+  // Ajustar vista a los puntos (si hay)
   const puntos = [];
-  datosFiltrados.forEach(row=>{
+  datosPuntos.forEach(row=>{
     const lat = parseFloat(row[28]);
     const lng = parseFloat(row[29]);
     if (!isNaN(lat) && !isNaN(lng)){
@@ -390,10 +460,6 @@ function actualizarPuntos(datos){
   if (rtmMarkersLayer){
     rtmMap.removeLayer(rtmMarkersLayer);
   }
-  if (rtmChoroplethLayer){
-    rtmMap.removeLayer(rtmChoroplethLayer);
-  }
-
   rtmMarkersLayer = L.layerGroup().addTo(rtmMap);
 
   datos.forEach(row=>{
@@ -493,9 +559,6 @@ function actualizarCoropletico(datos){
     if (rtmChoroplethLayer){
       rtmMap.removeLayer(rtmChoroplethLayer);
     }
-    if (rtmMarkersLayer){
-      rtmMap.removeLayer(rtmMarkersLayer);
-    }
 
     const conteoDistritos = {};
     datos.forEach(row=>{
@@ -540,25 +603,6 @@ function actualizarCoropletico(datos){
     }).addTo(rtmMap);
   });
 }
-
-// --------- TOGGLE VISTAS ----------
-function setVista(vista){
-  vistaActual = vista;
-
-  const btnPuntos = document.getElementById('btn-vista-puntos');
-  const btnCoro = document.getElementById('btn-vista-coropletica');
-
-  btnPuntos.classList.toggle('active', vista === 'puntos');
-  btnCoro.classList.toggle('active', vista === 'coropletica');
-
-  const datosFiltrados = filtrarDatos();
-
-  if (vista === 'puntos'){
-    actualizarPuntos(datosFiltrados);
-  } else {
-    actualizarCoropletico(datosFiltrados);
-  }
-}
 </script>
 
 <script>
@@ -579,15 +623,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
   cargarSigmaRTM();
 
   document.getElementById('filtro-oficina').addEventListener('change', aplicarFiltrosRTM);
-  document.getElementById('filtro-dia').addEventListener('change', aplicarFiltrosRTM);
-  document.getElementById('filtro-canal').addEventListener('change', aplicarFiltrosRTM);
-
-  document.getElementById('btn-vista-puntos').addEventListener('click', ()=>{
-    setVista('puntos');
-  });
-  document.getElementById('btn-vista-coropletica').addEventListener('click', ()=>{
-    setVista('coropletica');
-  });
+  document.getElementById('filtro-dia-puntos').addEventListener('change', aplicarFiltrosRTM);
+  document.getElementById('filtro-canal-puntos').addEventListener('change', aplicarFiltrosRTM);
+  document.getElementById('filtro-dia-choro').addEventListener('change', aplicarFiltrosRTM);
+  document.getElementById('filtro-canal-choro').addEventListener('change', aplicarFiltrosRTM);
 });
 </script>
 
