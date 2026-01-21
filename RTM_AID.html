@@ -89,7 +89,6 @@
       gap:6px;
     }
 
-    /* Barra de filtros estilo “cajita” */
     .filtros-rtm{
       display:flex;
       flex-wrap:wrap;
@@ -133,7 +132,7 @@
       background:#ffffff;
       display:flex;
       gap:8px;
-      align-items:center;
+      align-items:flex-start;
       flex-wrap:wrap;
     }
     .subgrupo-box-title{
@@ -160,6 +159,10 @@
       border:1px solid #d1d5db;
       font-size:10px;
       background:white;
+    }
+
+    .subgrupo-box .mini-item select[multiple]{
+      min-height:46px;
     }
 
     .toggle-capas{
@@ -265,9 +268,8 @@
                   </select>
                 </div>
                 <div class="mini-item">
-                  <label for="filtro-canal-puntos">Canal</label>
-                  <select id="filtro-canal-puntos">
-                    <option value="">Todos</option>
+                  <label for="filtro-canal-puntos">Canal (multi)</label>
+                  <select id="filtro-canal-puntos" multiple>
                     <option value="DET">DET</option>
                     <option value="FSE">FSE</option>
                     <option value="MES">MES</option>
@@ -292,9 +294,8 @@
                   </select>
                 </div>
                 <div class="mini-item">
-                  <label for="filtro-canal-choro">Canal</label>
-                  <select id="filtro-canal-choro">
-                    <option value="">Todos</option>
+                  <label for="filtro-canal-choro">Canal (multi)</label>
+                  <select id="filtro-canal-choro" multiple>
                     <option value="DET">DET</option>
                     <option value="FSE">FSE</option>
                     <option value="MES">MES</option>
@@ -400,6 +401,15 @@ function prepararFiltrosOficina(){
   });
 }
 
+// --------- UTILIDAD MULTISELECT ---------
+function getMultiSelectValues(selectEl){
+  const vals = [];
+  for (let opt of selectEl.options){
+    if (opt.selected) vals.push(opt.value);
+  }
+  return vals;
+}
+
 // --------- FILTROS ---------
 function filtrosComunes(){
   return {
@@ -411,7 +421,7 @@ function obtenerFiltrosPuntos(){
   return {
     oficina: com.oficina,
     dia: document.getElementById('filtro-dia-puntos').value,
-    canal: document.getElementById('filtro-canal-puntos').value
+    canales: getMultiSelectValues(document.getElementById('filtro-canal-puntos'))
   };
 }
 function obtenerFiltrosChoro(){
@@ -419,13 +429,13 @@ function obtenerFiltrosChoro(){
   return {
     oficina: com.oficina,
     dia: document.getElementById('filtro-dia-choro').value,
-    canal: document.getElementById('filtro-canal-choro').value
+    canales: getMultiSelectValues(document.getElementById('filtro-canal-choro'))
   };
 }
 
 // Datos para puntos
 function filtrarDatosPuntos(){
-  const { oficina, dia, canal } = obtenerFiltrosPuntos();
+  const { oficina, dia, canales } = obtenerFiltrosPuntos();
   const filtrados = [];
 
   sigmaDataRTM.forEach(row=>{
@@ -439,7 +449,7 @@ function filtrarDatosPuntos(){
 
     if (oficina && oficinaRow !== oficina) return;
     if (dia && !diasRow.includes(dia)) return;
-    if (canal && canalRow !== canal) return;
+    if (canales.length && !canales.includes(canalRow)) return;
 
     filtrados.push(row);
   });
@@ -449,7 +459,7 @@ function filtrarDatosPuntos(){
 
 // Datos para coroplético
 function filtrarDatosChoro(){
-  const { oficina, dia, canal } = obtenerFiltrosChoro();
+  const { oficina, dia, canales } = obtenerFiltrosChoro();
   const filtrados = [];
 
   sigmaDataRTM.forEach(row=>{
@@ -463,7 +473,7 @@ function filtrarDatosChoro(){
 
     if (oficina && oficinaRow !== oficina) return;
     if (dia && !diasRow.includes(dia)) return;
-    if (canal && canalRow !== canal) return;
+    if (canales.length && !canales.includes(canalRow)) return;
 
     filtrados.push(row);
   });
@@ -600,7 +610,7 @@ function actualizarPuntos(datos){
   });
 }
 
-// --------- COROPLÉTICO (escala lila/morado) ----------
+// --------- COROPLÉTICO (violeta + frecuencia) ----------
 function cargarDistritosGeoJSON(callback){
   if (distritosGeoJSON){
     callback();
@@ -617,6 +627,19 @@ function cargarDistritosGeoJSON(callback){
     });
 }
 
+// construir frecuencia de días a partir de filas filtradas del distrito
+function construirFrecuenciaDias(rows){
+  const setLetras = new Set();
+  rows.forEach(row=>{
+    const dias = (row[48] || '').toString().toUpperCase().trim();
+    for (let ch of dias){
+      if ('LMXJVSD'.includes(ch)) setLetras.add(ch);
+    }
+  });
+  const orden = ['L','M','X','J','V','S','D'];
+  return orden.filter(l=>setLetras.has(l)).join('') || 'N/D';
+}
+
 function actualizarCoropletico(datos){
   cargarDistritosGeoJSON(()=>{
 
@@ -625,22 +648,25 @@ function actualizarCoropletico(datos){
     }
 
     const conteoDistritos = {};
+    const filasPorDistrito = {};
+
     datos.forEach(row=>{
       const dist = (row[DISTRITO_INDEX] || '').toString().trim().toUpperCase();
       if (!dist) return;
       conteoDistritos[dist] = (conteoDistritos[dist] || 0) + 1;
+      if (!filasPorDistrito[dist]) filasPorDistrito[dist] = [];
+      filasPorDistrito[dist].push(row);
     });
 
     const valores = Object.values(conteoDistritos);
     const maxVal = valores.length ? Math.max(...valores) : 0;
 
     function getPurpleColor(c){
-      if (c === 0) return 'rgba(229,231,235,0.2)'; // gris clarito
-      const t = c / maxVal; // 0–1
-      const h = 280; // tono violeta
-      const s = 60 + t * 15; // 60–75
-      const l = 80 - t * 35; // 80–45
-      // convierto HSL aproximado a rgb simple
+      if (c === 0) return 'rgba(229,231,235,0.2)';
+      const t = c / maxVal;
+      const h = 280;
+      const s = 60 + t * 15;
+      const l = 80 - t * 35;
       const a = s * Math.min(l, 100 - l) / 10000;
       const f = n => {
         const k = (n + h / 30) % 12;
@@ -666,8 +692,11 @@ function actualizarCoropletico(datos){
 
     function onEachFeature(feature, layer){
       const nombreDist = (feature.properties.distrito || '').toString().trim();
-      const count = conteoDistritos[nombreDist.toUpperCase()] || 0;
-      layer.bindPopup(`<strong>${nombreDist}</strong><br>Clientes: ${count}`);
+      const key = nombreDist.toUpperCase();
+      const count = conteoDistritos[key] || 0;
+      const filas = filasPorDistrito[key] || [];
+      const freq = construirFrecuenciaDias(filas);
+      layer.bindPopup(`<strong>${nombreDist}</strong><br>Clientes: ${count}<br>Frecuencia: ${freq}`);
     }
 
     rtmChoroplethLayer = L.geoJSON(distritosGeoJSON, {
@@ -689,7 +718,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     closePopupOnClick:true
   }).setView([-12.1, -77.0], 12);
 
-  // panes: coroplético debajo, puntos encima [web:64][web:67]
   paneChoro = rtmMap.createPane('paneChoro');
   paneChoro.style.zIndex = 400;
   panePuntos = rtmMap.createPane('panePuntos');
