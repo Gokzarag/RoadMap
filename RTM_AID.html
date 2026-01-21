@@ -259,7 +259,7 @@
 
 <script>
 const SIGMA_CSV_URL = 'https://raw.githubusercontent.com/Gokzarag/MapTrack/main/Catalogo%20Sigma.csv';
-const DISTRITOS_GEOJSON_URL = 'https://raw.githubusercontent.com/joseluisq/peru-geojson-datasets/master/geojson/lima_callao_distritos_simple.geojson'; // [web:47]
+const DISTRITOS_GEOJSON_URL = 'https://raw.githubusercontent.com/Gokzarag/RoadMap/main/Distritos.geojson';
 const DISTRITO_INDEX = 17;
 
 let sigmaDataRTM = [];
@@ -484,7 +484,6 @@ function cargarDistritosGeoJSON(callback){
     })
     .catch(err=>{
       console.error('Error GeoJSON distritos', err);
-      alert('No se pudo cargar el GeoJSON de distritos (revisa conexión).');
     });
 }
 
