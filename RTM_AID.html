@@ -146,7 +146,7 @@
       display:flex;
       flex-direction:column;
       gap:2px;
-      min-width:120px;
+      min-width:130px;
     }
     .subgrupo-box .mini-item label{
       font-size:10px;
@@ -161,8 +161,65 @@
       background:white;
     }
 
-    .subgrupo-box .mini-item select[multiple]{
-      min-height:46px;
+    /* Dropdown multiselect personalizado */
+    .multi-select{
+      position:relative;
+      font-size:10px;
+    }
+    .multi-select-button{
+      width:100%;
+      padding:3px 6px;
+      border-radius:7px;
+      border:1px solid #d1d5db;
+      background:white;
+      text-align:left;
+      cursor:pointer;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:6px;
+    }
+    .multi-select-button span{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .multi-select-button .caret{
+      font-size:9px;
+      color:#6b7280;
+    }
+    .multi-select-panel{
+      position:absolute;
+      top:100%;
+      left:0;
+      right:0;
+      background:white;
+      border-radius:8px;
+      border:1px solid #d1d5db;
+      box-shadow:0 8px 20px rgba(15,23,42,0.18);
+      padding:4px 6px;
+      margin-top:2px;
+      z-index:500;
+      display:none;
+      max-height:160px;
+      overflow:auto;
+    }
+    .multi-select.open .multi-select-panel{
+      display:block;
+    }
+    .multi-select-option{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      padding:2px 2px;
+      cursor:pointer;
+      font-size:10px;
+    }
+    .multi-select-option:hover{
+      background:#f3f4f6;
+    }
+    .multi-select-option input{
+      cursor:pointer;
     }
 
     .toggle-capas{
@@ -268,13 +325,8 @@
                   </select>
                 </div>
                 <div class="mini-item">
-                  <label for="filtro-canal-puntos">Canal (multi)</label>
-                  <select id="filtro-canal-puntos" multiple>
-                    <option value="DET">DET</option>
-                    <option value="FSE">FSE</option>
-                    <option value="MES">MES</option>
-                    <option value="MOD">MOD</option>
-                  </select>
+                  <label>Canal (multi)</label>
+                  <div class="multi-select" id="multi-canal-puntos" data-target="canalesPuntos"></div>
                 </div>
               </div>
 
@@ -294,13 +346,8 @@
                   </select>
                 </div>
                 <div class="mini-item">
-                  <label for="filtro-canal-choro">Canal (multi)</label>
-                  <select id="filtro-canal-choro" multiple>
-                    <option value="DET">DET</option>
-                    <option value="FSE">FSE</option>
-                    <option value="MES">MES</option>
-                    <option value="MOD">MOD</option>
-                  </select>
+                  <label>Canal (multi)</label>
+                  <div class="multi-select" id="multi-canal-choro" data-target="canalesChoro"></div>
                 </div>
               </div>
             </div>
@@ -340,6 +387,10 @@ let distritosGeoJSON = null;
 
 // panes para orden de dibujo [web:64][web:67]
 let paneChoro, panePuntos;
+
+// estado de canales seleccionados
+let canalesPuntos = ['DET','FSE','MES','MOD'];
+let canalesChoro = ['DET','FSE','MES','MOD'];
 
 // Colores canal
 const canalColors = {
@@ -401,13 +452,87 @@ function prepararFiltrosOficina(){
   });
 }
 
-// --------- UTILIDAD MULTISELECT ---------
-function getMultiSelectValues(selectEl){
-  const vals = [];
-  for (let opt of selectEl.options){
-    if (opt.selected) vals.push(opt.value);
+// --------- MULTISELECT CUSTOM ---------
+const OPCIONES_CANAL = [
+  {value:'DET', label:'DET'},
+  {value:'FSE', label:'FSE'},
+  {value:'MES', label:'MES'},
+  {value:'MOD', label:'MOD'}
+];
+
+function crearMultiSelect(id, estadoInicial){
+  const cont = document.getElementById(id);
+  const targetKey = cont.dataset.target; // 'canalesPuntos' o 'canalesChoro'
+  cont.classList.add('multi-select');
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'multi-select-button';
+  const spanText = document.createElement('span');
+  const spanCaret = document.createElement('span');
+  spanCaret.className = 'caret';
+  spanCaret.textContent = '▾';
+  btn.appendChild(spanText);
+  btn.appendChild(spanCaret);
+
+  const panel = document.createElement('div');
+  panel.className = 'multi-select-panel';
+
+  OPCIONES_CANAL.forEach(op=>{
+    const row = document.createElement('label');
+    row.className = 'multi-select-option';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = op.value;
+    cb.checked = estadoInicial.includes(op.value);
+    const lbl = document.createElement('span');
+    lbl.textContent = op.label;
+    row.appendChild(cb);
+    row.appendChild(lbl);
+    panel.appendChild(row);
+
+    cb.addEventListener('change', ()=>{
+      actualizarEstadoCanales(targetKey, op.value, cb.checked);
+      actualizarTextoMulti(cont, targetKey);
+      aplicarFiltrosRTM();
+    });
+  });
+
+  btn.addEventListener('click', ()=>{
+    cont.classList.toggle('open');
+  });
+
+  document.addEventListener('click', (e)=>{
+    if (!cont.contains(e.target)){
+      cont.classList.remove('open');
+    }
+  });
+
+  cont.appendChild(btn);
+  cont.appendChild(panel);
+
+  actualizarTextoMulti(cont, targetKey);
+}
+
+function actualizarEstadoCanales(targetKey, value, checked){
+  let arr = (targetKey === 'canalesPuntos') ? canalesPuntos : canalesChoro;
+  if (checked){
+    if (!arr.includes(value)) arr.push(value);
+  } else {
+    arr = arr.filter(v=>v !== value);
   }
-  return vals;
+  if (targetKey === 'canalesPuntos') canalesPuntos = arr;
+  else canalesChoro = arr;
+}
+
+function actualizarTextoMulti(cont, targetKey){
+  const arr = (targetKey === 'canalesPuntos') ? canalesPuntos : canalesChoro;
+  const spanText = cont.querySelector('.multi-select-button span');
+  if (arr.length === OPCIONES_CANAL.length || arr.length === 0){
+    spanText.textContent = 'Todos';
+  } else {
+    spanText.textContent = arr.join(', ');
+  }
 }
 
 // --------- FILTROS ---------
@@ -421,7 +546,7 @@ function obtenerFiltrosPuntos(){
   return {
     oficina: com.oficina,
     dia: document.getElementById('filtro-dia-puntos').value,
-    canales: getMultiSelectValues(document.getElementById('filtro-canal-puntos'))
+    canales: canalesPuntos.slice()
   };
 }
 function obtenerFiltrosChoro(){
@@ -429,7 +554,7 @@ function obtenerFiltrosChoro(){
   return {
     oficina: com.oficina,
     dia: document.getElementById('filtro-dia-choro').value,
-    canales: getMultiSelectValues(document.getElementById('filtro-canal-choro'))
+    canales: canalesChoro.slice()
   };
 }
 
@@ -627,7 +752,6 @@ function cargarDistritosGeoJSON(callback){
     });
 }
 
-// construir frecuencia de días a partir de filas filtradas del distrito
 function construirFrecuenciaDias(rows){
   const setLetras = new Set();
   rows.forEach(row=>{
@@ -729,13 +853,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }).addTo(rtmMap);
 
   crearLeyendaCanal(rtmMap);
+
+  // inicializar multiselects
+  crearMultiSelect('multi-canal-puntos', canalesPuntos);
+  crearMultiSelect('multi-canal-choro', canalesChoro);
+
   cargarSigmaRTM();
 
   document.getElementById('filtro-oficina').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('filtro-dia-puntos').addEventListener('change', aplicarFiltrosRTM);
-  document.getElementById('filtro-canal-puntos').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('filtro-dia-choro').addEventListener('change', aplicarFiltrosRTM);
-  document.getElementById('filtro-canal-choro').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('chk-puntos').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('chk-choro').addEventListener('change', aplicarFiltrosRTM);
 });
