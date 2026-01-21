@@ -146,7 +146,7 @@
       display:flex;
       flex-direction:column;
       gap:2px;
-      min-width:140px;
+      min-width:130px;
     }
     .subgrupo-box .mini-item label{
       font-size:10px;
@@ -154,22 +154,23 @@
       color:var(--text-muted);
     }
     .subgrupo-box .mini-item select{
-      padding:3px 6px;
+      padding:4px 7px;
       border-radius:7px;
       border:1px solid #d1d5db;
-      font-size:10px;
+      font-size:11px;
       background:white;
+      height:26px;
     }
 
-    /* Dropdown multiselect personalizado */
+    /* Dropdown multiselect personalizado armonizado con select */
     .multi-select{
       position:relative;
-      font-size:10px;
+      font-size:11px;
       width:100%;
     }
     .multi-select-button{
       width:100%;
-      padding:3px 6px;
+      padding:4px 7px;          /* igual que select */
       border-radius:7px;
       border:1px solid #d1d5db;
       background:white;
@@ -179,11 +180,15 @@
       justify-content:space-between;
       align-items:center;
       gap:6px;
+      height:26px;              /* igual que select */
+      line-height:1.2;
     }
     .multi-select-button span{
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      font-size:11px;           /* igual que select */
+      color:#111827;
     }
     .multi-select-button .caret{
       font-size:9px;
@@ -308,7 +313,7 @@
       <section class="panel">
         <header class="panel-header">
           <div class="filtros-rtm">
-            <!-- Oficina única -->
+            <!-- Oficina -->
             <div class="filtro-item" style="max-width:200px;">
               <label for="filtro-oficina">Oficina</label>
               <select id="filtro-oficina">
@@ -316,7 +321,7 @@
               </select>
             </div>
 
-            <!-- Subgrupos Puntos / Coroplético -->
+            <!-- Subgrupos -->
             <div class="filtros-subgrupo">
               <div class="subgrupo-box">
                 <span class="subgrupo-box-title">Puntos</span>
@@ -394,14 +399,11 @@ let rtmMarkersLayer = null;
 let rtmChoroplethLayer = null;
 let distritosGeoJSON = null;
 
-// panes para orden de dibujo [web:64][web:67]
 let paneChoro, panePuntos;
 
-// estado de canales seleccionados
 let canalesPuntos = ['DET','FSE','MES','MOD'];
 let canalesChoro = ['DET','FSE','MES','MOD'];
 
-// Colores canal
 const canalColors = {
   'DET': '#e11d48',
   'FSE': '#2563eb',
@@ -461,7 +463,7 @@ function prepararFiltrosOficina(){
   });
 }
 
-// --------- MULTISELECT CUSTOM ---------
+// --------- MULTISELECT ---------
 const OPCIONES_CANAL = [
   {value:'DET', label:'DET'},
   {value:'FSE', label:'FSE'},
@@ -471,7 +473,7 @@ const OPCIONES_CANAL = [
 
 function crearMultiSelect(id, estadoInicial){
   const cont = document.getElementById(id);
-  const targetKey = cont.dataset.target; // 'canalesPuntos' o 'canalesChoro'
+  const targetKey = cont.dataset.target;
   cont.classList.add('multi-select');
 
   const btn = document.createElement('button');
@@ -487,7 +489,6 @@ function crearMultiSelect(id, estadoInicial){
   const panel = document.createElement('div');
   panel.className = 'multi-select-panel';
 
-  // Opción TODOS
   const rowTodos = document.createElement('label');
   rowTodos.className = 'multi-select-option multi-select-all';
   const cbTodos = document.createElement('input');
@@ -504,7 +505,6 @@ function crearMultiSelect(id, estadoInicial){
   divider.className = 'multi-select-divider';
   panel.appendChild(divider);
 
-  // Opciones individuales
   const checkboxes = [];
   OPCIONES_CANAL.forEach(op=>{
     const row = document.createElement('label');
@@ -522,7 +522,7 @@ function crearMultiSelect(id, estadoInicial){
 
     cb.addEventListener('change', ()=>{
       actualizarEstadoCanales(targetKey, op.value, cb.checked);
-      syncTodosCheckbox(targetKey, cbTodos, checkboxes);
+      syncTodosCheckbox(targetKey, cbTodos);
       actualizarTextoMulti(cont, targetKey);
       aplicarFiltrosRTM();
     });
@@ -530,18 +530,17 @@ function crearMultiSelect(id, estadoInicial){
 
   cbTodos.addEventListener('change', ()=>{
     const marcar = cbTodos.checked;
-    checkboxes.forEach(cb=>{
-      cb.checked = marcar;
-      actualizarEstadoCanales(targetKey, cb.value, marcar, true);
-    });
     if (marcar){
-      // todos seleccionados
       if (targetKey === 'canalesPuntos') canalesPuntos = OPCIONES_CANAL.map(o=>o.value);
       else canalesChoro = OPCIONES_CANAL.map(o=>o.value);
     } else {
       if (targetKey === 'canalesPuntos') canalesPuntos = [];
       else canalesChoro = [];
     }
+    checkboxes.forEach(cb=>{
+      cb.checked = marcar;
+    });
+    syncTodosCheckbox(targetKey, cbTodos);
     actualizarTextoMulti(cont, targetKey);
     aplicarFiltrosRTM();
   });
@@ -559,11 +558,11 @@ function crearMultiSelect(id, estadoInicial){
   cont.appendChild(btn);
   cont.appendChild(panel);
 
-  syncTodosCheckbox(targetKey, cbTodos, checkboxes);
+  syncTodosCheckbox(targetKey, cbTodos);
   actualizarTextoMulti(cont, targetKey);
 }
 
-function actualizarEstadoCanales(targetKey, value, checked, silent){
+function actualizarEstadoCanales(targetKey, value, checked){
   let arr = (targetKey === 'canalesPuntos') ? canalesPuntos : canalesChoro;
   if (checked){
     if (!arr.includes(value)) arr.push(value);
@@ -572,12 +571,9 @@ function actualizarEstadoCanales(targetKey, value, checked, silent){
   }
   if (targetKey === 'canalesPuntos') canalesPuntos = arr;
   else canalesChoro = arr;
-  if (!silent){
-    // nada extra
-  }
 }
 
-function syncTodosCheckbox(targetKey, cbTodos, checkboxes){
+function syncTodosCheckbox(targetKey, cbTodos){
   const arr = (targetKey === 'canalesPuntos') ? canalesPuntos : canalesChoro;
   if (arr.length === OPCIONES_CANAL.length){
     cbTodos.checked = true;
@@ -601,7 +597,7 @@ function actualizarTextoMulti(cont, targetKey){
   }
 }
 
-// --------- FILTROS ---------
+// --------- FILTRADO ---------
 function filtrosComunes(){
   return {
     oficina: document.getElementById('filtro-oficina').value
@@ -624,7 +620,6 @@ function obtenerFiltrosChoro(){
   };
 }
 
-// Datos para puntos
 function filtrarDatosPuntos(){
   const { oficina, dia, canales } = obtenerFiltrosPuntos();
   const filtrados = [];
@@ -648,7 +643,6 @@ function filtrarDatosPuntos(){
   return filtrados;
 }
 
-// Datos para coroplético
 function filtrarDatosChoro(){
   const { oficina, dia, canales } = obtenerFiltrosChoro();
   const filtrados = [];
@@ -801,7 +795,7 @@ function actualizarPuntos(datos){
   });
 }
 
-// --------- COROPLÉTICO (violeta + frecuencia) ----------
+// --------- COROPLÉTICO ----------
 function cargarDistritosGeoJSON(callback){
   if (distritosGeoJSON){
     callback();
@@ -920,7 +914,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   crearLeyendaCanal(rtmMap);
 
-  // inicializar multiselects
   crearMultiSelect('multi-canal-puntos', canalesPuntos);
   crearMultiSelect('multi-canal-choro', canalesChoro);
 
