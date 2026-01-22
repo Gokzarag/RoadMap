@@ -162,7 +162,6 @@
       height:26px;
     }
 
-    /* Dropdown multiselect personalizado armonizado con select */
     .multi-select{
       position:relative;
       font-size:11px;
@@ -170,7 +169,7 @@
     }
     .multi-select-button{
       width:100%;
-      padding:4px 7px;          /* igual que select */
+      padding:4px 7px;
       border-radius:7px;
       border:1px solid #d1d5db;
       background:white;
@@ -180,14 +179,14 @@
       justify-content:space-between;
       align-items:center;
       gap:6px;
-      height:26px;              /* igual que select */
+      height:26px;
       line-height:1.2;
     }
     .multi-select-button span{
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      font-size:11px;           /* igual que select */
+      font-size:11px;
       color:#111827;
     }
     .multi-select-button .caret{
@@ -376,6 +375,10 @@
                 <input type="checkbox" id="chk-choro" checked />
                 Coropléctico
               </label>
+              <label>
+                <input type="checkbox" id="chk-lima" checked />
+                Lima
+              </label>
             </div>
           </div>
         </header>
@@ -403,6 +406,9 @@ let paneChoro, panePuntos;
 
 let canalesPuntos = ['DET','FSE','MES','MOD'];
 let canalesChoro = ['DET','FSE','MES','MOD'];
+
+// distritos visibles en el coroplético (para filtro Lima)
+let distritosVisiblesChoro = new Set();
 
 const canalColors = {
   'DET': '#e11d48',
@@ -622,6 +628,7 @@ function obtenerFiltrosChoro(){
 
 function filtrarDatosPuntos(){
   const { oficina, dia, canales } = obtenerFiltrosPuntos();
+  const soloLima = document.getElementById('chk-lima').checked;
   const filtrados = [];
 
   sigmaDataRTM.forEach(row=>{
@@ -632,10 +639,15 @@ function filtrarDatosPuntos(){
     const oficinaRow = (row[46] || '').toString().trim();
     const diasRow = (row[48] || '').toString().toUpperCase().trim();
     const canalRow = (row[21] || '').toString().trim();
+    const distritoRow = (row[DISTRITO_INDEX] || '').toString().trim().toUpperCase();
 
     if (oficina && oficinaRow !== oficina) return;
     if (dia && !diasRow.includes(dia)) return;
     if (canales.length && !canales.includes(canalRow)) return;
+
+    if (soloLima && distritosVisiblesChoro.size > 0){
+      if (!distritosVisiblesChoro.has(distritoRow)) return;
+    }
 
     filtrados.push(row);
   });
@@ -669,19 +681,19 @@ function filtrarDatosChoro(){
 function aplicarFiltrosRTM(){
   if (!rtmMap) return;
 
-  const datosPuntos = filtrarDatosPuntos();
   const datosChoro = filtrarDatosChoro();
 
-  const mostrarPuntos = document.getElementById('chk-puntos').checked;
   const mostrarChoro = document.getElementById('chk-choro').checked;
-
   if (mostrarChoro){
     actualizarCoropletico(datosChoro);
   } else if (rtmChoroplethLayer){
     rtmMap.removeLayer(rtmChoroplethLayer);
     rtmChoroplethLayer = null;
+    distritosVisiblesChoro = new Set();
   }
 
+  const datosPuntos = filtrarDatosPuntos();
+  const mostrarPuntos = document.getElementById('chk-puntos').checked;
   if (mostrarPuntos){
     actualizarPuntos(datosPuntos);
   } else if (rtmMarkersLayer){
@@ -833,6 +845,7 @@ function actualizarCoropletico(datos){
 
     const conteoDistritos = {};
     const filasPorDistrito = {};
+    distritosVisiblesChoro = new Set();
 
     datos.forEach(row=>{
       const dist = (row[DISTRITO_INDEX] || '').toString().trim().toUpperCase();
@@ -840,6 +853,7 @@ function actualizarCoropletico(datos){
       conteoDistritos[dist] = (conteoDistritos[dist] || 0) + 1;
       if (!filasPorDistrito[dist]) filasPorDistrito[dist] = [];
       filasPorDistrito[dist].push(row);
+      distritosVisiblesChoro.add(dist);
     });
 
     const valores = Object.values(conteoDistritos);
@@ -924,6 +938,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('filtro-dia-choro').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('chk-puntos').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('chk-choro').addEventListener('change', aplicarFiltrosRTM);
+  document.getElementById('chk-lima').addEventListener('change', aplicarFiltrosRTM);
 });
 </script>
 
