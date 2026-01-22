@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>RoadMap - RTM AID</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/MapTrack/main/MapTrack.png" />
+  <link rel="icon" href="https://raw.githubusercontent.com/Gokzarag/RoadMap/main/MapTrack.png" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -251,7 +251,7 @@
       cursor:pointer;
     }
 
-    /* Switch Lima */
+    /* Switch Perú / Lima */
     .lima-switch-wrapper{
       display:flex;
       align-items:center;
@@ -261,7 +261,7 @@
     }
     .lima-switch{
       position:relative;
-      width:36px;
+      width:44px;
       height:18px;
     }
     .lima-switch input{
@@ -276,7 +276,7 @@
       left:0;
       right:0;
       bottom:0;
-      background:#b91c1c; /* rojo por defecto */
+      background:#16a34a; /* verde Perú por defecto */
       transition:0.2s;
       border-radius:999px;
     }
@@ -285,7 +285,7 @@
       content:"";
       height:14px;
       width:14px;
-      left:2px;
+      left:2px; /* Perú */
       top:2px;
       background:white;
       transition:0.2s;
@@ -293,10 +293,10 @@
       box-shadow:0 0 2px rgba(0,0,0,0.3);
     }
     .lima-switch input:checked + .lima-slider{
-      background:#16a34a; /* verde */
+      background:#b91c1c; /* rojo cuando Lima */
     }
     .lima-switch input:checked + .lima-slider:before{
-      transform:translateX(18px);
+      transform:translateX(22px); /* mueve a Lima */
     }
 
     .map-wrapper{
@@ -413,7 +413,7 @@
               </div>
             </div>
 
-            <!-- Toggles capas + Lima -->
+            <!-- Toggles capas + switch Perú/Lima -->
             <div class="toggle-capas">
               <label>
                 <input type="checkbox" id="chk-puntos" checked />
@@ -424,9 +424,10 @@
                 Coropléctico
               </label>
               <div class="lima-switch-wrapper">
-                <span>Todos</span>
+                <span>Perú</span>
                 <label class="lima-switch">
-                  <input type="checkbox" id="switch-lima" checked />
+                  <!-- false = Perú, true = Lima -->
+                  <input type="checkbox" id="switch-lima" />
                   <span class="lima-slider"></span>
                 </label>
                 <span>Lima</span>
@@ -459,8 +460,8 @@ let paneChoro, panePuntos;
 let canalesPuntos = ['DET','FSE','MES','MOD'];
 let canalesChoro = ['DET','FSE','MES','MOD'];
 
-// distritos visibles en el coroplético (Lima)
-let distritosVisiblesChoro = new Set();
+// distritos pertenecientes al GeoJSON (Lima) para filtro
+let distritosLimaSet = new Set();
 
 const canalColors = {
   'DET': '#e11d48',
@@ -680,7 +681,7 @@ function obtenerFiltrosChoro(){
 
 function filtrarDatosPuntos(){
   const { oficina, dia, canales } = obtenerFiltrosPuntos();
-  const soloLima = document.getElementById('switch-lima').checked;
+  const soloLima = document.getElementById('switch-lima').checked; // true = Lima
   const filtrados = [];
 
   sigmaDataRTM.forEach(row=>{
@@ -697,9 +698,9 @@ function filtrarDatosPuntos(){
     if (dia && !diasRow.includes(dia)) return;
     if (canales.length && !canales.includes(canalRow)) return;
 
-    // Filtro Lima: sólo distritos que existen en el GeoJSON cargado
-    if (soloLima && distritosVisiblesChoro.size > 0){
-      if (!distritosVisiblesChoro.has(distritoRow)) return;
+    // Filtro Lima usando set del GeoJSON
+    if (soloLima && distritosLimaSet.size > 0){
+      if (!distritosLimaSet.has(distritoRow)) return;
     }
 
     filtrados.push(row);
@@ -742,7 +743,6 @@ function aplicarFiltrosRTM(){
   } else if (rtmChoroplethLayer){
     rtmMap.removeLayer(rtmChoroplethLayer);
     rtmChoroplethLayer = null;
-    distritosVisiblesChoro = new Set();
   }
 
   const datosPuntos = filtrarDatosPuntos();
@@ -872,6 +872,14 @@ function cargarDistritosGeoJSON(callback){
     .then(r=>r.json())
     .then(data=>{
       distritosGeoJSON = data;
+
+      // armar set de distritos de Lima (GeoJSON completo)
+      distritosLimaSet = new Set();
+      data.features.forEach(f=>{
+        const nombreDist = (f.properties.distrito || '').toString().trim().toUpperCase();
+        if (nombreDist) distritosLimaSet.add(nombreDist);
+      });
+
       callback();
     })
     .catch(err=>{
@@ -900,7 +908,6 @@ function actualizarCoropletico(datos){
 
     const conteoDistritos = {};
     const filasPorDistrito = {};
-    distritosVisiblesChoro = new Set();
 
     datos.forEach(row=>{
       const dist = (row[DISTRITO_INDEX] || '').toString().trim().toUpperCase();
@@ -908,7 +915,6 @@ function actualizarCoropletico(datos){
       conteoDistritos[dist] = (conteoDistritos[dist] || 0) + 1;
       if (!filasPorDistrito[dist]) filasPorDistrito[dist] = [];
       filasPorDistrito[dist].push(row);
-      distritosVisiblesChoro.add(dist);
     });
 
     const valores = Object.values(conteoDistritos);
@@ -987,6 +993,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   crearMultiSelect('multi-canal-choro', canalesChoro);
 
   cargarSigmaRTM();
+  cargarDistritosGeoJSON(()=>{}); // pre-cargar para que el set de Lima esté listo
 
   document.getElementById('filtro-oficina').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('filtro-dia-puntos').addEventListener('change', aplicarFiltrosRTM);
