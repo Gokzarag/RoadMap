@@ -251,6 +251,54 @@
       cursor:pointer;
     }
 
+    /* Switch Lima */
+    .lima-switch-wrapper{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      font-size:11px;
+      margin-left:4px;
+    }
+    .lima-switch{
+      position:relative;
+      width:36px;
+      height:18px;
+    }
+    .lima-switch input{
+      opacity:0;
+      width:0;
+      height:0;
+    }
+    .lima-slider{
+      position:absolute;
+      cursor:pointer;
+      top:0;
+      left:0;
+      right:0;
+      bottom:0;
+      background:#b91c1c; /* rojo por defecto */
+      transition:0.2s;
+      border-radius:999px;
+    }
+    .lima-slider:before{
+      position:absolute;
+      content:"";
+      height:14px;
+      width:14px;
+      left:2px;
+      top:2px;
+      background:white;
+      transition:0.2s;
+      border-radius:999px;
+      box-shadow:0 0 2px rgba(0,0,0,0.3);
+    }
+    .lima-switch input:checked + .lima-slider{
+      background:#16a34a; /* verde */
+    }
+    .lima-switch input:checked + .lima-slider:before{
+      transform:translateX(18px);
+    }
+
     .map-wrapper{
       flex:1;
       border-radius:10px;
@@ -365,7 +413,7 @@
               </div>
             </div>
 
-            <!-- Toggles capas -->
+            <!-- Toggles capas + Lima -->
             <div class="toggle-capas">
               <label>
                 <input type="checkbox" id="chk-puntos" checked />
@@ -375,10 +423,14 @@
                 <input type="checkbox" id="chk-choro" checked />
                 Coropléctico
               </label>
-              <label>
-                <input type="checkbox" id="chk-lima" checked />
-                Lima
-              </label>
+              <div class="lima-switch-wrapper">
+                <span>Todos</span>
+                <label class="lima-switch">
+                  <input type="checkbox" id="switch-lima" checked />
+                  <span class="lima-slider"></span>
+                </label>
+                <span>Lima</span>
+              </div>
             </div>
           </div>
         </header>
@@ -407,7 +459,7 @@ let paneChoro, panePuntos;
 let canalesPuntos = ['DET','FSE','MES','MOD'];
 let canalesChoro = ['DET','FSE','MES','MOD'];
 
-// distritos visibles en el coroplético (para filtro Lima)
+// distritos visibles en el coroplético (Lima)
 let distritosVisiblesChoro = new Set();
 
 const canalColors = {
@@ -628,7 +680,7 @@ function obtenerFiltrosChoro(){
 
 function filtrarDatosPuntos(){
   const { oficina, dia, canales } = obtenerFiltrosPuntos();
-  const soloLima = document.getElementById('chk-lima').checked;
+  const soloLima = document.getElementById('switch-lima').checked;
   const filtrados = [];
 
   sigmaDataRTM.forEach(row=>{
@@ -645,6 +697,7 @@ function filtrarDatosPuntos(){
     if (dia && !diasRow.includes(dia)) return;
     if (canales.length && !canales.includes(canalRow)) return;
 
+    // Filtro Lima: sólo distritos que existen en el GeoJSON cargado
     if (soloLima && distritosVisiblesChoro.size > 0){
       if (!distritosVisiblesChoro.has(distritoRow)) return;
     }
@@ -682,8 +735,8 @@ function aplicarFiltrosRTM(){
   if (!rtmMap) return;
 
   const datosChoro = filtrarDatosChoro();
-
   const mostrarChoro = document.getElementById('chk-choro').checked;
+
   if (mostrarChoro){
     actualizarCoropletico(datosChoro);
   } else if (rtmChoroplethLayer){
@@ -694,6 +747,7 @@ function aplicarFiltrosRTM(){
 
   const datosPuntos = filtrarDatosPuntos();
   const mostrarPuntos = document.getElementById('chk-puntos').checked;
+
   if (mostrarPuntos){
     actualizarPuntos(datosPuntos);
   } else if (rtmMarkersLayer){
@@ -719,6 +773,7 @@ function aplicarFiltrosRTM(){
       }
     });
   }
+
   if (puntos.length > 0){
     const bounds = L.latLngBounds(puntos);
     rtmMap.fitBounds(bounds,{padding:[30,30]});
@@ -938,7 +993,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('filtro-dia-choro').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('chk-puntos').addEventListener('change', aplicarFiltrosRTM);
   document.getElementById('chk-choro').addEventListener('change', aplicarFiltrosRTM);
-  document.getElementById('chk-lima').addEventListener('change', aplicarFiltrosRTM);
+  document.getElementById('switch-lima').addEventListener('change', aplicarFiltrosRTM);
 });
 </script>
 
