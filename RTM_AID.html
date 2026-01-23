@@ -676,13 +676,26 @@ function obtenerFiltrosChoro(){
   };
 }
 
-// Sólo oficina para tooltips del coroplético
+// sólo oficina (para clientes del tooltip)
 function filtrarSoloOficina(){
   const oficina = document.getElementById('filtro-oficina').value;
   if (!oficina) return sigmaDataRTM.slice();
   return sigmaDataRTM.filter(row=>{
     const oficinaRow = (row[46] || '').toString().trim();
     return oficinaRow === oficina;
+  });
+}
+
+// oficina + canal del coroplético (para frecuencia del tooltip)
+function filtrarOficinaYCanalChoro(){
+  const oficina = document.getElementById('filtro-oficina').value;
+  const canales = canalesChoro.slice();
+  return sigmaDataRTM.filter(row=>{
+    const oficinaRow = (row[46] || '').toString().trim();
+    const canalRow = (row[21] || '').toString().trim();
+    if (oficina && oficinaRow !== oficina) return false;
+    if (canales.length && !canales.includes(canalRow)) return false;
+    return true;
   });
 }
 
@@ -909,7 +922,7 @@ function actualizarCoropletico(datos){
       rtmMap.removeLayer(rtmChoroplethLayer);
     }
 
-    // Para color: usa datos filtrados por día/canal/oficina
+    // Color del distrito: usa datos filtrados por oficina + día + canal
     const conteoDistritos = {};
     datos.forEach(row=>{
       const dist = (row[DISTRITO_INDEX] || '').toString().trim().toUpperCase();
@@ -936,7 +949,7 @@ function actualizarCoropletico(datos){
       return `rgba(${r},${g},${b},0.7)`;
     }
 
-    // Para tooltip: sólo oficina
+    // CLIENTES: sólo oficina
     const datosOficina = filtrarSoloOficina();
     const filasPorDistritoOf = {};
     datosOficina.forEach(row=>{
@@ -944,6 +957,16 @@ function actualizarCoropletico(datos){
       if (!dist) return;
       if (!filasPorDistritoOf[dist]) filasPorDistritoOf[dist] = [];
       filasPorDistritoOf[dist].push(row);
+    });
+
+    // FRECUENCIA: oficina + canal del coroplético
+    const datosOficinaCanal = filtrarOficinaYCanalChoro();
+    const filasPorDistritoFreq = {};
+    datosOficinaCanal.forEach(row=>{
+      const dist = (row[DISTRITO_INDEX] || '').toString().trim().toUpperCase();
+      if (!dist) return;
+      if (!filasPorDistritoFreq[dist]) filasPorDistritoFreq[dist] = [];
+      filasPorDistritoFreq[dist].push(row);
     });
 
     function style(feature){
@@ -962,10 +985,14 @@ function actualizarCoropletico(datos){
     function onEachFeature(feature, layer){
       const nombreDist = (feature.properties.distrito || '').toString().trim();
       const key = nombreDist.toUpperCase();
-      const filas = filasPorDistritoOf[key] || [];
-      const count = filas.length;
-      const freq = construirFrecuenciaDias(filas);
-      layer.bindPopup(`<strong>${nombreDist}</strong><br>Clientes: ${count}<br>Frecuencia: ${freq}`);
+
+      const filasClientes = filasPorDistritoOf[key] || [];
+      const countClientes = filasClientes.length;
+
+      const filasFreq = filasPorDistritoFreq[key] || [];
+      const freq = construirFrecuenciaDias(filasFreq);
+
+      layer.bindPopup(`<strong>${nombreDist}</strong><br>Clientes: ${countClientes}<br>Frecuencia: ${freq}`);
     }
 
     rtmChoroplethLayer = L.geoJSON(distritosGeoJSON, {
